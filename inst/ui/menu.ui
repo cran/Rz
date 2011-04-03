@@ -1,0 +1,30 @@
+<ui>
+  <menubar name='MenuBar'>
+    <menu action='MenuFile'>
+      <menuitem action='Open' />
+      <menuitem action='Save As' />
+      <separator/>
+      <menuitem action='Import' />
+      <menuitem action='ImportFromGlobalEnv' />
+      <separator/>
+      <menuitem action='Quit'/>
+    </menu>
+    <menu action='MenuEdit'>
+      <menuitem action='ChageDataSetName'/>
+      <menuitem action='RemoveDataSet' />
+    </menu>
+  </menubar>
+  <popup name="PopupVV">
+    <menuitem action="Recode" />
+  </popup>
+  <toolbar  name='ToolBar'>
+    <toolitem action='Open' />
+    <toolitem action='Save As' />
+    <separator/>
+    <toolitem action='Import' />
+    <toolitem action='ImportFromGlobalEnv' />
+    <separator/>
+    <toolitem action='ChageDataSetName' />
+    <toolitem action='RemoveDataSet' />
+  </toolbar>
+</ui>
