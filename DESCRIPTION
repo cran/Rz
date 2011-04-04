@@ -1,10 +1,10 @@
 Package: Rz
 Type: Package
 Title: GUI Tool for Data Management like SPSS or Stata
-Version: 0.2-0
-Date: 2011-04-03
-Author: Masahiro HAYASHI
-Maintainer: Masahiro HAYASHI <rinm884@gmail.com>
+Version: 0.2-1
+Date: 2011-04-04
+Author: Masahiro Hayashi
+Maintainer: Masahiro Hayashi <rinm884@gmail.com>
 Author@R: person(given="Masahiro",family="Hayashi",
         email="rinm884@gmail.com", role=c("aut","cre"))
 Description: R is very powerfull but not enough for social science
@@ -20,4 +20,4 @@ LazyLoad: yes
 Depends: R (>= 2.12), memisc, methods
 Imports: RGtk2 (>= 2.20)
 Repository: CRAN
-Date/Publication: 2011-04-03 07:42:36
+Date/Publication: 2012-01-31 07:23:06

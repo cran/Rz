@@ -1,0 +1,13 @@
+dbbdd4ccae1156702d1188e50f1810fa *DESCRIPTION
+badf099f3369cf71bd7eeb6d5467caa3 *NAMESPACE
+8aab06e665977d4ddd2fd2cb0b129c92 *R/class.R
+a12ec95ee279fd623b56859f2d34ef55 *R/functions.R
+0fc500096ba0b0b143151975477f16a9 *inst/images/cat.png
+9e827132bd4e7477ba73ef0459ea9ded *inst/images/error.png
+afce1cc5f8e8d02c4fb914c109789c58 *inst/images/num.png
+8d60518c6d18af693cfeea9c066026c1 *inst/images/order.png
+292d9aa0b474fa7a2c391ab65e4bf68f *inst/po/Rz.pot
+448b5dda500611adbb9a13945485736e *inst/po/ja/LC_MESSAGES/Rz.mo
+ec0876b719d7ea3425c9681064fef698 *inst/po/ja/LC_MESSAGES/Rz.po
+9e0a626a7f01de109724c80bfd2438c6 *inst/ui/menu.ui
+d5f81e1b08db1a09ce076584ee33138f *man/Rz-package.Rd

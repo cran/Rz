@@ -1,4 +1,4 @@
-data.collec.obj <- data.collection$new()
+data.collec.obj <- new("RzDataCollection")
 
 Rz <- function(...){
   data.collection <- data.collec.obj
@@ -45,9 +45,11 @@ gtkFileChooserDialogFilteredActivate <- function(obj){
 gtkFileChooserDialogFilteredRun <- function(obj) gtkDialogRun(obj)
 
 .onAttach <- function(lib, pkg){
-  if( Sys.info()["sysname"] == "Windows" & is.null(options("STERM")[[1]]) ){
-    try(winMenuAdd("Rz"))
-    try(winMenuAddItem("Rz", gettext("Start"), "Rz()"))
+	if(exists("winMenuAdd")){
+		temp<-try(winMenuAdd("Rz"),silent=TRUE)
+		if(class(temp)!="try-error"){
+    winMenuAddItem("Rz", gettext("Start"), "Rz()")
+    }
   }
   txt1 <- "################################ Rz ################################"
   txt2 <- gettext("Excute Rz() to start,")
