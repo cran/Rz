@@ -1,0 +1,178 @@
+settings <- 
+setRefClass("RzSettings",
+  fields = c("path", "theme", "theme.this", "globalFont", "variableViewFont", "monospaceFont", "monospaceFontFamily",
+    "plotFont", "plotFontFamily", "useDataSetObject",
+    "useEmbededDevice", "embededDeviceOn", "codebookOff", "popupOff",
+    "plotViewEnabled", "psFont", "pdfFont"),
+  methods = list(
+    load = function(){
+      path <<- "~/.Rz"
+      if(file.exists(path)) {
+        con <- file(path)
+        open(con)
+        settings <- dget(con)
+        close(con)
+        theme            <<- ifelse(is.null(settings$theme)   , "Default", settings$theme)          
+        if(grepl("darwin", R.Version()$os)){
+          globalFont       <<- ifelse(is.null(settings$globalFont)   , "Arial 10"     , settings$globalFont)
+          variableViewFont <<- ifelse(is.null(settings$variableViewFont)   , "Arial 10"     , settings$globalFont)
+          plotFont         <<- ifelse(is.null(settings$plotFont)     , "Arial 10"     , settings$plotFont)
+        } else {
+          globalFont       <<- ifelse(is.null(settings$globalFont)   , "sans 10"     , settings$globalFont)
+          variableViewFont <<- ifelse(is.null(settings$variableViewFont)   , "sans 10"     , settings$globalFont)
+          plotFont         <<- ifelse(is.null(settings$plotFont)     , "sans 10"     , settings$plotFont)
+        }
+        monospaceFont    <<- ifelse(is.null(settings$monospaceFont), "monospace 10", settings$monospaceFont)
+        monospaceFontFamily <<- pangoFontDescriptionFromString(monospaceFont)$getFamily()
+        plotFontFamily   <<- pangoFontDescriptionFromString(plotFont)$getFamily()
+        psFont           <<- ifelse(is.null(settings$psFont)       , "sans"        , settings$psFont)
+        pdfFont          <<- ifelse(is.null(settings$pdfFont)      , "sans"        , settings$pdfFont)
+        useDataSetObject <<- ifelse(is.null(settings$useDataSetObject), FALSE, settings$useDataSetObject)
+        useEmbededDevice <<- ifelse(is.null(settings$useEmbededDevice), FALSE, settings$useEmbededDevice)
+        codebookOff      <<- ifelse(is.null(settings$codebookOff),      TRUE , settings$codebookOff)
+        popupOff         <<- ifelse(is.null(settings$popupOff),         FALSE, settings$popupOff)
+        plotViewEnabled <<- FALSE
+      } else {
+        theme      <<- "Default"
+        if(grepl("darwin", R.Version()$os)){
+          globalFont <<- "Arial 10"
+          variableViewFont <<- "Arial 10"
+          plotFont <<- "Arial 10"
+        } else {
+          globalFont <<- "sans 10"
+          variableViewFont <<- "sans 10"
+          plotFont <<- "sans 10"
+        }
+        monospaceFont <<- "monospace 10"
+        monospaceFontFamily <<- pangoFontDescriptionFromString(monospaceFont)$getFamily()
+        plotFontFamily <<- pangoFontDescriptionFromString(plotFont)$getFamily()
+        psFont <<- "sans"
+        pdfFont <<- "sans"
+        useDataSetObject <<- FALSE
+        useEmbededDevice <<- FALSE
+        codebookOff      <<- TRUE
+        popupOff         <<- FALSE
+        plotViewEnabled  <<- FALSE
+      }
+      gtkRcParse(file.path(.Rz.path, "themes", theme, "gtk-2.0","gtkrc"))
+    },
+    runDialog = function(win){
+      dialog <- gtkDialogNewWithButtons(gettext("Settings"), win,
+                                        c("modal", "destroy-with-parent"), 
+                                          "gtk-ok", GtkResponseType["accept"], 
+                                          "gtk-cancel", GtkResponseType["reject"])
+
+
+      themes.label <- gtkLabelNew(gettext("Theme (requires restart R)"))
+      themesCombo  <- gtkComboBoxNewText()
+      themesCombo$getCells()[[1]]$setAlignment(0.5, 0.5)
+      themes <- sapply(list.dirs(file.path(.Rz.path, "themes"), recursive=FALSE), basename)
+      for(i in themes) themesCombo$appendText(i)
+      themesCombo$setActive(which(theme==themes) - 1)
+      themes.hbox <- gtkHBoxNew(spacing=5)
+      themes.hbox$packStart(themes.label, expand=FALSE)
+      themes.hbox$packStart(themesCombo)
+
+      checkButtonUseDataSet <- gtkCheckButtonNewWithLabel(gettext("Sync as data.set of memisc package"))
+      checkButtonUseDataSet$setActive(useDataSetObject)
+      checkButtonUseEmbededDevice <- gtkCheckButtonNewWithLabel(gettext("Use embeded graphics divice (requires restart Rz)\n * Some bugs exist on Windows"))
+      checkButtonUseEmbededDevice$setActive(useEmbededDevice)
+      checkButtonCodebookOff <- gtkCheckButtonNewWithLabel(gettext("Don't output summary while plot view open"))
+      checkButtonCodebookOff$setActive(codebookOff)
+      checkButtonPopupOff <- gtkCheckButtonNewWithLabel(gettext("Don't Popup Summary"))
+      checkButtonPopupOff$setActive(popupOff)
+
+      general.tab <- gtkVBoxNew()
+      general.tab["border-width"] <- 2
+      general.tab$packStart(themes.hbox, expand=FALSE)
+      general.tab$packStart(checkButtonUseDataSet, expand=FALSE)
+      general.tab$packStart(checkButtonUseEmbededDevice, expand=FALSE)
+      general.tab$packStart(checkButtonCodebookOff, expand=FALSE)
+      general.tab$packStart(checkButtonPopupOff, expand=FALSE)
+
+      
+      rzFontSettingWidget1 <- new("RzFontSettingWidget", title = gettext("Global Font"), fontName = globalFont, showSize = TRUE, showStyle=TRUE)
+      rzFontSettingWidget4 <- new("RzFontSettingWidget", title = gettext("Variable View Font"), fontName = variableViewFont, showSize = TRUE, showStyle=TRUE)
+      rzFontSettingWidget2 <- new("RzFontSettingWidget", title = gettext("Monospace Font"), fontName = monospaceFont, showSize = TRUE, showStyle=TRUE)
+      rzFontSettingWidget3 <- new("RzFontSettingWidget", title = gettext("Plot Font"), fontName = plotFont, showSize = FALSE, showStyle=FALSE)
+
+      pdf.font.label <- gtkLabelNew(gettext("PDF Font"))
+      pdfFontCombo <- gtkComboBoxNewText()
+      pdfFontCombo$getCells()[[1]]$setAlignment(0.5, 0.5)
+      for(i in names(pdfFonts())) pdfFontCombo$appendText(i)
+      pdfFontCombo$setActive(which(pdfFont==names(pdfFonts())) - 1)
+
+      ps.font.label <- gtkLabelNew(gettext("PostScript Font"))
+      psFontCombo <- gtkComboBoxNewText()
+      psFontCombo$getCells()[[1]]$setAlignment(0.5, 0.5)
+      for(i in names(postscriptFonts())) psFontCombo$appendText(i)
+      psFontCombo$setActive(which(psFont==names(postscriptFonts())) - 1)
+
+      pdffont.hbox <- gtkHBoxNew(spacing=5)
+      pdffont.hbox$packStart(pdf.font.label, expand=FALSE)
+      pdffont.hbox$packStart(pdfFontCombo)
+      psfont.hbox <- gtkHBoxNew(spacing=5)
+      psfont.hbox$packStart(ps.font.label, expand=FALSE)
+      psfont.hbox$packStart(psFontCombo)
+
+      font.tab <- gtkVBoxNew(spacing=2)
+      font.tab["border-width"] <- 2
+      font.tab$packStart(rzFontSettingWidget1$getFontBox(), fill=FALSE, expand=FALSE)
+      font.tab$packStart(rzFontSettingWidget4$getFontBox(), fill=FALSE, expand=FALSE)
+      font.tab$packStart(rzFontSettingWidget2$getFontBox(), fill=FALSE, expand=FALSE)
+      font.tab$packStart(rzFontSettingWidget3$getFontBox(), fill=FALSE, expand=FALSE)
+      font.tab$packStart(pdffont.hbox, fill=FALSE, expand=FALSE)
+      font.tab$packStart(psfont.hbox, fill=FALSE, expand=FALSE)
+
+      note <- gtkNotebookNew()
+      note$appendPage(general.tab, gtkLabelNew(gettext("General")))
+      note$appendPage(font.tab, gtkLabelNew(gettext("Font")))
+      dialog[["vbox"]]$packStart(note)
+
+      onResponse <- function(dialog, response.id){
+        if(response.id == GtkResponseType["accept"]) {
+          theme            <<- localize(themesCombo$getActiveText())
+          globalFont       <<- localize(rzFontSettingWidget1$getFontName())
+          variableViewFont <<- localize(rzFontSettingWidget4$getFontName())
+          monospaceFont    <<- localize(rzFontSettingWidget2$getFontName())
+          monospaceFontFamily <<- pangoFontDescriptionFromString(monospaceFont)$getFamily()
+          plotFont         <<- localize(rzFontSettingWidget3$getFontName())
+          plotFontFamily   <<- pangoFontDescriptionFromString(plotFont)$getFamily()
+          psFont           <<- localize(psFontCombo$getActiveText())
+          pdfFont          <<- localize(pdfFontCombo$getActiveText())
+          useDataSetObject <<- checkButtonUseDataSet$getActive()
+          useEmbededDevice <<- checkButtonUseEmbededDevice$getActive()
+          codebookOff      <<- checkButtonCodebookOff$getActive()
+          popupOff         <<- checkButtonPopupOff$getActive()
+          settings <- gtkSettingsGetDefault()
+          settings$setStringProperty("gtk-font-name", rzSettings$getGlobalFont(), NULL)
+          con <- file(path, open="w")
+          dput(list(
+                    theme      = theme,
+                    globalFont = globalFont,
+                    variableViewFont = variableViewFont,
+                    monospaceFont = monospaceFont,
+                    plotFont = plotFont,
+                    psFont = psFont,
+                    pdfFont = pdfFont,
+                    useDataSetObject = useDataSetObject,
+                    useEmbededDevice = useEmbededDevice,
+                    codebookOff      = codebookOff,
+                    popupOff         = popupOff
+                    ),
+               file=con, control=NULL)
+          close(con)
+          dialog$hide()
+        } else {
+          dialog$hide()
+        }
+      }
+      gSignalConnect(dialog, "response", onResponse)
+
+      dialog$run()
+    }
+))
+settings$accessors(c("globalFont", "variableViewFont", "monospaceFont", "monospaceFontFamily", "plotFont", "plotFontFamily",
+                     "useDataSetObject","useEmbededDevice", "embededDeviceOn", "codebookOff", "popupOff",
+                     "plotViewEnabled", "psFont", "pdfFont"))
+

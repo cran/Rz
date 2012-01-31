@@ -1,0 +1,21 @@
+0.3-3 2012-01-31
+fix issues around licenses
+
+0.3-1 (internal version)
+add data view
+add "add layer" button
+add geom and stat
+change stratum options' layout
+minor layout adjustment
+clarify license of themes and images
+
+0.3-0 (internal version)
+add Plot View
+add preferences
+add revert to original dataset
+add reload from global environment
+extend import and save file format
+many bugs fixed
+
+0.2-1 2011-04-04
+initial release

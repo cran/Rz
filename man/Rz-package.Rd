@@ -10,7 +10,8 @@ Memisc package supplements those, variable labels, value labels,
 definable missing values and so on, but to efficiently work these functions
 need graphical interface to overlook data. This package
 provides such graphical interface similar to SPSS's Variable View and
-data managing system using memisc package as backend.
+data managing system using memisc package as backend. Additionally, Rz has powerful
+plot assistant interface based on ggplot2.
 }
 \details{
 Simpliy excute Rz() to start.
