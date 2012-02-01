@@ -164,6 +164,7 @@ dialog$addActionWidget(entry, GtkResponseType["ok"])
 # ケースの選択
 # 正規表現オプション
 
+# !テーマが存在しないときの処理
 # !data view
 # !layer add
 # !\の除去

@@ -7,7 +7,7 @@ setRefClass("RzMenu",
 
       uimanager     <<- gtkUIManagerNew()
       uimanager$insertActionGroup(action.group, 0)
-      uimanager$addUiFromFile(file.path(.Rz.path, "ui", "menu.ui"))
+      uimanager$addUiFromFile(file.path(rzSettings$getRzPath(), "ui", "menu.ui"))
       menu.bar     <<- uimanager$getWidget("/MenuBar")
       tool.bar     <<- uimanager$getWidget("/ToolBar")
       context.menu <<- uimanager$getWidget("/PopupVV") 

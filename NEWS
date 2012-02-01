@@ -1,3 +1,10 @@
+0.3-6
+fix a bug which blocks startup Rz
+add theme folder selecter
+handling exception that specified theme doesn't exist
+improve row header of Data View
+fix preferences dialog's position
+
 0.3-3 2012-01-31
 fix issues around licenses
 

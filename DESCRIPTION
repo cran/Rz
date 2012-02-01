@@ -1,8 +1,8 @@
 Package: Rz
 Type: Package
 Title: GUI Tool for Data Management like SPSS or Stata
-Version: 0.3-3
-Date: 2012-01-31
+Version: 0.3-6
+Date: 2012-02-01
 Author: Masahiro Hayashi
 Maintainer: Masahiro Hayashi <rinm884@gmail.com>
 Author@R: person(given="Masahiro",family="Hayashi",
@@ -21,6 +21,6 @@ LazyLoad: yes
 Depends: R (>= 2.12), foreign, memisc, methods, ggplot2, cairoDevice
 Suggests: quantreg
 Imports: RGtk2 (>= 2.20)
-Packaged: 2012-01-31 08:03:01 UTC; masahiro
+Packaged: 2012-02-01 11:59:09 UTC; masahiro
 Repository: CRAN
-Date/Publication: 2012-01-31 10:57:00
+Date/Publication: 2012-02-01 12:45:08

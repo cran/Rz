@@ -1,17 +1,19 @@
 settings <- 
 setRefClass("RzSettings",
-  fields = c("path", "theme", "theme.this", "globalFont", "variableViewFont", "monospaceFont", "monospaceFontFamily",
-    "plotFont", "plotFontFamily", "useDataSetObject",
+  fields = c("RzPath", "path", "theme", "theme.this", "globalFont", "variableViewFont", "monospaceFont", "monospaceFontFamily",
+    "plotFont", "plotFontFamily", "useDataSetObject", "themesFolder",
     "useEmbededDevice", "embededDeviceOn", "codebookOff", "popupOff",
     "plotViewEnabled", "psFont", "pdfFont"),
   methods = list(
     load = function(){
       path <<- "~/.Rz"
+      RzPath <<- system.file(package = "Rz")
       if(file.exists(path)) {
         con <- file(path)
         open(con)
         settings <- dget(con)
         close(con)
+        themesFolder     <<- ifelse(is.null(settings$themesFolder), file.path(RzPath, "themes"), settings$themesFolder)
         theme            <<- ifelse(is.null(settings$theme)   , "Default", settings$theme)          
         if(grepl("darwin", R.Version()$os)){
           globalFont       <<- ifelse(is.null(settings$globalFont)   , "Arial 10"     , settings$globalFont)
@@ -33,6 +35,7 @@ setRefClass("RzSettings",
         popupOff         <<- ifelse(is.null(settings$popupOff),         FALSE, settings$popupOff)
         plotViewEnabled <<- FALSE
       } else {
+        themesFolder <<- file.path(RzPath, "themes")
         theme      <<- "Default"
         if(grepl("darwin", R.Version()$os)){
           globalFont <<- "Arial 10"
@@ -54,25 +57,43 @@ setRefClass("RzSettings",
         popupOff         <<- FALSE
         plotViewEnabled  <<- FALSE
       }
-      gtkRcParse(file.path(.Rz.path, "themes", theme, "gtk-2.0","gtkrc"))
+      theme.path  <- file.path(themesFolder, theme, "gtk-2.0", "gtkrc")
+      theme.path2 <- file.path(RzPath, "themes", theme, "gtk-2.0", "gtkrc")
+      if(file.exists(theme.path)){
+        gtkRcParse(theme.path)
+      } else if(file.exists(theme.path2)){
+        gtkRcParse(theme.path2)        
+      }
     },
+    
     runDialog = function(win){
       dialog <- gtkDialogNewWithButtons(gettext("Settings"), win,
                                         c("modal", "destroy-with-parent"), 
-                                          "gtk-ok", GtkResponseType["accept"], 
-                                          "gtk-cancel", GtkResponseType["reject"])
-
-
+                                        "gtk-ok", GtkResponseType["accept"], 
+                                        "gtk-cancel", GtkResponseType["reject"],
+                                        show=FALSE)
+      
+      themes.folder.label  <- gtkLabelNew(gettext("Themes Folder"))
+      themes.folder.button <- gtkFileChooserButtonNew(gettext("Themes Folder"), GtkFileChooserAction["select-folder"])
+      themes.folder.button$setCurrentFolder(themesFolder)
+      themes.folder.hbox <- gtkHBoxNew(spacing=5)
+      themes.folder.hbox$packStart(themes.folder.label, expand=FALSE)
+      themes.folder.hbox$packStart(themes.folder.button)
+      
       themes.label <- gtkLabelNew(gettext("Theme (requires restart R)"))
       themesCombo  <- gtkComboBoxNewText()
       themesCombo$getCells()[[1]]$setAlignment(0.5, 0.5)
-      themes <- sapply(list.dirs(file.path(.Rz.path, "themes"), recursive=FALSE), basename)
+      themes  <- sapply(list.dirs(file.path(RzPath, "themes"), recursive=FALSE), basename)
+      if(nzchar(themesFolder)){
+        themes2 <- sapply(list.dirs(themesFolder, recursive=FALSE), basename)
+        themes  <- unique(c(themes, themes2))        
+      }
       for(i in themes) themesCombo$appendText(i)
       themesCombo$setActive(which(theme==themes) - 1)
       themes.hbox <- gtkHBoxNew(spacing=5)
       themes.hbox$packStart(themes.label, expand=FALSE)
       themes.hbox$packStart(themesCombo)
-
+      
       checkButtonUseDataSet <- gtkCheckButtonNewWithLabel(gettext("Sync as data.set of memisc package"))
       checkButtonUseDataSet$setActive(useDataSetObject)
       checkButtonUseEmbededDevice <- gtkCheckButtonNewWithLabel(gettext("Use embeded graphics divice (requires restart Rz)\n * Some bugs exist on Windows"))
@@ -81,40 +102,41 @@ setRefClass("RzSettings",
       checkButtonCodebookOff$setActive(codebookOff)
       checkButtonPopupOff <- gtkCheckButtonNewWithLabel(gettext("Don't Popup Summary"))
       checkButtonPopupOff$setActive(popupOff)
-
+      
       general.tab <- gtkVBoxNew()
       general.tab["border-width"] <- 2
+      general.tab$packStart(themes.folder.hbox, expand=FALSE)
       general.tab$packStart(themes.hbox, expand=FALSE)
       general.tab$packStart(checkButtonUseDataSet, expand=FALSE)
       general.tab$packStart(checkButtonUseEmbededDevice, expand=FALSE)
       general.tab$packStart(checkButtonCodebookOff, expand=FALSE)
       general.tab$packStart(checkButtonPopupOff, expand=FALSE)
-
+      
       
       rzFontSettingWidget1 <- new("RzFontSettingWidget", title = gettext("Global Font"), fontName = globalFont, showSize = TRUE, showStyle=TRUE)
       rzFontSettingWidget4 <- new("RzFontSettingWidget", title = gettext("Variable View Font"), fontName = variableViewFont, showSize = TRUE, showStyle=TRUE)
       rzFontSettingWidget2 <- new("RzFontSettingWidget", title = gettext("Monospace Font"), fontName = monospaceFont, showSize = TRUE, showStyle=TRUE)
       rzFontSettingWidget3 <- new("RzFontSettingWidget", title = gettext("Plot Font"), fontName = plotFont, showSize = FALSE, showStyle=FALSE)
-
+      
       pdf.font.label <- gtkLabelNew(gettext("PDF Font"))
       pdfFontCombo <- gtkComboBoxNewText()
       pdfFontCombo$getCells()[[1]]$setAlignment(0.5, 0.5)
       for(i in names(pdfFonts())) pdfFontCombo$appendText(i)
       pdfFontCombo$setActive(which(pdfFont==names(pdfFonts())) - 1)
-
+      
       ps.font.label <- gtkLabelNew(gettext("PostScript Font"))
       psFontCombo <- gtkComboBoxNewText()
       psFontCombo$getCells()[[1]]$setAlignment(0.5, 0.5)
       for(i in names(postscriptFonts())) psFontCombo$appendText(i)
       psFontCombo$setActive(which(psFont==names(postscriptFonts())) - 1)
-
+      
       pdffont.hbox <- gtkHBoxNew(spacing=5)
       pdffont.hbox$packStart(pdf.font.label, expand=FALSE)
       pdffont.hbox$packStart(pdfFontCombo)
       psfont.hbox <- gtkHBoxNew(spacing=5)
       psfont.hbox$packStart(ps.font.label, expand=FALSE)
       psfont.hbox$packStart(psFontCombo)
-
+      
       font.tab <- gtkVBoxNew(spacing=2)
       font.tab["border-width"] <- 2
       font.tab$packStart(rzFontSettingWidget1$getFontBox(), fill=FALSE, expand=FALSE)
@@ -123,14 +145,15 @@ setRefClass("RzSettings",
       font.tab$packStart(rzFontSettingWidget3$getFontBox(), fill=FALSE, expand=FALSE)
       font.tab$packStart(pdffont.hbox, fill=FALSE, expand=FALSE)
       font.tab$packStart(psfont.hbox, fill=FALSE, expand=FALSE)
-
+      
       note <- gtkNotebookNew()
       note$appendPage(general.tab, gtkLabelNew(gettext("General")))
       note$appendPage(font.tab, gtkLabelNew(gettext("Font")))
       dialog[["vbox"]]$packStart(note)
-
+      
       onResponse <- function(dialog, response.id){
         if(response.id == GtkResponseType["accept"]) {
+          themesFolder     <<- normalizePath(localize(themes.folder.button$getCurrentFolder()), "/")
           theme            <<- localize(themesCombo$getActiveText())
           globalFont       <<- localize(rzFontSettingWidget1$getFontName())
           variableViewFont <<- localize(rzFontSettingWidget4$getFontName())
@@ -148,18 +171,19 @@ setRefClass("RzSettings",
           settings$setStringProperty("gtk-font-name", rzSettings$getGlobalFont(), NULL)
           con <- file(path, open="w")
           dput(list(
-                    theme      = theme,
-                    globalFont = globalFont,
-                    variableViewFont = variableViewFont,
-                    monospaceFont = monospaceFont,
-                    plotFont = plotFont,
-                    psFont = psFont,
-                    pdfFont = pdfFont,
-                    useDataSetObject = useDataSetObject,
-                    useEmbededDevice = useEmbededDevice,
-                    codebookOff      = codebookOff,
-                    popupOff         = popupOff
-                    ),
+            themesFolder     = themesFolder,
+            theme            = theme,
+            globalFont       = globalFont,
+            variableViewFont = variableViewFont,
+            monospaceFont    = monospaceFont,
+            plotFont         = plotFont,
+            psFont           = psFont,
+            pdfFont          = pdfFont,
+            useDataSetObject = useDataSetObject,
+            useEmbededDevice = useEmbededDevice,
+            codebookOff      = codebookOff,
+            popupOff         = popupOff
+            ),
                file=con, control=NULL)
           close(con)
           dialog$hide()
@@ -168,11 +192,12 @@ setRefClass("RzSettings",
         }
       }
       gSignalConnect(dialog, "response", onResponse)
-
+      
       dialog$run()
     }
-))
-settings$accessors(c("globalFont", "variableViewFont", "monospaceFont", "monospaceFontFamily", "plotFont", "plotFontFamily",
+  )
+)
+settings$accessors(c("RzPath", "themesFolder", "globalFont", "variableViewFont", "monospaceFont", "monospaceFontFamily", "plotFont", "plotFontFamily",
                      "useDataSetObject","useEmbededDevice", "embededDeviceOn", "codebookOff", "popupOff",
                      "plotViewEnabled", "psFont", "pdfFont"))
 

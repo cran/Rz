@@ -26,9 +26,9 @@ setRefClass("RzActionGroup",
       a.view      <<- gtkActionNew("MenuView", gettext("_View"))
       a.data.view <<- gtkActionNew("DataView", gettext("Data View"), gettext("Data View"))
       a.plot.view <<- gtkToggleActionNew("PlotView", gettext("Plot View"), gettext("Plot View"))
-      icon.data.view <- gFileIconNew(gFileNewForPath(file.path(.Rz.path, "images", "table.png")))
+      icon.data.view <- gFileIconNew(gFileNewForPath(file.path(rzSettings$getRzPath(), "images", "table.png")))
       a.data.view$setGicon(icon.data.view)
-      icon.plot.view <- gFileIconNew(gFileNewForPath(file.path(.Rz.path, "images", "order.png")))
+      icon.plot.view <- gFileIconNew(gFileNewForPath(file.path(rzSettings$getRzPath(), "images", "order.png")))
       a.plot.view$setGicon(icon.plot.view)
 
       action.group  <<- gtkActionGroupNew()
