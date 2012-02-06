@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: R 2.14.1\n"
 "Report-Msgid-Bugs-To: bugs@r-project.org\n"
-"POT-Creation-Date: 2012-01-31 07:59\n"
+"POT-Creation-Date: 2012-02-06 16:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -10,6 +10,15 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+
+msgid "File Path:"
+msgstr ""
+
+msgid "This file already exists. Overwrite it?"
+msgstr ""
+
+msgid "Cannot handle character variables longer than 255"
+msgstr ""
 
 msgid "_File"
 msgstr ""
@@ -32,10 +41,10 @@ msgstr ""
 msgid "Import from Grobal Environment"
 msgstr ""
 
-msgid "_Quit"
+msgid "_Close"
 msgstr ""
 
-msgid "Quit"
+msgid "Close"
 msgstr ""
 
 msgid "_Edit"
@@ -68,6 +77,9 @@ msgstr ""
 msgid "Recode"
 msgstr ""
 
+msgid "Edit Value Labels"
+msgstr ""
+
 msgid "_Preferences"
 msgstr ""
 
@@ -81,6 +93,9 @@ msgid "Data View"
 msgstr ""
 
 msgid "Plot View"
+msgstr ""
+
+msgid "Quick Editor View"
 msgstr ""
 
 msgid "This dataset name is invalid. Please enter a valid dataset name."
@@ -131,10 +146,10 @@ msgstr ""
 msgid "Tab-Separated Text (*.*)"
 msgstr ""
 
-msgid "%s [from Global Environment]"
+msgid "Changing encoding may takes several or more minutes. Please wait..."
 msgstr ""
 
-msgid "Changing encoding may takes several or more minutes. Please wait..."
+msgid "%s [from Global Environment]"
 msgstr ""
 
 msgid "Old Name"
@@ -221,9 +236,6 @@ msgstr ""
 msgid "height (cm)"
 msgstr ""
 
-msgid "This file already exists. Overwrite it?"
-msgstr ""
-
 msgid "statistics options"
 msgstr ""
 
@@ -234,6 +246,9 @@ msgid "Prev: Up Arrow Key\nNext: Down Arrow Key"
 msgstr ""
 
 msgid "Settings"
+msgstr ""
+
+msgid "Themes Folder"
 msgstr ""
 
 msgid "Theme (requires restart R)"
@@ -275,6 +290,33 @@ msgstr ""
 msgid "Font"
 msgstr ""
 
+msgid "Change Measurement"
+msgstr ""
+
+msgid "Edit Variable Labels"
+msgstr ""
+
+msgid "Apply Missing Values"
+msgstr ""
+
+msgid "Reverse"
+msgstr ""
+
+msgid "Select All"
+msgstr ""
+
+msgid "Unselect All"
+msgstr ""
+
+msgid "Templates"
+msgstr ""
+
+msgid "Quick Editor"
+msgstr ""
+
+msgid "Quick Variable Editor"
+msgstr ""
+
 msgid "Names"
 msgstr ""
 
@@ -285,6 +327,9 @@ msgid "Measurement"
 msgstr ""
 
 msgid "Missing"
+msgstr ""
+
+msgid "=============== Output from Quick Editor ==============="
 msgstr ""
 
 msgid "This recode syntax is invalid. Please enter a valid recode syntax."
@@ -314,10 +359,10 @@ msgstr ""
 msgid "Generate Template"
 msgstr ""
 
-msgid "File Path:"
+msgid "Variable Name"
 msgstr ""
 
-msgid "Cannot handle character variables longer than 255"
+msgid "Duplicate label is detected."
 msgstr ""
 
 msgid "Start"

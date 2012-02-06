@@ -90,7 +90,7 @@ setRefClass("RzData",
     
     getValueLabels    = function() {
       val.labs  <- lapply(data.set, labels)
-      val.labs  <- sapply(val.labs, function(x){ifelse(is.null(x), "", paste(x@values, "\"",x@.Data, "\"", collapse=", "))})
+      val.labs  <- sapply(val.labs, function(x){ifelse(is.null(x), "", paste(x@values, " \"",x@.Data, "\"", sep="", collapse=", "))})
     },
     
     getSummaries      = function() {

@@ -183,6 +183,8 @@ setRefClass("RzPlot",
       } else if (xlab==gettext("variable name")){
         xlab <- variableNames[col]
       }
+      p <- p + xlab(xlab)
+      
       if (!is.null(y)){
         if(ylab==gettext("variable label")){
           ylab <- variableLabels[which(variableNames==y)]
@@ -190,6 +192,8 @@ setRefClass("RzPlot",
           ylab <- y
         }
         p <- p + ylab(ylab)        
+      } else if(ylab!=gettext("variable label")&&ylab!=gettext("variable name")){
+        p <- p + ylab(ylab)
       }
       
       

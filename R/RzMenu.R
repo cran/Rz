@@ -26,4 +26,4 @@ setRefClass("RzMenu",
         return(TRUE)
     }
 ))
-menu$accessors(c("menu.bar", "tool.bar", "context.menu"))
+menu$accessors(c("uimanager", "menu.bar", "tool.bar", "context.menu"))

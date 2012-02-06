@@ -1,9 +1,10 @@
 searchEntry <-
 setRefClass("RzSearchEntry",
-  fields = c("entry.search"),
+  fields = c("entry.search", "column.definition"),
   methods = list(
     initialize    = function(...) {
       initFields(...)
+      column.definition <<- c(index=0, select=1, vars=2, var.labs=3, msr=4, val.labs=5, missing=6)
       entry.search  <<- gtkEntryNew()
       entry.search$modifyFont(pangoFontDescriptionFromString(rzSettings$getGlobalFont()))
       entry.search$setWidthChars(20)
@@ -12,7 +13,7 @@ setRefClass("RzSearchEntry",
     },
     searchFunc = function(model, column, key, iter) {
         key <-  gsub("([]\\[\\^?|(){}!$&*+?])", "\\\\\\1", localize(key))
-        value <- model$get(iter, 1, 2)
+        value <- model$get(iter, column.definition["vars"],  column.definition["var.labs"])
         match <- tryCatch(grepl(key, c(localize(value[[1]][1]), localize(value[[2]][1])), perl=TRUE),
                           error=function(...) FALSE)
         return(!any(match))

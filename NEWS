@@ -1,4 +1,14 @@
-0.3-6
+0.3-8 2012-02-06
+add quick editor
+add label editor
+add keyboard shortcuts
+fix a bug which blocks to unset missing values
+
+0.3-7
+fix InfoBar behavior
+fix a bug xlab & ylab options are invalid 
+
+0.3-6 2012-02-01
 fix a bug which blocks startup Rz
 add theme folder selecter
 handling exception that specified theme doesn't exist
@@ -8,7 +18,7 @@ fix preferences dialog's position
 0.3-3 2012-01-31
 fix issues around licenses
 
-0.3-1 (internal version)
+0.3-1
 add data view
 add "add layer" button
 add geom and stat
@@ -16,7 +26,7 @@ change stratum options' layout
 minor layout adjustment
 clarify license of themes and images
 
-0.3-0 (internal version)
+0.3-0
 add Plot View
 add preferences
 add revert to original dataset

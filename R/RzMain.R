@@ -3,7 +3,8 @@ setRefClass("RzMain",
   fields = c("recode.id", "win",
              "main.hpaned", "main.view", "plot.view", "variable.view", "entry.search",
              "info.bar", "message.label", "status.bar", "progress.bar", "actions", "variable.view.list",
-             "rzActionGroup", "rzMenu", "rzDataHandler", "rzSearchEntry", "rzDataSetIO", "rzPlot"),
+             "rzActionGroup", "rzMenu", "rzDataHandler", "rzSearchEntry", "rzDataSetIO", "rzPlot",
+             "rzVariableEditorView", "view.box"),
   methods = list(
     initialize            = function(...) {
       initFields(...)
@@ -16,8 +17,13 @@ setRefClass("RzMain",
       main.hpaned   <<- gtkHPanedNew()
       main.view     <<- gtkVBoxNew()
       plot.view     <<- gtkVPanedNew()
+      rzVariableEditorView <<- new("RzVariableEditorView")
+      view.box      <<- gtkHBoxNew()
+      view.box$packStart(plot.view)
+      view.box$packStart(rzVariableEditorView$getMain())
+      
       main.hpaned$pack1(main.view)
-      main.hpaned$pack2(plot.view)
+      main.hpaned$pack2(view.box)
       main.hpaned$setPosition(300)
       
       info.bar      <<- gtkInfoBarRzNew()
@@ -38,6 +44,7 @@ setRefClass("RzMain",
       
       rzPlot <<- new("RzPlot", win=win)
       rzPlot$setInfo.bar(info.bar)
+      rzVariableEditorView$setInfo.bar(info.bar)
       plot.view$pack2(rzPlot$getMain(), resize=FALSE)
       if(rzSettings$getUseEmbededDevice()){
         plot.area <- gtkDrawingArea()
@@ -56,6 +63,15 @@ setRefClass("RzMain",
       gSignalConnect(info.bar, "response", .self$onInfoBarResponsed)
       
       rzActionGroup <<- new("RzActionGroup")
+      rzActionGroup$load()
+      
+      rzMenu <<- new("RzMenu", action.group=rzActionGroup$getAction.group())
+      gSignalConnect(main.view, "button-release-event" , rzMenu$popupmenu)
+      accel.group <- rzMenu$getUimanager()$getAccelGroup()
+      
+      win$addAccelGroup(accel.group)
+      rzVariableEditorView$setAccel(accel.group)
+      
       rzActionGroup$getA.plot.view()$setActive(rzSettings$getPlotViewEnabled())
       rzActionGroup$getA.reload()$setSensitive(rzSettings$getUseDataSetObject())
       gSignalConnect(rzActionGroup$getA.open(),      "activate", .self$onOpen)
@@ -69,15 +85,12 @@ setRefClass("RzMain",
       gSignalConnect(rzActionGroup$getA.settings(),  "activate", .self$onSetting)
       gSignalConnect(rzActionGroup$getA.data.view(), "activate", .self$onDataView)
       gSignalConnect(rzActionGroup$getA.plot.view(), "toggled" , .self$onPlotViewToggled)
-      
-      rzMenu <<- new("RzMenu", action.group=rzActionGroup$getAction.group())
-      gSignalConnect(main.view, "button-release-event" , rzMenu$popupmenu)
+      gSignalConnect(rzActionGroup$getA.variable.editor.view(), "toggled" , .self$onVariableEditorViewToggled)
+      gSignalConnect(rzActionGroup$getA.value.lab(), "activate", .self$onEditValueLabels)
       
       rzDataHandler <<- new("RzDataHandler", data.collection=data.collection.obj)
       gSignalConnect(rzDataHandler$getData.set.list.combo(), "changed", .self$onDatasetChanged)
       
-      # construct window
-      #      status.bar$packEnd(spinner, expand=FALSE)
       vbox       <- gtkVBoxNew()
       data.handler.box  <- gtkHBoxNew(spacing=1)
       data.handler.box$packStart(rzDataHandler$getData.set.list.combo(), expand=TRUE, fill=TRUE)
@@ -86,13 +99,17 @@ setRefClass("RzMain",
       vbox$packStart(rzMenu$getMenu.bar(),     expand=FALSE, fill=FALSE)
       vbox$packStart(rzMenu$getTool.bar(),     expand=FALSE, fill=FALSE)
       vbox$packStart(info.bar,     expand=FALSE, fill=FALSE)
-      vbox$packStart(data.handler.box, expand=FALSE, fill=FALSE)
+      vbox$packStart(data.handler.box, expand=FALSE, fill=FALSE, padding=2)
       vbox$packStart(main.hpaned,    expand=TRUE , fill=TRUE )
       vbox$packEnd  (status.bar,   expand=FALSE, fill=FALSE)
       rzMenu$getTool.bar()$showAll()
       win$add(vbox)
       win$show()
       if(!rzSettings$getPlotViewEnabled()) { plot.view$hide() }
+      if(!rzSettings$getVariableEditorViewEnabled()) { rzVariableEditorView$getMain()$hide() }
+      if(!rzSettings$getPlotViewEnabled() && !rzSettings$getVariableEditorViewEnabled()) {
+        view.box$hide() 
+      }
       
       gSignalConnect(win, "destroy", function(...){
         if(rzSettings$getEmbededDeviceOn()){
@@ -103,6 +120,10 @@ setRefClass("RzMain",
     },
     
     # actions
+    onEditValueLabels = function(action){
+      variable.view$onEditValueLabels(win=win)
+    },
+    
     onDataView = function(action){
       if(!is.null(variable.view)){
         rzDataView <- new("RzDataView", RzData=rzDataHandler$getCurrentData())        
@@ -111,11 +132,41 @@ setRefClass("RzMain",
     
     onPlotViewToggled = function(action){
       if(action$getActive()) {
+        view.box$show()
         plot.view$show()
         rzSettings$setPlotViewEnabled(TRUE)
+        if(rzSettings$getVariableEditorViewEnabled()){
+          action <- rzActionGroup$getA.variable.editor.view()
+          action["active"] <- FALSE
+#          action$toggled()
+        }
       } else {
         plot.view$hide()
         rzSettings$setPlotViewEnabled(FALSE)
+        if(!rzSettings$getVariableEditorViewEnabled()){
+          view.box$hide()
+        }
+      }
+    },
+    
+    onVariableEditorViewToggled = function(action){
+      if(action$getActive()) {
+        view.box$show()
+        rzVariableEditorView$getMain()$show()
+        rzSettings$setVariableEditorViewEnabled(TRUE)
+        if(!is.null(variable.view)) variable.view$selectMode(TRUE)
+        if(rzSettings$getVariableEditorViewEnabled()){
+          action <- rzActionGroup$getA.plot.view()
+          action["active"] <- FALSE
+#          action$toggled()
+        }
+      } else {
+        rzVariableEditorView$getMain()$hide()
+        rzSettings$setVariableEditorViewEnabled(FALSE)
+        if(!is.null(variable.view)) variable.view$selectMode(FALSE)
+        if(!rzSettings$getPlotViewEnabled()){
+          view.box$hide()
+        }
       }
     },
     
@@ -128,12 +179,8 @@ setRefClass("RzMain",
     },
     
     onOpen                = function(action){
-      info.bar$setText(gettext("Changing encoding may takes several or more minutes. Please wait..."))
-      info.bar$setMessageType(GtkMessageType["info"])
-      info.bar$show()
       timeoutid <- gTimeoutAdd(80, progress.bar$start)
       data <- rzDataSetIO$open(win, info.bar)
-      info.bar$hide()
       gSourceRemove(timeoutid)
       progress.bar["activity-mode"] <<- FALSE
       if(!is.null(data)) {
@@ -156,7 +203,7 @@ setRefClass("RzMain",
       progress.bar["activity-mode"] <<- FALSE
       if(!is.null(data)) {
         rzDataHandler$addData(data)
-      }        
+      }
     },
     
     onChangeDataSetName   = function(action){
@@ -233,6 +280,7 @@ setRefClass("RzMain",
         variable.view$getSw()$destroy()
         variable.view <<- NULL
         variable.view.list[data.set.name] <<- NULL
+        rzVariableEditorView$setVariableView(variable.view)
       }
     },
     
@@ -293,7 +341,8 @@ setRefClass("RzMain",
       variable.view <<- variable.view.list[[data.set.name]]
       if ( is.null(variable.view) ) {
         timeoutid <- gTimeoutAdd(80, progress.bar$start)
-        variable.view <<- new("RzVariableView", data=rzDataHandler$getData(data.set.name), rzPlot=rzPlot)
+        variable.view <<- new("RzVariableView", data=rzDataHandler$getData(data.set.name),
+                              rzPlot=rzPlot)
         variable.view$construct()
         variable.view.list[[data.set.name]] <<- variable.view
         main.view$packStart(variable.view$getSw())
@@ -302,6 +351,7 @@ setRefClass("RzMain",
       }
       rzDataHandler$sync(data.set.name)
       variable.view$toggleView(rzSearchEntry)
+      rzVariableEditorView$setVariableView(variable.view)
       
       win["title"] <<- paste("Rz -", data.set.name)
       if (!is.null(recode.id)) gSignalHandlerDisconnect(rzActionGroup$getA.recode(), recode.id)

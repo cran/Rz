@@ -124,7 +124,6 @@ setRefClass("RzDataSetIO",
           }
 
         } else {
-          info.bar$hide()
           dialog$hide()
         }
       })
@@ -231,30 +230,38 @@ setRefClass("RzDataSetIO",
           encoding <- localeToCharset()[1]
         }
         if ( encoding != c.encoding ) {
-          gdkWindowProcessAllUpdates()
+          info.bar$setText(gettext("Changing encoding may takes several or more minutes. Please wait..."))
+          info.bar$setMessageType(GtkMessageType["info"])
+          info.bar$show()
+          while(gtkEventsPending()) gtkMainIteration()
           names(data.set) <- iconv(names(data.set), from=encoding, to=c.encoding)
+          gtkMainIterationDo(FALSE)
           var.labs   <- iconv(description(data.set), from=encoding, to=c.encoding)
+          gtkMainIterationDo(FALSE)
           var.labs   <- as.list(var.labs)
+          gtkMainIterationDo(FALSE)
           var.labs   <- lapply(var.labs, function(x) gsub("(^')|('$)", "", x))
+          gtkMainIterationDo(FALSE)
           labels     <- lapply(data.set, labels)
+          gtkMainIterationDo(FALSE)
           labels     <- lapply(labels, function(x){
             x <- iconv(as.character(x), from=encoding, to=c.encoding)
+            gtkMainIterationDo(FALSE)
             if(length(x) == 0) return(NULL)
             else return(x)
           })
           for(i in seq_along(var.labs)){
+            gtkMainIterationDo(FALSE)
             description(data.set[[i]]) <- var.labs[[i]]
             if( !is.null(labels[[i]]))
               labels(data.set[[i]])@.Data <- labels[[i]]
           }
-        } else {
           info.bar$hide()
         }
 
         data <- new("RzData",
                     file.path=file$filename, original.name=base,
                     data.set=data.set)
-#        spinner$stop()
         return(data)
       }
 

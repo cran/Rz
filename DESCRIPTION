@@ -1,8 +1,8 @@
 Package: Rz
 Type: Package
 Title: GUI Tool for Data Management like SPSS or Stata
-Version: 0.3-6
-Date: 2012-02-01
+Version: 0.3-8
+Date: 2012-02-06
 Author: Masahiro Hayashi
 Maintainer: Masahiro Hayashi <rinm884@gmail.com>
 Author@R: person(given="Masahiro",family="Hayashi",
@@ -18,9 +18,9 @@ Description: R is very powerfull but not enough for social science
         Rz has powerful plot assistant interface based on ggplot2.
 License: file LICENSE
 LazyLoad: yes
-Depends: R (>= 2.12), foreign, memisc, methods, ggplot2, cairoDevice
+Depends: R (>= 2.12), methods, foreign, memisc, ggplot2, cairoDevice
 Suggests: quantreg
 Imports: RGtk2 (>= 2.20)
-Packaged: 2012-02-01 11:59:09 UTC; masahiro
+Packaged: 2012-02-06 07:20:56 UTC; masahiro
 Repository: CRAN
-Date/Publication: 2012-02-01 12:45:08
+Date/Publication: 2012-02-06 08:00:37

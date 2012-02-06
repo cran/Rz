@@ -3,7 +3,7 @@ setRefClass("RzSettings",
   fields = c("RzPath", "path", "theme", "theme.this", "globalFont", "variableViewFont", "monospaceFont", "monospaceFontFamily",
     "plotFont", "plotFontFamily", "useDataSetObject", "themesFolder",
     "useEmbededDevice", "embededDeviceOn", "codebookOff", "popupOff",
-    "plotViewEnabled", "psFont", "pdfFont"),
+    "plotViewEnabled", "variableEditorViewEnabled", "psFont", "pdfFont"),
   methods = list(
     load = function(){
       path <<- "~/.Rz"
@@ -33,7 +33,6 @@ setRefClass("RzSettings",
         useEmbededDevice <<- ifelse(is.null(settings$useEmbededDevice), FALSE, settings$useEmbededDevice)
         codebookOff      <<- ifelse(is.null(settings$codebookOff),      TRUE , settings$codebookOff)
         popupOff         <<- ifelse(is.null(settings$popupOff),         FALSE, settings$popupOff)
-        plotViewEnabled <<- FALSE
       } else {
         themesFolder <<- file.path(RzPath, "themes")
         theme      <<- "Default"
@@ -55,7 +54,6 @@ setRefClass("RzSettings",
         useEmbededDevice <<- FALSE
         codebookOff      <<- TRUE
         popupOff         <<- FALSE
-        plotViewEnabled  <<- FALSE
       }
       theme.path  <- file.path(themesFolder, theme, "gtk-2.0", "gtkrc")
       theme.path2 <- file.path(RzPath, "themes", theme, "gtk-2.0", "gtkrc")
@@ -64,6 +62,9 @@ setRefClass("RzSettings",
       } else if(file.exists(theme.path2)){
         gtkRcParse(theme.path2)        
       }
+      
+      plotViewEnabled <<- FALSE
+      variableEditorViewEnabled <<- FALSE
     },
     
     runDialog = function(win){
@@ -199,5 +200,5 @@ setRefClass("RzSettings",
 )
 settings$accessors(c("RzPath", "themesFolder", "globalFont", "variableViewFont", "monospaceFont", "monospaceFontFamily", "plotFont", "plotFontFamily",
                      "useDataSetObject","useEmbededDevice", "embededDeviceOn", "codebookOff", "popupOff",
-                     "plotViewEnabled", "psFont", "pdfFont"))
+                     "plotViewEnabled", "variableEditorViewEnabled", "psFont", "pdfFont"))
 

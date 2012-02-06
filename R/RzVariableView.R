@@ -1,25 +1,28 @@
 variable.view <- 
 setRefClass("RzVariableView",
   fields = c("data","main", "liststore", "sw", "column.definition", "summaries",
-             "rt.index", "rt.vars", "rt.var.labs", "rt.val.labs", "rc.msr", "rt.missing",
-             "rzPlot"),
+             "rt.index", "rtg.select", "rt.vars", "rt.var.labs", "rt.val.labs", "rc.msr", "rt.missing",
+             "rzPlot", "selectable"),
   methods = list(
     initialize  = function(...) {
       initFields(...)
-      
-      column.definition <<- c(index=0, vars=1, var.labs=2, msr=3, val.labs=4, missing=5)
-      liststore <<- gtkListStoreNew("character", "character", "character", "character", "character", "character")
+      selectable <<- FALSE
+      column.definition <<- c(index=0, select=1, vars=2, var.labs=3, msr=4, val.labs=5, missing=6)
+      liststore <<- gtkListStoreNew("character", "logical", "character", "character", "character", "character", "character")
       main <<- gtkTreeViewNewWithModel(liststore)
       
       main$modifyFont(pangoFontDescriptionFromString(rzSettings$getVariableViewFont()))
       
       sw   <<- gtkScrolledWindowNew()
+      sw["shadow-type"] <<- GtkShadowType["in"]
       sw$add(main)
       sw$setPolicy(GtkPolicyType["automatic"], GtkPolicyType["automatic"])
       main["enable-grid-lines"] <<- GtkTreeViewGridLines["both"]
       main["rules-hint"] <<- TRUE
       main["has-tooltip"] <<- TRUE
+      
       rt.index    <<- gtkCellRendererText()
+      rtg.select  <<- gtkCellRendererToggleNew()
       rt.vars     <<- gtkCellRendererText()
       rt.var.labs <<- gtkCellRendererText()
       rt.val.labs <<- gtkCellRendererText()
@@ -48,6 +51,7 @@ setRefClass("RzVariableView",
       
       gSignalConnect(main, "row-activated", .self$onRowActivated)
       gSignalConnect(main, "query-tooltip", .self$onQueryTooltip)
+      gSignalConnect(rtg.select , "toggled", .self$onCelltoggledSelect)
       gSignalConnect(rt.vars    , "edited", .self$onCellEditedVars)
       gSignalConnect(rt.var.labs, "edited", .self$onCellEditedVarLabs)
       gSignalConnect(rc.msr     , "edited", .self$onCellEditedMsr)
@@ -56,6 +60,7 @@ setRefClass("RzVariableView",
       rzPlot$setModel(main$getModel())
       
     },
+    
     construct   = function() {
       vars      <-  data$getVariableNames()
       var.labs  <-  data$getVariableLabels()
@@ -67,6 +72,7 @@ setRefClass("RzVariableView",
         iter <- liststore$append()$iter
         liststore$set(iter,
                       column.definition[["index"]], i,
+                      column.definition[["select"]], FALSE,
                       column.definition[["vars"]], vars[i],
                       column.definition[["var.labs"]], var.labs[i],
                       column.definition[["msr"]], msr[i],
@@ -75,6 +81,7 @@ setRefClass("RzVariableView",
       }
       columns <- list(
         index   = gtkTreeViewColumnNewWithAttributes(""                     , rt.index   , "text"=column.definition[["index"]]   ),
+        select  = gtkTreeViewColumnNewWithAttributes(""                     , rtg.select , "active"=column.definition[["select"]]),
         vars    = gtkTreeViewColumnNewWithAttributes(gettext("Names")       , rt.vars    , "text"=column.definition[["vars"]]    ),
         labs    = gtkTreeViewColumnNewWithAttributes(gettext("Labels")      , rt.var.labs, "text"=column.definition[["var.labs"]]),
         msr     = gtkTreeViewColumnNewWithAttributes(gettext("Measurement") , rc.msr     , "text"=column.definition[["msr"]]     ),
@@ -87,6 +94,8 @@ setRefClass("RzVariableView",
       columns$index$setMinWidth(30)
       columns$index$setSizing("automatic")
       columns$index$setResizable(FALSE)
+      columns$select$setSizing("automatic")
+      columns$select$setResizable(FALSE)
       columns$vars$setFixedWidth(50)
       columns$labs$setFixedWidth(250)
       columns$val.labs$setFixedWidth(100)
@@ -96,9 +105,17 @@ setRefClass("RzVariableView",
       columns$missing$setSizing("automatic")
       columns$missing$setResizable(FALSE)
       lapply(columns, function(column) main$appendColumn(column))
+      
     },
     
     reload = function(){
+      iter <- liststore$getIterFirst()
+      selects <- logical(0)
+      while(iter$retval){
+        select  <- liststore$getValue(iter$iter, column.definition["select"])$value
+        selects <- c(selects, select)
+        iter$retval <- liststore$iterNext(iter$iter)
+      }
       vars      <-  data$getVariableNames()
       var.labs  <-  data$getVariableLabels()
       msr       <-  data$getMeasurement()
@@ -110,6 +127,7 @@ setRefClass("RzVariableView",
         iter <- liststore$append()$iter
         liststore$set(iter,
                       column.definition[["index"]], i,
+                      column.definition[["select"]], selects[i],
                       column.definition[["vars"]], vars[i],
                       column.definition[["var.labs"]], var.labs[i],
                       column.definition[["msr"]], msr[i],
@@ -127,6 +145,7 @@ setRefClass("RzVariableView",
         liststore$set(iter, col, new.value) 
       }
     },
+    
     getSelected = function(){
       iter  <- main$getSelection()$getSelected()$iter
       value <- liststore$get(iter, unlist(column.definition))
@@ -135,21 +154,40 @@ setRefClass("RzVariableView",
       names(value) <- names(column.definition)
       return(value)
     },
+    
     toggleView  = function(rzSearchEntry=NULL){
       .self$changeFont()
       if (is.null(rzSearchEntry)){
         main$setSearchEntry(NULL)
         sw$hideAll()
         rzPlot$setModel(NULL)
+        if(selectable){
+          selectable <<- FALSE
+        }
       } else {
         main$setSearchEntry(rzSearchEntry$getEntry.search())
         main$setSearchEqualFunc(rzSearchEntry$searchFunc)
         sw$showAll()
         rzPlot$setModel(main$getModel())
+        if(rzSettings$getVariableEditorViewEnabled()){
+          selectable <<- TRUE
+        }
       }
     },
     
+    selectMode = function(switch){
+      selectable <<- switch
+    },
+    
     # actions
+    onCelltoggledSelect = function(renderer, path){
+      active <- renderer$getActive()
+      renderer$setActive(!active)
+      active <- renderer$getActive()
+      .self$setCell(path, column.definition["select"], active)
+      
+    },
+    
     onCellEditedVars    = function(renderer, path, new.text){
       txt     <- localize(new.text)
       txt     <- sub("^([[:space:]]+)([^[:space:]]+)([[:space:]]+)$", "\\2", txt)
@@ -202,11 +240,13 @@ setRefClass("RzVariableView",
       var.name      <- data$getVariableNames()[row]
       data.set      <- data$getData.set()
       result <- try(eval(parse(text=sprintf("c(%s)", txt))), silent=TRUE)
-      if (!is.numeric(result)) return()
+      if (nzchar(txt)&&!is.numeric(result)) return()
       else {
-        if (length(result)==2&&grepl("range", txt)){
+        if (length(result)==2&&grepl("range", txt)) {
           missing.values(data.set[[row]]) <- eval(parse(text=sprintf("list(%s)", txt))) 
-        } else{
+        } else if (!nzchar(txt)) {
+          missing.values(data.set[[row]]) <- NULL          
+        } else {
           missing.values(data.set[[row]]) <- result
         }
       }
@@ -298,7 +338,7 @@ setRefClass("RzVariableView",
           miss.val  <- missing.values(var)
           miss.val  <- ifelse(is.null(miss.val), "", paste(miss.val@filter, collapse=","))
           val.labs  <- labels(var)
-          val.labs  <- ifelse(is.null(val.labs), "", paste(val.labs@values, "\"",val.labs@.Data, "\"", collapse=", "))
+          val.labs  <- ifelse(is.null(val.labs), "", paste(val.labs@values, " \"",val.labs@.Data, "\"", sep="", collapse=", "))
           row <- which(names(data.set)==new.var)
           cell.row <- as.character(row - 1)
           data$constructVariable(row)
@@ -342,14 +382,18 @@ setRefClass("RzVariableView",
       tw$appendColumn(col.val)
       tw$appendColumn(col.lab)
       
-      vbox1  <- gtkVBoxNew()
-      hbox1  <- gtkHBoxNew()
-      vbox2  <- gtkVBoxNew()
+      vbox1  <- gtkVBoxNew(spacing=2)
+      hbox1  <- gtkHBoxNew(spacing=5)
+      vbox2  <- gtkVBoxNew(spacing=2)
       hpaned <- gtkHPanedNew()
       table1  <- gtkTableNew(rows=3, columns=2)
       hpaned$setPosition(160)
       sw1 <- gtkScrolledWindowNew()
+      sw1["shadow-type"] <- GtkShadowType["in"]
+      
       sw2 <- gtkScrolledWindowNew()
+      sw2["shadow-type"] <- GtkShadowType["in"]
+
       sw1$setPolicy("automatic", "automatic")
       sw2$setPolicy("automatic", "automatic")
       label1 <- gtkLabelNew(gettext("Existing Values"))
@@ -376,6 +420,8 @@ setRefClass("RzVariableView",
       entry.var.lab$setWidthChars(10)
       textview <- gtkTextViewNew()
       textview$modifyFont(pangoFontDescriptionFromString(rzSettings$getMonospaceFont()))
+      textview$setLeftMargin(5)
+      textview$setRightMargin(5)
       
       textbuffer <- textview$getBuffer()
       gtbutton   <- gtkButtonNewWithLabel(gettext("Generate Template"))
@@ -401,6 +447,8 @@ setRefClass("RzVariableView",
       table1$attach(entry3, 1, 2, 1, 2, xpadding = 1, ypadding = 1)
       table1$attach(label.var.lab, 0, 1, 2, 3, xoptions=GtkAttachOptions["fill"])
       table1$attach(entry.var.lab, 1, 2, 2, 3, xpadding = 1, ypadding = 1)
+      table1$setColSpacings(5)
+      table1$setRowSpacings(2)
       
       gSignalConnect(gtbutton, "clicked", onActivatedGTButton, list(var.name=var.name, liststore2=liststore2, textbuffer=textbuffer))
       
@@ -412,6 +460,171 @@ setRefClass("RzVariableView",
       dialog[["vbox"]]$packStart(vbox1)
       gSignalConnect(dialog, "response", onResponse)
       response <- dialog$run()
+    },
+    
+    onEditValueLabels = function(win){
+      selec      <- .self$getSelected()
+      var.name   <- selec["vars"]
+      var.lab    <- selec["var.labs"]
+      var.name.label <- gtkLabelNew(gettext("Variable Name"))
+      var.lab.label  <- gtkLabelNew(gettext("Variable Label"))
+      var.name.entry <- gtkEntryNew()
+      var.lab.entry  <- gtkEntryNew()
+      var.name.entry$setText(var.name)
+      var.lab.entry$setText(var.lab)
+      var.name.entry["editable"] <- FALSE
+      var.lab.entry["editable"]  <- FALSE
+      table <- gtkTableNew(2, 2)
+      table$attach(var.name.label, 0, 1, 0, 1, "shrink", "shrink", 5, 2)
+      table$attachDefaults(var.name.entry, 1, 2, 0, 1)
+      table$attach(var.lab.label , 0, 1, 1, 2, "shrink", "shrink", 5, 2)
+      table$attachDefaults(var.lab.entry , 1, 2, 1, 2)
+      table$setRowSpacings(2)
+      table$setColSpacings(5)
+      hbox <- gtkHBoxNew()
+      hbox$packStart(table)
+      
+      data.set   <- data$getData.set()
+      var        <- data.set[[var.name]]
+      missing.values(var) <- NULL
+      labels     <- labels(var)
+      deletepix  <- gdkPixbufNewFromFile(file.path(rzSettings$getRzPath(), "images/delete.png"))$retval
+      addpix     <- gdkPixbufNewFromFile(file.path(rzSettings$getRzPath(), "images/add.png"   ))$retval
+      liststore2 <- gtkListStoreNew("GdkPixbuf", "character", "character", "logical")
+      if(!is.null(labels)){
+        labels <- data.frame(values=labels@values, labels=labels@.Data, stringsAsFactors=FALSE)
+      } else {
+        labels <- data.frame(values=numeric(0), labels=character(0), stringsAsFactors=FALSE)
+      }
+      
+      values <- sort(unique(c(labels[[1]], na.omit(as.numeric(var)))))
+      labels <- merge(data.frame(values=values), labels, all=TRUE)
+      for(i in seq_len(nrow(labels))) {
+        iter <- liststore2$append()$iter
+        liststore2$set(iter,
+                       0, deletepix,
+                       1, labels$values[i],
+                       2, ifelse(is.na(labels$labels[i]), "", labels$labels[i]),
+                       3, FALSE)
+      }
+      iter <- liststore2$append()$iter
+      liststore2$set(iter, 0, addpix, 1, "", 2, "", 3, TRUE)
+      
+      rp      <- gtkCellRendererPixbuf()
+      rt.val  <- gtkCellRendererText()
+      rt.lab  <- gtkCellRendererText()
+      rt.val["editable"] <- TRUE          
+      rt.lab["editable"] <- TRUE
+      
+      col.icon <- gtkTreeViewColumnNewWithAttributes("", rp, "pixbuf"=0)
+      col.val  <- gtkTreeViewColumnNewWithAttributes(gettext("Values"), rt.val, "text"=1)
+      col.lab  <- gtkTreeViewColumnNewWithAttributes(gettext("Value Labels"), rt.lab, "text"=2)
+      col.icon$setSizing("fixed")
+      col.icon$setFixedWidth(50)
+      col.icon$setResizable(FALSE)
+      col.val$setSizing("fixed")
+      col.val$setFixedWidth(50)
+      col.val$setResizable(TRUE)
+      col.lab$setSizing("fixed")
+      col.lab$setResizable(FALSE)
+      
+      tw <- gtkTreeViewNewWithModel(liststore2)
+      tw["enable-grid-lines"] <- GtkTreeViewGridLines["both"]
+      tw["fixed-height-mode"] <- TRUE
+      tw["rules-hint"] <- TRUE
+      tw$appendColumn(col.icon)
+      tw$appendColumn(col.val)
+      tw$appendColumn(col.lab)
+      
+      gSignalConnect(rt.val, "edited", function(object, path, new_text){
+        text <- localize(new_text)
+        e <- try(as.numeric(text), silent=TRUE)
+        if(is.na(e)) return()
+        if(nzchar(text)){
+          iter <- liststore2$getIterFromString(path)$iter
+          add  <- liststore2$getValue(iter, 3)$value
+          liststore2$set(iter, 0, deletepix, 1, text, 3, FALSE)
+          if(add) {
+            iter <- liststore2$append()$iter
+            liststore2$set(iter, 0, addpix, 1, "", 2, "", 3, TRUE)
+          }
+        }
+      })
+
+      gSignalConnect(rt.lab, "edited", function(object, path, new_text){
+        text <- localize(new_text)
+        iter <- liststore2$getIterFromString(path)$iter
+        liststore2$set(iter, 2, text)
+      })
+      
+      gSignalConnect(tw, "row-activated", function(object, path, column){
+        if(column==col.icon){
+          iter <- liststore2$getIter(path)$iter
+          add  <- liststore2$getValue(iter, 3)$value
+          if(!add){
+            liststore2$remove(iter)
+          }
+        }
+      })
+      
+      dialog <- gtkDialogNewWithButtons(title=gettext("Edit Value Labels"), parent=win, flags=c("modal", "destroy-with-parent"),
+                                        "gtk-ok", GtkResponseType["ok"], 
+                                        "gtk-cancel", GtkResponseType["cancel"],
+                                        show=FALSE)
+      dialog$setDefaultSize(430, 300)
+      sw1 <- gtkScrolledWindowNew()
+      sw1["shadow-type"] <- GtkShadowType["in"]
+      sw1$setPolicy("automatic", "automatic")
+      sw1$add(tw)
+      dialog[["vbox"]]$setSpacing(2)
+      dialog[["vbox"]]$packStart(hbox, expand=FALSE)
+      dialog[["vbox"]]$packStart(sw1)
+      gSignalConnect(dialog, "response", function(object, response.id){
+        if(response.id==GtkResponseType["ok"]) {
+          labels <- numeric(0)
+          iter <- liststore2$getIterFirst()
+          while(iter$retval){
+            val <- liststore2$getValue(iter$iter, 1)$value
+            lab <- liststore2$getValue(iter$iter, 2)$value
+            val <- localize(val)
+            lab <- localize(lab)
+            val <- try(as.numeric(val), silent=TRUE)
+            if(!is.na(val)&&nzchar(lab)){
+              labels[lab] <- val
+            }
+            iter$retval <- liststore2$iterNext(iter$iter)
+          }
+          if(any(duplicated(labels))){
+            dialog2 <- gtkMessageDialogNew(dialog, "destroy-with-parent",
+                                           GtkMessageType["error"],
+                                           GtkButtonsType["close"],
+                                           gettext("Duplicate label is detected."))
+            dialog2$run()
+            dialog2$hide()
+            dialog$run()
+          } else {
+            dialog$hide()
+            row <- which(names(data.set)==var.name)
+            if (length(labels)==0) {
+              labels(data.set[[row]]) <- NULL
+              labels <- ""
+            } else {
+              labels <- sort(labels)
+              labels(data.set[[row]]) <- labels              
+              labels <- paste(labels, " \"", names(labels), "\"", sep="", collapse=", ")
+            }
+            data$setData.set(data.set)
+            data$constructVariable(row)
+            data$linkDataFrame()
+            cell.row <- as.character(row - 1)
+            .self$setCell(cell.row, column.definition["val.labs"], labels)
+            summaries[row] <<- data$getSummary(row)
+          }
+        } else {
+          dialog$hide()
+        }
+      })
+      dialog$run()
     },
     
     onRowActivated      = function(tw, path, column){
@@ -441,4 +654,4 @@ setRefClass("RzVariableView",
     }
   )
 )
-variable.view$accessors("sw")
+variable.view$accessors("sw", "liststore", "data")

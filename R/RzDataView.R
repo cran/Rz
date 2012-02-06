@@ -16,7 +16,10 @@ setRefClass("RzDataView",
       model2 <- rGtkDataFrameNew(df2)
       treeView2 <- gtkTreeViewNewWithModel(model2)
       treeView2["enable-grid-lines"] <- GtkTreeViewGridLines["both"]
-
+      treeView2["can-focus"] <- FALSE
+      selec <- treeView2$getSelection()
+      gSignalConnect(selec, "changed", function(object) object$unselectAll())
+      
       rt.index    <- gtkCellRendererText()
       color       <- rt.index["cell-background-gdk"]
       color$red   <- 45000L
@@ -39,15 +42,19 @@ setRefClass("RzDataView",
       treeView2$appendColumn(column1)
       
       scrolledWindow <- gtkScrolledWindowNew()
+      scrolledWindow["shadow-type"] <- GtkShadowType["in"]
       scrolledWindow$add(treeView)
       
       scrolledWindow2 <- gtkScrolledWindowNew(NULL, scrolledWindow$getVadjustment())
+      scrolledWindow2["shadow-type"] <- GtkShadowType["in"]
+      scrolledWindow2["hscrollbar-policy"] <- GtkPolicyType["never"]
       scrolledWindow2["vscrollbar-policy"] <- GtkPolicyType["never"]
       scrolledWindow2$add(treeView2)
       
       hbox <- gtkHBoxNew()
       hbox$packStart(scrolledWindow2, expand=FALSE)
       hbox$packStart(scrolledWindow)
+      
       
       win <- gtkWindowNew(show=FALSE)
       win$add(hbox)
@@ -56,7 +63,20 @@ setRefClass("RzDataView",
       win["allow-shrink"] <- TRUE
       win["title"] <- gettext("Data View")
       win["window-position"] <- GtkWindowPosition["center"]
+      
+      accel.group <- gtkAccelGroupNew()
+      win$addAccelGroup(accel.group)
+      gSignalConnect(win, "activate-default", win$destroy)
+
+      accel <- gtkAcceleratorParse("<Ctrl>w")
+      win$addAccelerator("activate-default", accel.group, accel$accelerator.key,
+                         as.numeric(accel$accelerator.mods), 1)
+      accel <- gtkAcceleratorParse("<Ctrl>1")
+      win$addAccelerator("activate-default", accel.group, accel$accelerator.key,
+                         as.numeric(accel$accelerator.mods), 1)
+      
       win$showAll()
+      
     }
   )
 )

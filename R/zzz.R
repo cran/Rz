@@ -4,7 +4,6 @@ rzSettings <- new("RzSettings")
 #      .Rz.path <- "/media/sf_Dropbox/Documents/R/Rz/Rz/inst"  # for debug
 
 .onAttach <- function(lib, pkg){
-  #     if(exists("winMenuAdd")){
   if(grepl("mingw", R.Version()$os)){
     temp<-try(winMenuAdd("Rz"),silent=TRUE)
     if(class(temp)!="try-error"){
@@ -12,6 +11,7 @@ rzSettings <- new("RzSettings")
     }
   }
   rzSettings$load()
+  gtkAccelMapLoad(file.path(rzSettings$getRzPath(), "themes", "Default", "gtk-2.0-key", "key.txt"))
   txt1 <- "################################ Rz ################################"
   txt2 <- gettext("Excute Rz() to start,")
   txt3 <- gettext("or you can start from menu bar if you use R on Windows.")

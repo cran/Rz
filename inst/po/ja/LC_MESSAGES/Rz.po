@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Rz 0.1\n"
 "Report-Msgid-Bugs-To: bugs@r-project.org\n"
-"POT-Creation-Date: 2012-01-31 07:59\n"
-"PO-Revision-Date: 2012-01-31 08:00+0900\n"
+"POT-Creation-Date: 2012-02-06 16:00\n"
+"PO-Revision-Date: 2012-02-06 16:00+0900\n"
 "Last-Translator: Masahiro Hayashi <rinm884@gmail.com>\n"
 "Language-Team:  <rinm884@gmail.com>\n"
 "MIME-Version: 1.0\n"
@@ -12,6 +12,15 @@ msgstr ""
 "X-Poedit-Language: Japanese\n"
 "X-Poedit-Country: JAPAN\n"
 "X-Poedit-SourceCharset: utf-8\n"
+
+msgid "File Path:"
+msgstr "File Path:"
+
+msgid "This file already exists. Overwrite it?"
+msgstr "このファイルは既に存在しています。上書きしますか？"
+
+msgid "Cannot handle character variables longer than 255"
+msgstr "255文字を超える文字変数は取り扱えません"
 
 msgid "_File"
 msgstr "ファイル(_F)"
@@ -34,11 +43,11 @@ msgstr "大局的環境からインポート(_G)"
 msgid "Import from Grobal Environment"
 msgstr "大局的環境からインポート"
 
-msgid "_Quit"
-msgstr "終了(_Q)"
+msgid "_Close"
+msgstr "閉じる(_C)"
 
-msgid "Quit"
-msgstr "終了"
+msgid "Close"
+msgstr "閉じる"
 
 msgid "_Edit"
 msgstr "編集(_E)"
@@ -70,6 +79,9 @@ msgstr "欠損値"
 msgid "Recode"
 msgstr "リコード"
 
+msgid "Edit Value Labels"
+msgstr "値ラベルを編集する"
+
 msgid "_Preferences"
 msgstr "設定(_P)"
 
@@ -84,6 +96,9 @@ msgstr "データビュー"
 
 msgid "Plot View"
 msgstr "プロットビュー"
+
+msgid "Quick Editor View"
+msgstr "クイックエディタビュー"
 
 msgid "This dataset name is invalid. Please enter a valid dataset name."
 msgstr "このデータセット名は無効です。有効なデータセット名を入力してください。"
@@ -133,11 +148,11 @@ msgstr "コンマ区切りテキスト (*.*)"
 msgid "Tab-Separated Text (*.*)"
 msgstr "タブ区切りテキスト (*.*)"
 
-msgid "%s [from Global Environment]"
-msgstr "%s [大局的環境から]"
-
 msgid "Changing encoding may takes several or more minutes. Please wait..."
 msgstr "エンコーディングの変更は数分かそれ以上かかることがあります。お待ちください．．．"
+
+msgid "%s [from Global Environment]"
+msgstr "%s [大局的環境から]"
 
 msgid "Old Name"
 msgstr "古い名前"
@@ -223,9 +238,6 @@ msgstr "幅（cm）"
 msgid "height (cm)"
 msgstr "高さ（cm）"
 
-msgid "This file already exists. Overwrite it?"
-msgstr "このファイルは既に存在しています。上書きしますか？"
-
 msgid "statistics options"
 msgstr "statistics options"
 
@@ -241,6 +253,9 @@ msgstr ""
 
 msgid "Settings"
 msgstr "設定"
+
+msgid "Themes Folder"
+msgstr "テーマフォルダ"
 
 msgid "Theme (requires restart R)"
 msgstr "テーマ（Rの再起動が必要）"
@@ -285,6 +300,33 @@ msgstr "全般"
 msgid "Font"
 msgstr "フォント"
 
+msgid "Change Measurement"
+msgstr "尺度を変更する"
+
+msgid "Edit Variable Labels"
+msgstr "変数ラベルを編集する"
+
+msgid "Apply Missing Values"
+msgstr "欠損値を設定する"
+
+msgid "Reverse"
+msgstr "反転する"
+
+msgid "Select All"
+msgstr "全て選択"
+
+msgid "Unselect All"
+msgstr "選択を解除"
+
+msgid "Templates"
+msgstr "テンプレート"
+
+msgid "Quick Editor"
+msgstr "クイックエディタ"
+
+msgid "Quick Variable Editor"
+msgstr "クイック変数エディタ"
+
 msgid "Names"
 msgstr "変数名"
 
@@ -296,6 +338,9 @@ msgstr "尺度"
 
 msgid "Missing"
 msgstr "欠損値"
+
+msgid "=============== Output from Quick Editor ==============="
+msgstr "=============== クイックエディタからの出力 ==============="
 
 msgid "This recode syntax is invalid. Please enter a valid recode syntax."
 msgstr "このリコード・シンタックスは無効です。有効なリコード・シンタックスを入力してください。"
@@ -324,11 +369,11 @@ msgstr "変数ラベル"
 msgid "Generate Template"
 msgstr "テンプレートの生成"
 
-msgid "File Path:"
-msgstr "File Path:"
+msgid "Variable Name"
+msgstr "変数名"
 
-msgid "Cannot handle character variables longer than 255"
-msgstr "255文字を超える文字変数は取り扱えません"
+msgid "Duplicate label is detected."
+msgstr "ラベルが重複しています。"
 
 msgid "Start"
 msgstr "スタート"
@@ -338,6 +383,18 @@ msgstr "Rz() を実行して開始してください．"
 
 msgid "or you can start from menu bar if you use R on Windows."
 msgstr "WindowsでRを使っている場合はメニューバーから起動することもできます．"
+
+#~ msgid "Change Variable Labels"
+#~ msgstr "変数ラベルを変更する"
+
+#~ msgid "Change Value Labels"
+#~ msgstr "値ラベルを変更する"
+
+#~ msgid "_Quit"
+#~ msgstr "終了(_Q)"
+
+#~ msgid "Quit"
+#~ msgstr "終了"
 
 #~ msgid "category"
 #~ msgstr "カテゴリ"
@@ -371,12 +428,6 @@ msgstr "WindowsでRを使っている場合はメニューバーから起動す�
 
 #~ msgid "_OK"
 #~ msgstr "OK(_O)"
-
-#~ msgid "Close"
-#~ msgstr "閉じる"
-
-#~ msgid "_Close"
-#~ msgstr "閉じる(_C)"
 
 #~ msgid "Cancel"
 #~ msgstr "キャンセル"
