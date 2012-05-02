@@ -1,7 +1,7 @@
 variableEditorView <-
 setRefClass("RzVariableEditorView",
   fields = c("main", "treeview", "textview",
-             "model", "model.dummy", "data", "column.definition",
+             "model", "model.dummy", "data",
              "info.bar", "variable.view", "button.execute",
              "current.page", "script.prev"),
   methods = list(
@@ -23,16 +23,7 @@ setRefClass("RzVariableEditorView",
                             gettext("Edit Value Labels"),
                             gettext("Apply Missing Values"),
                             gettext("Reverse"))
-      
-      column.definition <<- c(index=0, select=1, vars=2, var.labs=3, msr=4, val.labs=5, missing=6)
-      
-      button.selectall     <- gtkButtonNewWithLabel(gettext("Select All"))
-      button.unselectall   <- gtkButtonNewWithLabel(gettext("Unselect All"))
-      button.box1          <- gtkHButtonBoxNew()
-      button.box1$setLayout(GtkButtonBoxStyle["spread"])
-      button.box1$packStart(button.selectall)
-      button.box1$packStart(button.unselectall)
-      
+            
       
       model.dummy <<- gtkListStoreNew("character", "logical", "character", "character", "character", "character", "character")
       model       <<- gtkTreeModelFilterNew(model.dummy)
@@ -47,7 +38,6 @@ setRefClass("RzVariableEditorView",
       
       vbox1 <- gtkVBoxNew(spacing=2)
       vbox1$packStart(scrolledWindow)
-      vbox1$packStart(button.box1, expand=FALSE)
       
       label.template <- gtkLabelNew(gettext("Templates"))
       combo.template <- gtkComboBoxNewText()
@@ -71,13 +61,13 @@ setRefClass("RzVariableEditorView",
       button.box2$packStart(button.clear)
       button.box2$packStart(button.execute)
 
-      vbox2 <- gtkVBoxNew(spacing=2)
+      vbox2 <- gtkVBoxNew(spacing=0)
 #      vbox2$packStart(hbox.template, expand=FALSE)
-      vbox2$packStart(scrolledWindow2)
+      vbox2$packStart(scrolledWindow2, padding=2)
       vbox2$packStart(button.box2, expand=FALSE)
       
-      vbox3 <- gtkVBoxNew(spacing=2)
-      vbox3$packStart(hbox.template, expand=FALSE)
+      vbox3 <- gtkVBoxNew(spacing=0)
+      vbox3$packStart(hbox.template, expand=FALSE, padding=2)
       
       note <- gtkNotebookNew()
       note$setTabPos("bottom")
@@ -93,7 +83,7 @@ setRefClass("RzVariableEditorView",
       rt.index    <- gtkCellRendererText()
       rt.vars     <- gtkCellRendererText()
       rt.var.labs <- gtkCellRendererText()
-      rt.msr      <- gtkCellRendererText()
+      rp.msr      <- gtkCellRendererPixbuf()
       rt.val.labs <- gtkCellRendererText()
       rt.missing  <- gtkCellRendererText()
       color       <- rt.index["cell-background-gdk"]
@@ -105,9 +95,9 @@ setRefClass("RzVariableEditorView",
 
       columns <- list(
         index   = gtkTreeViewColumnNewWithAttributes(""                     , rt.index   , "text"=column.definition[["index"]]   ),
+        msr     = gtkTreeViewColumnNewWithAttributes(gettext("Measurement") , rp.msr     , "pixbuf"=column.definition[["msr.image"]]),
         vars    = gtkTreeViewColumnNewWithAttributes(gettext("Names")       , rt.vars    , "text"=column.definition[["vars"]]    ),
         labs    = gtkTreeViewColumnNewWithAttributes(gettext("Labels")      , rt.var.labs, "text"=column.definition[["var.labs"]]),
-        msr     = gtkTreeViewColumnNewWithAttributes(gettext("Measurement") , rt.msr     , "text"=column.definition[["msr"]]     ),
         val.labs= gtkTreeViewColumnNewWithAttributes(gettext("Value Labels"), rt.val.labs, "text"=column.definition[["val.labs"]]),
         missing = gtkTreeViewColumnNewWithAttributes(gettext("Missing")     , rt.missing , "text"=column.definition[["missing"]] )
         )
@@ -120,26 +110,12 @@ setRefClass("RzVariableEditorView",
       columns$vars$setFixedWidth(50)
       columns$labs$setFixedWidth(150)
       columns$val.labs$setFixedWidth(100)
-      columns$msr$setSizing("automatic")
-      columns$msr$setMinWidth(80)
+      columns$msr$setFixedWidth(30)
+      columns$msr$setMinWidth(30)
       columns$missing$setSizing("automatic")
       columns$missing$setResizable(FALSE)
       lapply(columns, function(column) treeview$appendColumn(column))
       
-      gSignalConnect(button.selectall, "clicked", function(button){
-        liststore <- model$getModel()
-        liststore$foreach(function(m, path, iter){
-          m$setValue(iter, 1, TRUE)
-          return(FALSE)
-        })
-      })
-      gSignalConnect(button.unselectall, "clicked", function(button){
-        liststore <- model$getModel()
-        liststore$foreach(function(m, path, iter){
-          m$setValue(iter, 1, FALSE)
-          return(FALSE)
-        })
-      })
       gSignalConnect(button.clear, "clicked", function(button){
         buffer <- textview$getBuffer()
         buffer$setText("")
@@ -153,7 +129,7 @@ setRefClass("RzVariableEditorView",
         if(page_num==0){
           vbox3$remove(scrolledWindow2)
           vbox3$remove(button.box2)
-          vbox2$packStart(scrolledWindow2)
+          vbox2$packStart(scrolledWindow2, padding=2)
           vbox2$packStart(button.box2, expand=FALSE)
           buffer <- textview$getBuffer()
           iter   <- buffer$getBounds()
@@ -163,7 +139,7 @@ setRefClass("RzVariableEditorView",
         } else {
           vbox2$remove(scrolledWindow2)
           vbox2$remove(button.box2)
-          vbox3$packStart(scrolledWindow2)
+          vbox3$packStart(scrolledWindow2, padding=2)
           vbox3$packStart(button.box2, expand=FALSE)          
           buffer <- textview$getBuffer()
           iter   <- buffer$getBounds()
@@ -240,7 +216,7 @@ setRefClass("RzVariableEditorView",
         model <<- gtkTreeModelFilterNew(variable.view$getListstore())
         data  <<- variable.view$getData()
       }
-      model$setVisibleColumn(1)
+      model$setVisibleColumn(column.definition["select"])
       treeview$setModel(model)        
     },
     

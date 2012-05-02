@@ -1,6 +1,6 @@
+gettext  <- function(...) base::gettext(..., domain = "Rz")
+gettextf <- function(...) base::gettextf(..., domain = "Rz")
 
-formals(gettext)$domain <- "Rz"
-formals(gettextf)$domain <- "Rz"
 #if(grepl("darwin",R.Version()$os) formals(gettext)$domain <- NULL
 #if(grepl("darwin",R.Version()$os) formals(gettextf)$domain <- NULL
 
@@ -100,7 +100,7 @@ gtkInfoBarRzSetText <- function(obj, txt){
 write.spss <-
 function (df, datafile, codefile, varlabels, varnames = NULL) {
     dfn <- lapply(df, function(x) if (is.factor(x)) as.numeric(x) else x)
-    write.table(dfn, file = datafile, row = FALSE, col = FALSE, 
+    write.table(dfn, file = datafile, row.names = FALSE, col.names = FALSE, 
         sep = ",", quote = FALSE, na = "", eol = ",\n")
     if (is.null(varnames)) {
         varnames <- names(df)

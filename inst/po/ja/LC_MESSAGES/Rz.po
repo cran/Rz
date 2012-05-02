@@ -2,9 +2,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Rz 0.1\n"
 "Report-Msgid-Bugs-To: bugs@r-project.org\n"
-"POT-Creation-Date: 2012-02-06 16:00\n"
-"PO-Revision-Date: 2012-02-06 16:00+0900\n"
-"Last-Translator: Masahiro Hayashi <rinm884@gmail.com>\n"
+"POT-Creation-Date: 2012-05-01 13:09\n"
+"PO-Revision-Date: 2012-05-02 13:06+0900\n"
+"Last-Translator: Masahiro Hayashi <mh@m884.jp>\n"
 "Language-Team:  <rinm884@gmail.com>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -79,6 +79,18 @@ msgstr "欠損値"
 msgid "Recode"
 msgstr "リコード"
 
+msgid "Select All Variables"
+msgstr "全ての変数を選択"
+
+msgid "Unselect All Variables"
+msgstr "選択を解除"
+
+msgid "Delete Selected Variables"
+msgstr "選択されている変数を削除"
+
+msgid "Duplicate Selected Variables"
+msgstr "選択されている変数を複製"
+
 msgid "Edit Value Labels"
 msgstr "値ラベルを編集する"
 
@@ -99,6 +111,15 @@ msgstr "プロットビュー"
 
 msgid "Quick Editor View"
 msgstr "クイックエディタビュー"
+
+msgid "_Help"
+msgstr "ヘルプ(_H)"
+
+msgid "Tutorial on Web"
+msgstr "チュートリアル（Web）"
+
+msgid "Load Sample Dataset"
+msgstr "サンプル・データセットの読み込み"
 
 msgid "This dataset name is invalid. Please enter a valid dataset name."
 msgstr "このデータセット名は無効です。有効なデータセット名を入力してください。"
@@ -154,17 +175,26 @@ msgstr "エンコーディングの変更は数分かそれ以上かかること
 msgid "%s [from Global Environment]"
 msgstr "%s [大局的環境から]"
 
+msgid "http://m884.jp/RzTutorial.html"
+msgstr "http://m884.jp/RzTutorial_Ja.html"
+
+msgid "Are you sure you want to do that?"
+msgstr "本当に実行しますか？"
+
+msgid "NES1948 [Sample Dataset in memisc]"
+msgstr "NES1948 [memiscのサンプル・データセット]"
+
 msgid "Old Name"
 msgstr "古い名前"
 
 msgid "New Name"
 msgstr "新しい名前"
 
-msgid "Are you sure you want to do that?"
-msgstr "本当に実行しますか？"
-
 msgid "\"%s\" isn't a data.set or don't exist."
 msgstr "\"%s\" はdata.setではないか，存在しません。"
+
+msgid "Please enter valid x."
+msgstr "有効な x を入力してください。"
 
 msgid "variable label"
 msgstr "変数ラベル"
@@ -172,20 +202,20 @@ msgstr "変数ラベル"
 msgid "variable name"
 msgstr "変数名"
 
-msgid "Add Layer and Redraw"
-msgstr "レイヤーを追加し再描画"
+msgid "facet options"
+msgstr "facetオプション"
+
+msgid "x"
+msgstr "x"
 
 msgid "y"
 msgstr "y"
 
-msgid "flip"
-msgstr "flip"
+msgid "Add Layer and Redraw"
+msgstr "レイヤーを追加し再描画"
 
-msgid "remove NA"
-msgstr "欠損値を取り除く"
-
-msgid "general & geom options"
-msgstr "general & geom options"
+msgid "geom options"
+msgstr "geomオプション"
 
 msgid "title"
 msgstr "タイトル"
@@ -199,8 +229,26 @@ msgstr "（任意の文字列）"
 msgid "y axis"
 msgstr "y軸"
 
+msgid "label options"
+msgstr "labelオプション"
+
+msgid "axis limits"
+msgstr "軸の範囲"
+
+msgid "flip"
+msgstr "flip"
+
+msgid "remove NA"
+msgstr "欠損値を取り除く"
+
+msgid "misc options"
+msgstr "その他のオプション"
+
 msgid "position"
 msgstr "position"
+
+msgid "position options"
+msgstr "positionオプション"
 
 msgid "Save"
 msgstr "保存"
@@ -238,11 +286,20 @@ msgstr "幅（cm）"
 msgid "height (cm)"
 msgstr "高さ（cm）"
 
+msgid "save options"
+msgstr "保存オプション"
+
 msgid "statistics options"
-msgstr "statistics options"
+msgstr "statisticsオプション"
 
 msgid "legend position"
 msgstr "凡例の位置"
+
+msgid "line type"
+msgstr "線の種類"
+
+msgid "stratum options"
+msgstr "層化オプション"
 
 msgid ""
 "Prev: Up Arrow Key\n"
@@ -260,15 +317,14 @@ msgstr "テーマフォルダ"
 msgid "Theme (requires restart R)"
 msgstr "テーマ（Rの再起動が必要）"
 
-msgid "Sync as data.set of memisc package"
-msgstr "memiscパッケージのdata.setとして同期"
+msgid "Sync as data.set object"
+msgstr "data.setオブジェクトとして同期"
 
-msgid ""
-"Use embeded graphics divice (requires restart Rz)\n"
-" * Some bugs exist on Windows"
-msgstr ""
-"埋め込みグラフィックスデバイスを使う (Rzの再起動が必要)\n"
-" * Windowsではいくつかバグがあります"
+msgid "Use embeded graphics divice (requires cairoDevice package)"
+msgstr "埋め込みグラフィックスデバイスを使う (cairoDeviceパッケージが必要です)"
+
+msgid "Plot when a index cell is double-clicked"
+msgstr "インデックスをダブルクリックしたときにプロットを実行する"
 
 msgid "Don't output summary while plot view open"
 msgstr "プロットビューを開いている間はサマリーを出力しない"
@@ -312,12 +368,6 @@ msgstr "欠損値を設定する"
 msgid "Reverse"
 msgstr "反転する"
 
-msgid "Select All"
-msgstr "全て選択"
-
-msgid "Unselect All"
-msgstr "選択を解除"
-
 msgid "Templates"
 msgstr "テンプレート"
 
@@ -327,14 +377,14 @@ msgstr "クイックエディタ"
 msgid "Quick Variable Editor"
 msgstr "クイック変数エディタ"
 
+msgid "Measurement"
+msgstr "尺度"
+
 msgid "Names"
 msgstr "変数名"
 
 msgid "Labels"
 msgstr "変数ラベル"
-
-msgid "Measurement"
-msgstr "尺度"
 
 msgid "Missing"
 msgstr "欠損値"
@@ -383,6 +433,9 @@ msgstr "Rz() を実行して開始してください．"
 
 msgid "or you can start from menu bar if you use R on Windows."
 msgstr "WindowsでRを使っている場合はメニューバーから起動することもできます．"
+
+#~ msgid "Select All"
+#~ msgstr "全て選択"
 
 #~ msgid "Change Variable Labels"
 #~ msgstr "変数ラベルを変更する"

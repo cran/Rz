@@ -1,12 +1,12 @@
 Package: Rz
 Type: Package
 Title: GUI Tool for Data Management like SPSS or Stata
-Version: 0.3-8
-Date: 2012-02-06
+Version: 0.4-0
+Date: 2012-05-02
+Author@R: person(given="Masahiro", family="Hayashi",
+        email="rinm884@gmail.com", role=c("aut","cre"))
 Author: Masahiro Hayashi
 Maintainer: Masahiro Hayashi <rinm884@gmail.com>
-Author@R: person(given="Masahiro",family="Hayashi",
-        email="rinm884@gmail.com", role=c("aut","cre"))
 Description: R is very powerfull but not enough for social science
         becouse of lack in some functionality for managing survey data
         SPSS or Stata provides.  Memisc package supplements these,
@@ -17,10 +17,11 @@ Description: R is very powerfull but not enough for social science
         managing system using memisc package as backend. Additionally,
         Rz has powerful plot assistant interface based on ggplot2.
 License: file LICENSE
+URL: http://m884.jp/Rz.html
 LazyLoad: yes
-Depends: R (>= 2.12), methods, foreign, memisc, ggplot2, cairoDevice
-Suggests: quantreg
+Depends: R (>= 2.14), methods, foreign, memisc, ggplot2 (>= 0.9)
+Suggests: quantreg, Hmisc, cairoDevice
 Imports: RGtk2 (>= 2.20)
-Packaged: 2012-02-06 07:20:56 UTC; masahiro
+Packaged: 2012-05-02 08:26:27 UTC; masahiro
 Repository: CRAN
-Date/Publication: 2012-02-06 08:00:37
+Date/Publication: 2012-05-02 08:59:07

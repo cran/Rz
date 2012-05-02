@@ -8,7 +8,7 @@ setRefClass("RzPlotPosition",
       label <- gtkLabelNew(gettext("position"))
       combo <<- gtkComboBoxNewText()
       combo$show()
-      positions <- c("identity", "dodge", "fill", "stack", "jitter")
+      positions <- c("default", "identity", "dodge", "fill", "stack", "jitter")
       for(i in positions) combo$appendText(i)
       combo$setActive(0)
 
@@ -26,11 +26,18 @@ setRefClass("RzPlotPosition",
       table$attach        (label.height, 0, 1, 2, 3, "shrink", "shrink", 0, 0)
       table$attachDefaults(entry.height, 1, 2, 2, 3)
 
-      expander <<- gtkExpanderNew("position options")
+      expander <<- gtkExpanderNew(gettext("position options"))
       expander["border-width"] <<- 3
       expander$setExpanded(FALSE)
       expander$add(table)
     },
+    
+    clear = function(){
+      combo$setActive(0)
+      entry.width$setText("")
+      entry.height$setText("")
+    },
+    
     getArgs = function(){
       position  <- localize(combo$getActiveText())
       width     <- localize(entry.width$getText())

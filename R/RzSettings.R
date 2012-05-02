@@ -2,28 +2,36 @@ settings <-
 setRefClass("RzSettings",
   fields = c("RzPath", "path", "theme", "theme.this", "globalFont", "variableViewFont", "monospaceFont", "monospaceFontFamily",
     "plotFont", "plotFontFamily", "useDataSetObject", "themesFolder",
-    "useEmbededDevice", "embededDeviceOn", "codebookOff", "popupOff",
+    "useEmbededDevice", "embededDeviceOn", "runPlot", "codebookOff", "popupOff",
     "plotViewEnabled", "variableEditorViewEnabled", "psFont", "pdfFont"),
   methods = list(
     load = function(){
       path <<- "~/.Rz"
       RzPath <<- system.file(package = "Rz")
+      
+      # Does a setting file exits?
       if(file.exists(path)) {
         con <- file(path)
         open(con)
         settings <- dget(con)
         close(con)
         themesFolder     <<- ifelse(is.null(settings$themesFolder), file.path(RzPath, "themes"), settings$themesFolder)
-        theme            <<- ifelse(is.null(settings$theme)   , "Default", settings$theme)          
+        # platform dependent settings
+        if(grepl("linux", R.Version()$os)){
+          theme            <<- ifelse(is.null(settings$theme)   , "Default", settings$theme)          
+        } else {
+          theme            <<- ifelse(is.null(settings$theme)   , "kde42-oxygen", settings$theme)
+        }
         if(grepl("darwin", R.Version()$os)){
           globalFont       <<- ifelse(is.null(settings$globalFont)   , "Arial 10"     , settings$globalFont)
-          variableViewFont <<- ifelse(is.null(settings$variableViewFont)   , "Arial 10"     , settings$globalFont)
+          variableViewFont <<- ifelse(is.null(settings$variableViewFont)   , "Arial 10"     , settings$variableViewFont)
           plotFont         <<- ifelse(is.null(settings$plotFont)     , "Arial 10"     , settings$plotFont)
         } else {
           globalFont       <<- ifelse(is.null(settings$globalFont)   , "sans 10"     , settings$globalFont)
-          variableViewFont <<- ifelse(is.null(settings$variableViewFont)   , "sans 10"     , settings$globalFont)
+          variableViewFont <<- ifelse(is.null(settings$variableViewFont)   , "sans 10"     , settings$variableViewFont)
           plotFont         <<- ifelse(is.null(settings$plotFont)     , "sans 10"     , settings$plotFont)
         }
+        # settings        
         monospaceFont    <<- ifelse(is.null(settings$monospaceFont), "monospace 10", settings$monospaceFont)
         monospaceFontFamily <<- pangoFontDescriptionFromString(monospaceFont)$getFamily()
         plotFontFamily   <<- pangoFontDescriptionFromString(plotFont)$getFamily()
@@ -31,11 +39,17 @@ setRefClass("RzSettings",
         pdfFont          <<- ifelse(is.null(settings$pdfFont)      , "sans"        , settings$pdfFont)
         useDataSetObject <<- ifelse(is.null(settings$useDataSetObject), FALSE, settings$useDataSetObject)
         useEmbededDevice <<- ifelse(is.null(settings$useEmbededDevice), FALSE, settings$useEmbededDevice)
-        codebookOff      <<- ifelse(is.null(settings$codebookOff),      TRUE , settings$codebookOff)
+        runPlot          <<- ifelse(is.null(settings$runPlot),          FALSE, settings$runPlot)
+        codebookOff      <<- ifelse(is.null(settings$codebookOff),      FALSE, settings$codebookOff)
         popupOff         <<- ifelse(is.null(settings$popupOff),         FALSE, settings$popupOff)
       } else {
+        # initialize settings
         themesFolder <<- file.path(RzPath, "themes")
-        theme      <<- "Default"
+        if(grepl("linux", R.Version()$os)){
+          theme      <<- "Default"
+        } else {
+          theme      <<- "kde42-oxygen"          
+        }
         if(grepl("darwin", R.Version()$os)){
           globalFont <<- "Arial 10"
           variableViewFont <<- "Arial 10"
@@ -47,12 +61,13 @@ setRefClass("RzSettings",
         }
         monospaceFont <<- "monospace 10"
         monospaceFontFamily <<- pangoFontDescriptionFromString(monospaceFont)$getFamily()
-        plotFontFamily <<- pangoFontDescriptionFromString(plotFont)$getFamily()
+        plotFontFamily      <<- pangoFontDescriptionFromString(plotFont)$getFamily()
         psFont <<- "sans"
         pdfFont <<- "sans"
         useDataSetObject <<- FALSE
         useEmbededDevice <<- FALSE
-        codebookOff      <<- TRUE
+        runPlot         <<- FALSE
+        codebookOff      <<- FALSE
         popupOff         <<- FALSE
       }
       theme.path  <- file.path(themesFolder, theme, "gtk-2.0", "gtkrc")
@@ -95,10 +110,12 @@ setRefClass("RzSettings",
       themes.hbox$packStart(themes.label, expand=FALSE)
       themes.hbox$packStart(themesCombo)
       
-      checkButtonUseDataSet <- gtkCheckButtonNewWithLabel(gettext("Sync as data.set of memisc package"))
+      checkButtonUseDataSet <- gtkCheckButtonNewWithLabel(gettext("Sync as data.set object"))
       checkButtonUseDataSet$setActive(useDataSetObject)
-      checkButtonUseEmbededDevice <- gtkCheckButtonNewWithLabel(gettext("Use embeded graphics divice (requires restart Rz)\n * Some bugs exist on Windows"))
+      checkButtonUseEmbededDevice <- gtkCheckButtonNewWithLabel(gettext("Use embeded graphics divice (requires cairoDevice package)"))
       checkButtonUseEmbededDevice$setActive(useEmbededDevice)
+      checkButtonRunPlot <- gtkCheckButtonNewWithLabel(gettext("Plot when a index cell is double-clicked"))
+      checkButtonRunPlot$setActive(runPlot)
       checkButtonCodebookOff <- gtkCheckButtonNewWithLabel(gettext("Don't output summary while plot view open"))
       checkButtonCodebookOff$setActive(codebookOff)
       checkButtonPopupOff <- gtkCheckButtonNewWithLabel(gettext("Don't Popup Summary"))
@@ -110,6 +127,7 @@ setRefClass("RzSettings",
       general.tab$packStart(themes.hbox, expand=FALSE)
       general.tab$packStart(checkButtonUseDataSet, expand=FALSE)
       general.tab$packStart(checkButtonUseEmbededDevice, expand=FALSE)
+      general.tab$packStart(checkButtonRunPlot, expand=FALSE)
       general.tab$packStart(checkButtonCodebookOff, expand=FALSE)
       general.tab$packStart(checkButtonPopupOff, expand=FALSE)
       
@@ -166,6 +184,7 @@ setRefClass("RzSettings",
           pdfFont          <<- localize(pdfFontCombo$getActiveText())
           useDataSetObject <<- checkButtonUseDataSet$getActive()
           useEmbededDevice <<- checkButtonUseEmbededDevice$getActive()
+          runPlot          <<- checkButtonRunPlot$getActive()
           codebookOff      <<- checkButtonCodebookOff$getActive()
           popupOff         <<- checkButtonPopupOff$getActive()
           settings <- gtkSettingsGetDefault()
@@ -182,6 +201,7 @@ setRefClass("RzSettings",
             pdfFont          = pdfFont,
             useDataSetObject = useDataSetObject,
             useEmbededDevice = useEmbededDevice,
+            runPlot          = runPlot,
             codebookOff      = codebookOff,
             popupOff         = popupOff
             ),
@@ -199,6 +219,6 @@ setRefClass("RzSettings",
   )
 )
 settings$accessors(c("RzPath", "themesFolder", "globalFont", "variableViewFont", "monospaceFont", "monospaceFontFamily", "plotFont", "plotFontFamily",
-                     "useDataSetObject","useEmbededDevice", "embededDeviceOn", "codebookOff", "popupOff",
+                     "useDataSetObject","useEmbededDevice", "embededDeviceOn", "runPlot", "codebookOff", "popupOff",
                      "plotViewEnabled", "variableEditorViewEnabled", "psFont", "pdfFont"))
 

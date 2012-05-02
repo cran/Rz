@@ -6,7 +6,6 @@ setRefClass("RzDataHandler",
       initFields(...)
       data.set.list <<- gtkListStoreNew("character", "character", "character", "character")
       data.set.list.combo <<- gtkComboBoxNewWithModel(data.set.list)
-      data.set.list.combo$modifyFont(pangoFontDescriptionFromString(rzSettings$getGlobalFont()))
       dsnames        <- data.collection$getDataSetNames()
       original.names <- data.collection$getOriginalNames()
       for( i in seq_len(data.collection$getLength()) ){
@@ -15,6 +14,7 @@ setRefClass("RzDataHandler",
       }
       renderer1 <- gtkCellRendererText()
       renderer2 <- gtkCellRendererText()
+      renderer2$setAlignment(1,0.5)
       data.set.list.combo$setFocusOnClick(FALSE)
       data.set.list.combo$packStart(renderer1)
       data.set.list.combo$packStart(renderer2, expand=FALSE)

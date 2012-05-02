@@ -1,14 +1,17 @@
 variable.view <- 
 setRefClass("RzVariableView",
-  fields = c("data","main", "liststore", "sw", "column.definition", "summaries",
-             "rt.index", "rtg.select", "rt.vars", "rt.var.labs", "rt.val.labs", "rc.msr", "rt.missing",
-             "rzPlot", "selectable"),
+  fields = c("data", "win", "main", "liststore", "sw", "summaries",
+             "rt.index", "rtg.select", "rt.vars", "rt.var.labs", "rt.val.labs", "rp.msr", "rt.missing",
+             "rzPlot", "selectable", "nominalpix", "ordinalpix", "intervalpix", "ratiopix"),
   methods = list(
     initialize  = function(...) {
       initFields(...)
       selectable <<- FALSE
-      column.definition <<- c(index=0, select=1, vars=2, var.labs=3, msr=4, val.labs=5, missing=6)
-      liststore <<- gtkListStoreNew("character", "logical", "character", "character", "character", "character", "character")
+      liststore <<- gtkListStoreNew("character", "logical", "character", "character", "character", "GdkPixbuf", "character", "character")
+      nominalpix    <<- gdkPixbufNewFromFile(file.path(rzSettings$getRzPath(), "images/cat.png"     ))$retval
+      ordinalpix    <<- gdkPixbufNewFromFile(file.path(rzSettings$getRzPath(), "images/order.png"   ))$retval
+      intervalpix   <<- gdkPixbufNewFromFile(file.path(rzSettings$getRzPath(), "images/interval.png"))$retval
+      ratiopix      <<- gdkPixbufNewFromFile(file.path(rzSettings$getRzPath(), "images/ratio.png"   ))$retval
       main <<- gtkTreeViewNewWithModel(liststore)
       
       main$modifyFont(pangoFontDescriptionFromString(rzSettings$getVariableViewFont()))
@@ -25,6 +28,7 @@ setRefClass("RzVariableView",
       rtg.select  <<- gtkCellRendererToggleNew()
       rt.vars     <<- gtkCellRendererText()
       rt.var.labs <<- gtkCellRendererText()
+      rp.msr      <<- gtkCellRendererPixbuf()
       rt.val.labs <<- gtkCellRendererText()
       rt.missing  <<- gtkCellRendererText()
       color       <- rt.index["cell-background-gdk"]
@@ -37,27 +41,28 @@ setRefClass("RzVariableView",
       rt.var.labs["editable"] <<- TRUE
       rt.missing ["editable"] <<- TRUE
       
-      combo.list <- gtkListStoreNew("character")
-      sapply(c("nominal","ordinal","interval","ratio"),
-             function(x) {
-               iter <- combo.list$append()$iter
-               combo.list$set(iter, 0, x)
-             })
-      rc.msr <<- gtkCellRendererCombo()
-      rc.msr["model"] <<- combo.list
-      rc.msr["text-column"] <<- 0
-      rc.msr["editable"] <<- TRUE
-      rc.msr["has-entry"] <<- FALSE
+#      combo.list <- gtkListStoreNew("character")
+#      sapply(c("nominal","ordinal","interval","ratio"),
+#             function(x) {
+#               iter <- combo.list$append()$iter
+#               combo.list$set(iter, 0, x)
+#             })
+#      rp.msr <<- gtkCellRendererCombo()
+#      rp.msr["model"] <<- combo.list
+#      rp.msr["text-column"] <<- 0
+#      rp.msr["editable"] <<- TRUE
+#      rp.msr["has-entry"] <<- FALSE
       
       gSignalConnect(main, "row-activated", .self$onRowActivated)
       gSignalConnect(main, "query-tooltip", .self$onQueryTooltip)
       gSignalConnect(rtg.select , "toggled", .self$onCelltoggledSelect)
       gSignalConnect(rt.vars    , "edited", .self$onCellEditedVars)
       gSignalConnect(rt.var.labs, "edited", .self$onCellEditedVarLabs)
-      gSignalConnect(rc.msr     , "edited", .self$onCellEditedMsr)
+#      gSignalConnect(rp.msr     , "edited", .self$onCellEditedMsr)
       gSignalConnect(rt.missing , "edited", .self$onCellEditedMissing)
       
       rzPlot$setModel(main$getModel())
+      rzPlot$setData(data)
       
     },
     
@@ -71,41 +76,70 @@ setRefClass("RzVariableView",
       for ( i in seq_len(data$ncol()) ) {
         iter <- liststore$append()$iter
         liststore$set(iter,
-                      column.definition[["index"]], i,
-                      column.definition[["select"]], FALSE,
-                      column.definition[["vars"]], vars[i],
-                      column.definition[["var.labs"]], var.labs[i],
-                      column.definition[["msr"]], msr[i],
-                      column.definition[["val.labs"]], val.labs[i],
-                      column.definition[["missing"]], miss.val[i])
+                      column.definition["index"], i,
+                      column.definition["select"], FALSE,
+                      column.definition["vars"], vars[i],
+                      column.definition["var.labs"], var.labs[i],
+                      column.definition["msr"], msr[i],
+                      column.definition["msr.image"], .self$msrPix(msr[i]),
+                      column.definition["val.labs"], val.labs[i],
+                      column.definition["missing"], miss.val[i])
       }
       columns <- list(
         index   = gtkTreeViewColumnNewWithAttributes(""                     , rt.index   , "text"=column.definition[["index"]]   ),
         select  = gtkTreeViewColumnNewWithAttributes(""                     , rtg.select , "active"=column.definition[["select"]]),
+        msr     = gtkTreeViewColumnNewWithAttributes(gettext("Measurement") , rp.msr     , "pixbuf"=column.definition[["msr.image"]]),
         vars    = gtkTreeViewColumnNewWithAttributes(gettext("Names")       , rt.vars    , "text"=column.definition[["vars"]]    ),
         labs    = gtkTreeViewColumnNewWithAttributes(gettext("Labels")      , rt.var.labs, "text"=column.definition[["var.labs"]]),
-        msr     = gtkTreeViewColumnNewWithAttributes(gettext("Measurement") , rc.msr     , "text"=column.definition[["msr"]]     ),
         val.labs= gtkTreeViewColumnNewWithAttributes(gettext("Value Labels"), rt.val.labs, "text"=column.definition[["val.labs"]]),
         missing = gtkTreeViewColumnNewWithAttributes(gettext("Missing")     , rt.missing , "text"=column.definition[["missing"]] )
         )
       lapply(columns, gtkTreeViewColumnSetSizing   , "fixed")
       lapply(columns, gtkTreeViewColumnSetResizable, TRUE)
       lapply(columns, gtkTreeViewColumnSetSpacing  , 1)
+      
+      columns$index$setData("attr", c(title="index"))
       columns$index$setMinWidth(30)
       columns$index$setSizing("automatic")
       columns$index$setResizable(FALSE)
+      
+      columns$select$setData("attr", c(title="select"))
       columns$select$setSizing("automatic")
       columns$select$setResizable(FALSE)
+      
+      columns$vars$setData("attr", c(title="vars"))
       columns$vars$setFixedWidth(50)
+      
+      columns$labs$setData("attr", c(title="labs"))
       columns$labs$setFixedWidth(250)
+      
+      columns$val.labs$setData("attr", c(title="val.labs"))
       columns$val.labs$setFixedWidth(100)
-      columns$msr$setSizing("automatic")
-      columns$msr$setMinWidth(80)
-      columns$msr$setResizable(FALSE)
+      
+      columns$msr$setData("attr", c(title="msr"))
+      columns$msr$setFixedWidth(30)
+      columns$msr$setMinWidth(30)
+      
+      columns$missing$setData("attr", c(title="missing"))
       columns$missing$setSizing("automatic")
       columns$missing$setResizable(FALSE)
+      
       lapply(columns, function(column) main$appendColumn(column))
       
+    },
+    
+    msrPix = function(msr){
+      pix <- NULL
+      if(msr=="nominal"){
+        pix <- nominalpix
+      } else if(msr=="ordinal"){
+        pix <- ordinalpix
+      } else if(msr=="interval"){
+        pix <- intervalpix
+      } else if(msr=="ratio"){
+        pix <- ratiopix
+      }
+      return(pix)
     },
     
     reload = function(){
@@ -115,6 +149,12 @@ setRefClass("RzVariableView",
         select  <- liststore$getValue(iter$iter, column.definition["select"])$value
         selects <- c(selects, select)
         iter$retval <- liststore$iterNext(iter$iter)
+      }
+      diff <- data$ncol() - length(selects)
+      if(diff > 0){
+        selects <- c(selects, rep(FALSE, diff))        
+      } else if(diff < 0){
+        selects <- rep(FALSE, data$ncol())
       }
       vars      <-  data$getVariableNames()
       var.labs  <-  data$getVariableLabels()
@@ -126,13 +166,14 @@ setRefClass("RzVariableView",
       for ( i in seq_len(data$ncol()) ) {
         iter <- liststore$append()$iter
         liststore$set(iter,
-                      column.definition[["index"]], i,
-                      column.definition[["select"]], selects[i],
-                      column.definition[["vars"]], vars[i],
-                      column.definition[["var.labs"]], var.labs[i],
-                      column.definition[["msr"]], msr[i],
-                      column.definition[["val.labs"]], val.labs[i],
-                      column.definition[["missing"]], miss.val[i])
+                      column.definition["index"], i,
+                      column.definition["select"], selects[i],
+                      column.definition["vars"], vars[i],
+                      column.definition["var.labs"], var.labs[i],
+                      column.definition["msr"], msr[i],
+                      column.definition["msr.image"], .self$msrPix(msr[i]),
+                      column.definition["val.labs"], val.labs[i],
+                      column.definition["missing"], miss.val[i])
       }
     },
     
@@ -140,19 +181,39 @@ setRefClass("RzVariableView",
       iter <- liststore$getIterFromString(path)$iter
       if (liststore$iterIsValid(iter)) {
         liststore$set(iter, col, new.value)
+        if(col==column.definition["msr"]){
+          liststore$set(iter, column.definition["msr.image"], .self$msrPix(new.value))
+        }
       } else {
         iter <- liststore$append()$iter
         liststore$set(iter, col, new.value) 
       }
+      
     },
     
     getSelected = function(){
       iter  <- main$getSelection()$getSelected()$iter
       value <- liststore$get(iter, unlist(column.definition))
+      value <- value[-(column.definition["msr.image"]+1)]
       value <- lapply(value, localize)
       value <- unlist(value)
-      names(value) <- names(column.definition)
+      names(value) <- names(column.definition[-(column.definition["msr.image"]+1)])
       return(value)
+    },
+    
+    getSelectedRows = function(){
+      model <- gtkTreeModelFilterNew(liststore)
+      model$setVisibleColumn(column.definition["select"])
+      iter  <- model$getIterFirst()
+      inds  <- character(0)
+      while(iter$retval){
+        value <- model$getValue(iter$iter, column.definition["index"])$value
+        inds <- c(inds, value)
+        iter$retval <- model$iterNext(iter$iter)
+      }
+      inds <- sapply(inds, localize)
+      inds <- as.numeric(inds)
+      return(inds)
     },
     
     toggleView  = function(rzSearchEntry=NULL){
@@ -169,6 +230,7 @@ setRefClass("RzVariableView",
         main$setSearchEqualFunc(rzSearchEntry$searchFunc)
         sw$showAll()
         rzPlot$setModel(main$getModel())
+        rzPlot$setData(data)
         if(rzSettings$getVariableEditorViewEnabled()){
           selectable <<- TRUE
         }
@@ -188,12 +250,41 @@ setRefClass("RzVariableView",
       
     },
     
+    onSelectAll = function(){
+      liststore$foreach(function(model, path, iter){
+        model$setValue(iter, column.definition["select"], TRUE)
+        return(FALSE)
+      })
+    },
+    
+    onUnselect = function(){
+      liststore$foreach(function(model, path, iter){
+        model$setValue(iter, column.definition["select"], FALSE)
+        return(FALSE)
+      })
+    },
+    
+    onDelete = function(){
+      inds <- .self$getSelectedRows()
+      if(length(inds)==0) return()
+      data$deleteVars(inds)
+      .self$reload()
+    },
+    
+    onDuplicate = function(){
+      inds <- .self$getSelectedRows()
+      if(length(inds)==0) return()
+      data$duplicate(inds)
+      .self$reload()      
+    },
+    
     onCellEditedVars    = function(renderer, path, new.text){
       txt     <- localize(new.text)
-      txt     <- sub("^([[:space:]]+)([^[:space:]]+)([[:space:]]+)$", "\\2", txt)
-      invalid <- grepl("(^$)|(^[0-9]+)|([]\\[\\^$*?|(){}@!\"#$%&'*+,/:;<=>?~[:space:]-])",
-                       txt)
-      if(invalid) return()
+#      txt     <- sub("^([[:space:]]+)([^[:space:]]+)([[:space:]]+)$", "\\2", txt)
+#      invalid <- grepl("(^$)|(^[0-9]+)|([]\\[\\^$*?|(){}@!\"#$%&'*+,/:;<=>?~[:space:]-])",
+#                       txt)
+#      if(invalid) return()
+      txt           <- make.names(txt)
       row           <- as.numeric(path) + 1
       data.set.name <- data$getData.set.name()
       var.name      <- data$getVariableNames()[row]
@@ -218,18 +309,80 @@ setRefClass("RzVariableView",
       .self$setCell(path, column.definition["var.labs"], txt)
     },
     
-    onCellEditedMsr     = function(renderer, path, new.text){
-      txt           <- localize(new.text)
-      row           <- as.numeric(path) + 1
+    onEditMsr     = function(renderer, path, new.text){
       data.set.name <- data$getData.set.name()
-      var.name      <- data$getVariableNames()[row]
-      data.set      <- data$getData.set()
-      measurement(data.set[[row]]) <- txt
-      data$setData.set(data.set)
-      data$constructVariable(row)
-      data$linkDataFrame()
-      .self$setCell(path, column.definition["msr"], txt)
-      summaries[row] <<- data$getSummary(row)
+      selec      <- .self$getSelected()
+      var.name   <- selec["vars"]
+      var.lab    <- selec["var.labs"]
+      data.set   <- data$getData.set()
+      var        <- data.set[[var.name]]
+      msr        <- measurement(var)
+      row <- which(names(data.set)==var.name)
+      
+      dialog <- gtkDialogNewWithButtons(title=gettext("Change Measurement"),
+                                        parent=win,
+                                        flags=c("modal", "destroy-with-parent"),
+                                        "gtk-cancel", GtkResponseType["cancel"],
+                                        show=FALSE)
+      dialog["window-position"] <- GtkWindowPosition["mouse"]
+
+      radio1 <- gtkRadioButtonNewWithLabel(label="nominal")
+      radio2 <- gtkRadioButtonNewWithLabelFromWidget(group=radio1, label="ordinal")
+      radio3 <- gtkRadioButtonNewWithLabelFromWidget(radio1, label="interval")
+      radio4 <- gtkRadioButtonNewWithLabelFromWidget(radio1, label="ratio")
+      image <- gtkImageNewFromPixbuf(nominalpix)
+      radio1$setImage(image)
+      image$show()
+      image <- gtkImageNewFromPixbuf(ordinalpix)
+      radio2$setImage(image)
+      image$show()
+      image <- gtkImageNewFromPixbuf(intervalpix)
+      radio3$setImage(image)
+      image$show()
+      image <- gtkImageNewFromPixbuf(ratiopix)
+      radio4$setImage(image)
+      image$show()
+      if(msr=="nominal"){
+        radio1$setActive(TRUE)
+      } else if(msr=="ordinal"){
+        radio2$setActive(TRUE)
+      } else if(msr=="interval"){
+        radio3$setActive(TRUE)
+      } else if(msr=="ratio"){
+        radio4$setActive(TRUE)
+      }
+      radio1["draw-indicator"] <- FALSE
+      radio2["draw-indicator"] <- FALSE
+      radio3["draw-indicator"] <- FALSE
+      radio4["draw-indicator"] <- FALSE
+      onToggled <- function(button){
+        if(button$getActive()){
+          dialog$hide()
+          msr <- localize(button["label"])
+          measurement(data.set[[row]]) <- msr
+          data$setData.set(data.set)
+          data$constructVariable(row)
+          data$linkDataFrame()
+          cell.row <- as.character(row - 1)
+          .self$setCell(cell.row, column.definition["msr"], msr)
+          summaries[row] <<- data$getSummary(row)
+        }
+      }
+      gSignalConnect(radio1, "toggled", onToggled)
+      gSignalConnect(radio2, "toggled", onToggled)
+      gSignalConnect(radio3, "toggled", onToggled)
+      gSignalConnect(radio4, "toggled", onToggled)
+      
+      dialog[["vbox"]]$setSpacing(2)
+      dialog[["vbox"]]$packStart(radio1, expand=FALSE)
+      dialog[["vbox"]]$packStart(radio2, expand=FALSE)
+      dialog[["vbox"]]$packStart(radio3, expand=FALSE)
+      dialog[["vbox"]]$packStart(radio4, expand=FALSE)
+      
+      dialog$show()
+      dialog$getActionArea()$getChildren()[[1]]$grabFocus()
+      dialog$run()
+      dialog$hide()
     },
     
     onCellEditedMissing = function(renderer, path, new.text){
@@ -344,9 +497,11 @@ setRefClass("RzVariableView",
           data$constructVariable(row)
           data$linkDataFrame()
           .self$setCell(cell.row, column.definition["index"], as.character(row))
+          .self$setCell(cell.row, column.definition["select"], FALSE)
           .self$setCell(cell.row, column.definition["vars"], new.var)
           .self$setCell(cell.row, column.definition["var.labs"], new.var.lab)
           .self$setCell(cell.row, column.definition["msr"], msr)
+          .self$setCell(cell.row, column.definition["msr.image"], .self$msrPix(msr))
           .self$setCell(cell.row, column.definition["val.labs"], val.labs)
           .self$setCell(cell.row, column.definition["missing"] , miss.val)
           summary <- data$getSummary(row)
@@ -462,7 +617,7 @@ setRefClass("RzVariableView",
       response <- dialog$run()
     },
     
-    onEditValueLabels = function(win){
+    onEditValueLabels = function(){
       selec      <- .self$getSelected()
       var.name   <- selec["vars"]
       var.lab    <- selec["var.labs"]
@@ -629,14 +784,24 @@ setRefClass("RzVariableView",
     
     onRowActivated      = function(tw, path, column){
       row      <- as.numeric(path$toString())
-      data.set <- data$getData.set()
-      if(rzSettings$getPlotViewEnabled()) {
-        rzPlot$onPlot(data, row + 1)
+      col.title <- column$getData("attr")["title"]
+
+      if (col.title=="index") {
+        data.set <- data$getData.set()
+        if(rzSettings$getPlotViewEnabled() & rzSettings$getRunPlot()) {
+          rzPlot$setX(row + 1)
+          rzPlot$onPlot()
+        }
+        if(!(rzSettings$getPlotViewEnabled() & rzSettings$getCodebookOff())) {
+          print(codebook(data.set[ row+1 ]))
+        }
+      } else if (col.title=="val.labs") {
+        .self$onEditValueLabels()
+      } else if (col.title=="msr") {
+        .self$onEditMsr()
       }
-      if(!(rzSettings$getPlotViewEnabled()&rzSettings$getCodebookOff())) {
-        print(codebook(data.set[ row+1 ]))
-      }
-    },  
+      
+    },
     
     onQueryTooltip      = function(tw, x, y, keyboard_mode, tooltip){
       if(rzSettings$getPopupOff()) return(FALSE)

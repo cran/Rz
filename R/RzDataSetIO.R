@@ -197,7 +197,9 @@ setRefClass("RzDataSetIO",
 
         dir  <- dirname(file$filename)
         base <- basename(file$filename)
+        
         if (file$filetype == file.types[["rzdata"]]){
+        # open rzd
           tmp.env <- new.env()
           load(file=file$filename, envir=tmp.env)
           # for old version
@@ -207,28 +209,40 @@ setRefClass("RzDataSetIO",
             rzdata   <- tmp.env$rzdata
             data.set <- rzdata$data.set
           }
+          
         } else if (file$filetype == file.types[["spss"]]) {
+        # import sav
           importer <- spss.system.file(file$filename)
           data.set   <- as.data.set(importer)
+          
         } else if (file$filetype == file.types[["spss.por"]]) {
+        # import por
           importer <- spss.portable.file(file$filename)
           data.set   <- as.data.set(importer)
+          
         } else if (file$filetype == file.types[["stata"]]) {
+        # import dta
           importer <- Stata.file(file$filename)
           data.set   <- as.data.set(importer)
+          
         } else if (file$filetype == file.types[["csv"]]) {
+        # read csv
           df <- read.csv(file$filename, header=header, na.strings=na.strings,
                          row.names=NULL, fileEncoding=encoding)
           data.set   <- data.set(df)
           names(data.set) <- colnames(df)
           encoding <- localeToCharset()[1]
+          
         } else if (file$filetype == file.types[["tsv"]]) {
+        # read delim
           df <- read.delim(file$filename, header=header, na.strings=na.strings,
                            row.names=NULL, fileEncoding=encoding)
           data.set   <- data.set(df)
           names(data.set) <- colnames(df)
           encoding <- localeToCharset()[1]
         }
+        
+        # transcoding
         if ( encoding != c.encoding ) {
           info.bar$setText(gettext("Changing encoding may takes several or more minutes. Please wait..."))
           info.bar$setMessageType(GtkMessageType["info"])
@@ -258,7 +272,7 @@ setRefClass("RzDataSetIO",
           }
           info.bar$hide()
         }
-
+        colnames(data.set) <- make.names(colnames(data.set), unique=TRUE)
         data <- new("RzData",
                     file.path=file$filename, original.name=base,
                     data.set=data.set)

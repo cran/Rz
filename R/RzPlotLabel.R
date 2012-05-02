@@ -32,11 +32,18 @@ setRefClass("RzPlotLabel",
       table$setColSpacings(5)
       table$setRowSpacings(2)
       
-      expander <<- gtkExpanderNew("label options")
+      expander <<- gtkExpanderNew(gettext("label options"))
       expander["border-width"] <<- 3
       expander$setExpanded(FALSE)
       expander$add(table)                  
     },
+    
+    clear = function(){
+      title.entry$setText("")
+      xlab.combo$setActive(0)
+      ylab.combo$setActive(0)
+    },
+    
     getArgs = function(){
       title <- localize(title.entry$getText())
       xlab  <- localize(xlab.combo$getActiveText())

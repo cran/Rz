@@ -1,32 +1,21 @@
 rzplot.facet <- 
 setRefClass("RzPlotFacet",
-  fields = c("combo", "combo2", "entry1",
-    "entry2", "entry3", "entry4", "entry5",
-    "label2", "label3", "label4", "label5", "expander",
-    "entry.completion1", "entry.completion2"),
+  fields = c("combo", "combo2", "combo.x",
+    "combo.y", "entry3", "entry4", "entry5",
+    "label.y", "label3", "label4", "label5", "expander"),
   methods = list(
     initialize  = function(...) {
       initFields(...)
-      entry.completion1 <<- gtkEntryCompletionNew()
-      entry.completion1$setTextColumn(1)
-      entry.completion1$setInlineCompletion(TRUE)
-      entry.completion1$setInlineSelection(TRUE)
-      entry.completion1$setPopupSetWidth(FALSE)
-      entry.completion2 <<- gtkEntryCompletionNew()
-      entry.completion2$setTextColumn(1)
-      entry.completion2$setInlineCompletion(TRUE)
-      entry.completion2$setInlineSelection(TRUE)
-      entry.completion2$setPopupSetWidth(FALSE)
 
       label <- gtkLabelNew("facet")
       combo <<- gtkComboBoxNewText()
       combo$appendText("grid")
       combo$appendText("wrap")
       combo$setActive(0)
-      label1 <-  gtkLabelNew("x")
-      entry1 <<- gtkEntryNew()
-      label2 <<-  gtkLabelNew("y")
-      entry2 <<- gtkEntryNew()
+      label.x <-  gtkLabelNew("x")
+      combo.x <<- new("RzCompletionCombo")
+      label.y <<- gtkLabelNew("y")
+      combo.y <<- new("RzCompletionCombo")
       label3 <<- gtkLabelNew("nrow", show=FALSE)
       entry3 <<- gtkEntryNew(show=FALSE)
       label4 <<- gtkLabelNew("ncol", show=FALSE)
@@ -38,13 +27,11 @@ setRefClass("RzPlotFacet",
       combo2$appendText("free_x")
       combo2$appendText("free_y")
       combo2$setActive(0)
-      entry1$setCompletion(entry.completion1)
-      entry2$setCompletion(entry.completion2)
       gSignalConnect(combo, "changed", function(combo){
         facet <- localize(combo$getActiveText())
         if(facet == "grid"){
-          label2$show()
-          entry2$show()
+          label.y$show()
+          combo.y$getCombo()$show()
           label3$hide()
           entry3$hide()
           label4$hide()
@@ -52,8 +39,8 @@ setRefClass("RzPlotFacet",
           label5$hide()
           combo2$hide()
         } else {
-          label2$hide()
-          entry2$hide()
+          label.y$hide()
+          combo.y$getCombo()$hide()
           label3$show()
           entry3$show()
           label4$show()
@@ -81,10 +68,10 @@ setRefClass("RzPlotFacet",
       table["border-width"] <- 5
       table$attach(label,  0, 1, 0, 1, "shrink", "shrink", 0, 0)
       table$attachDefaults(combo,  1, 2, 0, 1)
-      table$attach(label1, 0, 1, 1, 2, "shrink", "shrink", 0, 0)
-      table$attachDefaults(entry1, 1, 2, 1, 2)
-      table$attach(label2, 0, 1, 2, 3, "shrink", "shrink", 0, 0)
-      table$attachDefaults(entry2, 1, 2, 2, 3)
+      table$attach(label.x, 0, 1, 1, 2, "shrink", "shrink", 0, 0)
+      table$attachDefaults(combo.x$getCombo(), 1, 2, 1, 2)
+      table$attach(label.y, 0, 1, 2, 3, "shrink", "shrink", 0, 0)
+      table$attachDefaults(combo.y$getCombo(), 1, 2, 2, 3)
       table$attach(label3, 0, 1, 3, 4, "shrink", "shrink", 0, 0)
       table$attachDefaults(entry3, 1, 2, 3, 4)
       table$attach(label4, 0, 1, 4, 5, "shrink", "shrink", 0, 0)
@@ -94,21 +81,32 @@ setRefClass("RzPlotFacet",
       table$setColSpacings(5)
       table$setRowSpacings(2)
 
-      expander <<- gtkExpanderNew("facet options")
+      expander <<- gtkExpanderNew(gettext("facet options"))
       expander["border-width"] <<- 3
       expander$setExpanded(FALSE)
       expander$add(table)
 
 
     },
+    
     completionSetModel = function(model){
-      entry.completion1$setModel(model)
-      entry.completion2$setModel(model)
+      combo.x$setModel(model)
+      combo.y$setModel(model)
     },
+    
+    clear = function(){
+      combo$setActive(0)
+      combo.x$clear()
+      combo.y$clear()
+      entry3$setText("")
+      entry4$setText("")
+      combo2$setActive(0)
+    },
+    
     getArgs = function(){
       facet <- localize(combo$getActiveText())
-      x <- localize(entry1$getText())
-      y <- localize(entry2$getText())
+      x <- localize(combo.x$getActiveText())
+      y <- localize(combo.y$getActiveText())
       on <- FALSE
       if(x!="" || y!=""){
         on <- TRUE

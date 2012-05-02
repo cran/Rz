@@ -1,7 +1,7 @@
 \name{Rz-package}
+\docType{package}
 \alias{Rz-package}
 \alias{Rz}
-\docType{package}
 \title{GUI Tool for Data Management like SPSS or Stata}
 \description{
 R is very powerfull but not enough for social science becouse of lack
@@ -14,7 +14,7 @@ data managing system using memisc package as backend. Additionally, Rz has power
 plot assistant interface based on ggplot2.
 }
 \details{
-Simpliy excute Rz() to start.
+Simply excute Rz() to start.
 }
 
 \keyword{ memisc }

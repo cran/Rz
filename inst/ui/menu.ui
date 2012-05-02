@@ -15,12 +15,22 @@
       <menuitem action='RevertToOriginal' />
       <menuitem action='ReloadFromGlobalEnv' />
       <separator/>
+      <menuitem action='SelectAll' />
+      <menuitem action='Unselect' />
+      <separator/>
+      <menuitem action='Delete' />
+      <menuitem action='Duplicate' />
+      <separator/>
       <menuitem action='Settings' />
     </menu>
     <menu action='MenuView'>
       <menuitem action='DataView' />
       <menuitem action='QuickEditorView' />
       <menuitem action='PlotView' />
+    </menu>
+    <menu action='MenuHelp'>
+      <menuitem action='Tutorial' />
+      <menuitem action='LoadSample' />
     </menu>
   </menubar>
   <popup name="PopupVV">
@@ -38,6 +48,12 @@
     <separator/>
     <toolitem action='RevertToOriginal' />
     <toolitem action='ReloadFromGlobalEnv' />
+    <separator/>
+    <toolitem action='SelectAll' />
+    <toolitem action='Unselect' />
+    <separator/>
+    <toolitem action='Delete' />
+    <toolitem action='Duplicate' />
     <separator/>
     <toolitem action='Settings' />
     <separator/>

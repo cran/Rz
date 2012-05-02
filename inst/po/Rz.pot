@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: R 2.14.1\n"
+"Project-Id-Version: R 2.15.0\n"
 "Report-Msgid-Bugs-To: bugs@r-project.org\n"
-"POT-Creation-Date: 2012-02-06 16:00\n"
+"POT-Creation-Date: 2012-05-01 13:09\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -77,6 +77,18 @@ msgstr ""
 msgid "Recode"
 msgstr ""
 
+msgid "Select All Variables"
+msgstr ""
+
+msgid "Unselect All Variables"
+msgstr ""
+
+msgid "Delete Selected Variables"
+msgstr ""
+
+msgid "Duplicate Selected Variables"
+msgstr ""
+
 msgid "Edit Value Labels"
 msgstr ""
 
@@ -96,6 +108,15 @@ msgid "Plot View"
 msgstr ""
 
 msgid "Quick Editor View"
+msgstr ""
+
+msgid "_Help"
+msgstr ""
+
+msgid "Tutorial on Web"
+msgstr ""
+
+msgid "Load Sample Dataset"
 msgstr ""
 
 msgid "This dataset name is invalid. Please enter a valid dataset name."
@@ -152,16 +173,25 @@ msgstr ""
 msgid "%s [from Global Environment]"
 msgstr ""
 
+msgid "http://m884.jp/RzTutorial.html"
+msgstr ""
+
+msgid "Are you sure you want to do that?"
+msgstr ""
+
+msgid "NES1948 [Sample Dataset in memisc]"
+msgstr ""
+
 msgid "Old Name"
 msgstr ""
 
 msgid "New Name"
 msgstr ""
 
-msgid "Are you sure you want to do that?"
+msgid "\"%s\" isn't a data.set or don't exist."
 msgstr ""
 
-msgid "\"%s\" isn't a data.set or don't exist."
+msgid "Please enter valid x."
 msgstr ""
 
 msgid "variable label"
@@ -170,19 +200,19 @@ msgstr ""
 msgid "variable name"
 msgstr ""
 
-msgid "Add Layer and Redraw"
+msgid "facet options"
+msgstr ""
+
+msgid "x"
 msgstr ""
 
 msgid "y"
 msgstr ""
 
-msgid "flip"
+msgid "Add Layer and Redraw"
 msgstr ""
 
-msgid "remove NA"
-msgstr ""
-
-msgid "general & geom options"
+msgid "geom options"
 msgstr ""
 
 msgid "title"
@@ -197,7 +227,25 @@ msgstr ""
 msgid "y axis"
 msgstr ""
 
+msgid "label options"
+msgstr ""
+
+msgid "axis limits"
+msgstr ""
+
+msgid "flip"
+msgstr ""
+
+msgid "remove NA"
+msgstr ""
+
+msgid "misc options"
+msgstr ""
+
 msgid "position"
+msgstr ""
+
+msgid "position options"
 msgstr ""
 
 msgid "Save"
@@ -236,10 +284,19 @@ msgstr ""
 msgid "height (cm)"
 msgstr ""
 
+msgid "save options"
+msgstr ""
+
 msgid "statistics options"
 msgstr ""
 
 msgid "legend position"
+msgstr ""
+
+msgid "line type"
+msgstr ""
+
+msgid "stratum options"
 msgstr ""
 
 msgid "Prev: Up Arrow Key\nNext: Down Arrow Key"
@@ -254,10 +311,13 @@ msgstr ""
 msgid "Theme (requires restart R)"
 msgstr ""
 
-msgid "Sync as data.set of memisc package"
+msgid "Sync as data.set object"
 msgstr ""
 
-msgid "Use embeded graphics divice (requires restart Rz)\n * Some bugs exist on Windows"
+msgid "Use embeded graphics divice (requires cairoDevice package)"
+msgstr ""
+
+msgid "Plot when a index cell is double-clicked"
 msgstr ""
 
 msgid "Don't output summary while plot view open"
@@ -302,12 +362,6 @@ msgstr ""
 msgid "Reverse"
 msgstr ""
 
-msgid "Select All"
-msgstr ""
-
-msgid "Unselect All"
-msgstr ""
-
 msgid "Templates"
 msgstr ""
 
@@ -317,13 +371,13 @@ msgstr ""
 msgid "Quick Variable Editor"
 msgstr ""
 
+msgid "Measurement"
+msgstr ""
+
 msgid "Names"
 msgstr ""
 
 msgid "Labels"
-msgstr ""
-
-msgid "Measurement"
 msgstr ""
 
 msgid "Missing"

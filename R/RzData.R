@@ -9,7 +9,7 @@ setRefClass("RzData",
       initFields(...)
 #      data.set.name     <<- NULL
       original.data.set <<- data.set
-      data.frame        <<- as.data.frame(data.set)
+      data.frame        <<- suppressWarnings(as.data.frame(data.set))
 #      log               <<- NULL
       system            <<- R.Version()
       package.version   <<- list(Rz = packageVersion("Rz"),
@@ -37,7 +37,7 @@ setRefClass("RzData",
 
     revert = function(){
       data.set   <<- original.data.set
-      data.frame <<- as.data.frame(data.set)
+      data.frame <<- suppressWarnings(as.data.frame(data.set))
       .self$linkDataFrame()
     },
 
@@ -45,7 +45,7 @@ setRefClass("RzData",
       data.set.tmp <- try(get(data.set.name, envir=.GlobalEnv), silent=TRUE)
       if(is.data.set(data.set.tmp)){
         data.set   <<- data.set.tmp
-        data.frame <<- as.data.frame(data.set)
+        data.frame <<- suppressWarnings(as.data.frame(data.set))
         .self$linkDataFrame()
         return(TRUE)
       } else {
@@ -53,10 +53,38 @@ setRefClass("RzData",
       }
     },
     
+    deleteVars = function(inds){
+      inds <- sort(inds)
+      inds <- rev(inds)
+      for(i in inds){
+        data.set[[i]] <<- NULL
+      }
+      data.frame <<- suppressWarnings(as.data.frame(data.set))
+      .self$linkDataFrame()      
+    },
+    
+    duplicate = function(inds){
+      dup <- data.set[inds]
+      orig.names <- colnames(data.set)
+      dup.names  <- colnames(dup)
+      dup.names  <- dup.names.tmp <- sprintf("%s.copy", dup.names)
+      for(i in seq_along(dup.names)){
+        suffix <- 2
+        while(any(dup.names[i]==orig.names)){
+          dup.names[i] <- sprintf("%s%s", dup.names.tmp[i], suffix)
+          suffix <- suffix + 1
+        }
+      }
+      data.set <<- cbind(data.set, dup)
+      colnames(data.set) <<- c(orig.names, dup.names)
+      data.frame <<- suppressWarnings(as.data.frame(data.set))
+      .self$linkDataFrame()      
+    },
+    
     ncol              = function() { length(description(data.set)) },
     
     constructVariable = function(col){
-      data.frame[[col]] <<- as.data.frame(data.set[[col]])[[1]]
+      data.frame[[col]] <<- suppressWarnings(as.data.frame(data.set[[col]])[[1]])
       names(data.frame) <<- names(data.set)
     },
     
