@@ -3,20 +3,15 @@
     <menu action='MenuFile'>
       <menuitem action='Open' />
       <menuitem action='Save As' />
-      <separator/>
+      <menuitem action='RevertToOriginal' />
       <menuitem action='ImportFromGlobalEnv' />
+      <menuitem action='RemoveDataSet' />
       <separator/>
       <menuitem action='Close'/>
     </menu>
     <menu action='MenuEdit'>
       <menuitem action='ChageDataSetName'/>
-      <menuitem action='RemoveDataSet' />
-      <separator/>
-      <menuitem action='RevertToOriginal' />
       <menuitem action='ReloadFromGlobalEnv' />
-      <separator/>
-      <menuitem action='SelectAll' />
-      <menuitem action='Unselect' />
       <separator/>
       <menuitem action='Delete' />
       <menuitem action='Duplicate' />
@@ -25,7 +20,7 @@
     </menu>
     <menu action='MenuView'>
       <menuitem action='DataView' />
-      <menuitem action='QuickEditorView' />
+      <menuitem action='AnalysisView' />
       <menuitem action='PlotView' />
     </menu>
     <menu action='MenuHelp'>
@@ -40,17 +35,12 @@
   <toolbar  name='ToolBar'>
     <toolitem action='Open' />
     <toolitem action='Save As' />
-    <separator/>
+    <toolitem action='RevertToOriginal' />
     <toolitem action='ImportFromGlobalEnv' />
-    <separator/>
-    <toolitem action='ChageDataSetName' />
     <toolitem action='RemoveDataSet' />
     <separator/>
-    <toolitem action='RevertToOriginal' />
+    <toolitem action='ChageDataSetName' />
     <toolitem action='ReloadFromGlobalEnv' />
-    <separator/>
-    <toolitem action='SelectAll' />
-    <toolitem action='Unselect' />
     <separator/>
     <toolitem action='Delete' />
     <toolitem action='Duplicate' />
@@ -58,7 +48,7 @@
     <toolitem action='Settings' />
     <separator/>
     <toolitem action='DataView' />
-    <toolitem action='QuickEditorView' />
+    <toolitem action='AnalysisView' />
     <toolitem action='PlotView' />
   </toolbar>
   <accelerator action="Save As"/>

@@ -1,5 +1,6 @@
 data.collection.obj <- new("RzDataCollection")
 rzSettings <- new("RzSettings")
+rzTools    <-new("RzTools")
 column.definition <- c(index=0, select=1, vars=2, var.labs=3, msr=4, msr.image=5, val.labs=6, missing=7)
 
 #      .Rz.path <- "/home/masahiro/Documents/R/Rz/Rz/inst"  # for debug

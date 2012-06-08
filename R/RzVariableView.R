@@ -1,6 +1,6 @@
 variable.view <- 
 setRefClass("RzVariableView",
-  fields = c("data", "win", "main", "liststore", "sw", "summaries",
+  fields = c("data", "win", "notebook", "main", "liststore", "sw", "summaries", "treeview.selected", "model.selected",
              "rt.index", "rtg.select", "rt.vars", "rt.var.labs", "rt.val.labs", "rp.msr", "rt.missing",
              "rzPlot", "selectable", "nominalpix", "ordinalpix", "intervalpix", "ratiopix"),
   methods = list(
@@ -14,7 +14,6 @@ setRefClass("RzVariableView",
       ratiopix      <<- gdkPixbufNewFromFile(file.path(rzSettings$getRzPath(), "images/ratio.png"   ))$retval
       main <<- gtkTreeViewNewWithModel(liststore)
       
-      main$modifyFont(pangoFontDescriptionFromString(rzSettings$getVariableViewFont()))
       
       sw   <<- gtkScrolledWindowNew()
       sw["shadow-type"] <<- GtkShadowType["in"]
@@ -23,6 +22,7 @@ setRefClass("RzVariableView",
       main["enable-grid-lines"] <<- GtkTreeViewGridLines["both"]
       main["rules-hint"] <<- TRUE
       main["has-tooltip"] <<- TRUE
+      main$modifyFont(pangoFontDescriptionFromString(rzSettings$getVariableViewFont()))
       
       rt.index    <<- gtkCellRendererText()
       rtg.select  <<- gtkCellRendererToggleNew()
@@ -53,13 +53,91 @@ setRefClass("RzVariableView",
 #      rp.msr["editable"] <<- TRUE
 #      rp.msr["has-entry"] <<- FALSE
       
+      
+      # selected variables
+      model.selected <<- gtkTreeModelFilterNew(liststore)
+      model.selected$setVisibleColumn(column.definition["select"])
+      treeview.selected <<- gtkTreeViewNewWithModel(model.selected)
+      treeview.selected["enable-grid-lines"] <<- GtkTreeViewGridLines["both"]
+      treeview.selected["rules-hint"] <<- TRUE
+      treeview.selected["has-tooltip"] <<- TRUE
+      treeview.selected$modifyFont(pangoFontDescriptionFromString(rzSettings$getVariableViewFont()))
+      
+      scrolledWindow.selected <- gtkScrolledWindowNew()
+      scrolledWindow.selected["shadow-type"] <- GtkShadowType["in"]
+      scrolledWindow.selected$setPolicy(GtkPolicyType["automatic"], GtkPolicyType["automatic"])
+      scrolledWindow.selected$add(treeview.selected)
+      
+      columns <- list(
+        index   = gtkTreeViewColumnNewWithAttributes(""                     , rt.index   , "text"=column.definition[["index"]]   ),
+        select  = gtkTreeViewColumnNewWithAttributes(""                     , rtg.select , "active"=column.definition[["select"]]),
+        msr     = gtkTreeViewColumnNewWithAttributes(gettext("Measurement") , rp.msr     , "pixbuf"=column.definition[["msr.image"]]),
+        vars    = gtkTreeViewColumnNewWithAttributes(gettext("Names")       , rt.vars    , "text"=column.definition[["vars"]]    ),
+        labs    = gtkTreeViewColumnNewWithAttributes(gettext("Labels")      , rt.var.labs, "text"=column.definition[["var.labs"]]),
+        val.labs= gtkTreeViewColumnNewWithAttributes(gettext("Value Labels"), rt.val.labs, "text"=column.definition[["val.labs"]]),
+        missing = gtkTreeViewColumnNewWithAttributes(gettext("Missing")     , rt.missing , "text"=column.definition[["missing"]] )
+        )
+      lapply(columns, gtkTreeViewColumnSetSizing   , "fixed")
+      lapply(columns, gtkTreeViewColumnSetResizable, TRUE)
+      lapply(columns, gtkTreeViewColumnSetSpacing  , 1)
+
+      columns$index$setData("attr", c(title="index"))
+      columns$index$setMinWidth(30)
+      columns$index$setSizing("automatic")
+      columns$index$setResizable(FALSE)
+      
+      columns$select$setData("attr", c(title="select"))
+      columns$select$setSizing("automatic")
+      columns$select$setResizable(FALSE)
+      
+      columns$vars$setData("attr", c(title="vars"))
+      columns$vars$setFixedWidth(50)
+      
+      columns$labs$setData("attr", c(title="labs"))
+      columns$labs$setFixedWidth(250)
+      
+      columns$val.labs$setData("attr", c(title="val.labs"))
+      columns$val.labs$setFixedWidth(100)
+      
+      columns$msr$setData("attr", c(title="msr"))
+      columns$msr$setFixedWidth(30)
+      columns$msr$setMinWidth(30)
+      
+      columns$missing$setData("attr", c(title="missing"))
+      columns$missing$setSizing("automatic")
+      columns$missing$setResizable(FALSE)
+      
+      lapply(columns, function(column) treeview.selected$appendColumn(column))
+      
+      # notebook
+      button.selectall <- gtkButtonNew()
+      button.selectall["tooltip-text"] <- gettext("Select All Variables")
+      image <- gtkImageNewFromFile(file.path(rzSettings$getRzPath(), "images", "tick.png"))
+      button.selectall$setImage(image)
+      button.unselect <- gtkButtonNew()
+      button.unselect["tooltip-text"] <- gettext("Unselect All Variables")
+      image <- gtkImageNewFromFile(file.path(rzSettings$getRzPath(), "images", "cross.png"))
+      button.unselect$setImage(image)
+      hbox.select <- gtkHBoxNew(spacing=2)
+      hbox.select$packEnd(button.unselect , expand=FALSE)
+      hbox.select$packEnd(button.selectall, expand=FALSE)
+      notebook <<- gtkNotebookNew()
+      notebook$setActionWidget(hbox.select, GtkPackType["end"])
+      notebook$appendPage(sw, gtkLabelNew(gettext("All Variables")))
+      notebook$appendPage(scrolledWindow.selected, gtkLabelNew(gettext("Selected Variables")))
+      
+      
       gSignalConnect(main, "row-activated", .self$onRowActivated)
       gSignalConnect(main, "query-tooltip", .self$onQueryTooltip)
+      gSignalConnect(treeview.selected, "row-activated", .self$onRowActivated)
+      gSignalConnect(treeview.selected, "query-tooltip", .self$onQueryTooltip)
       gSignalConnect(rtg.select , "toggled", .self$onCelltoggledSelect)
       gSignalConnect(rt.vars    , "edited", .self$onCellEditedVars)
       gSignalConnect(rt.var.labs, "edited", .self$onCellEditedVarLabs)
 #      gSignalConnect(rp.msr     , "edited", .self$onCellEditedMsr)
       gSignalConnect(rt.missing , "edited", .self$onCellEditedMissing)
+      gSignalConnect(button.selectall, "clicked", .self$onSelectAll)
+      gSignalConnect(button.unselect , "clicked", .self$onUnselect)
       
       rzPlot$setModel(main$getModel())
       rzPlot$setData(data)
@@ -177,9 +255,14 @@ setRefClass("RzVariableView",
       }
     },
     
-    setCell     = function(path, col, new.value){
-      iter <- liststore$getIterFromString(path)$iter
-      if (liststore$iterIsValid(iter)) {
+    setCell     = function(path, col, new.value, filtered=NULL){
+      if(notebook$getCurrentPage() == 0 | (!is.null(filtered) && !filtered)) {
+        iter <- liststore$getIterFromString(path)$iter
+      } else {
+        iter <- model.selected$getIterFromString(path)$iter
+        iter <- model.selected$convertIterToChildIter(iter)$child.iter
+      }
+      if (liststore$iterIsValid(iter) | (!is.null(filtered) && filtered)) {
         liststore$set(iter, col, new.value)
         if(col==column.definition["msr"]){
           liststore$set(iter, column.definition["msr.image"], .self$msrPix(new.value))
@@ -191,10 +274,27 @@ setRefClass("RzVariableView",
       
     },
     
+    getCell     = function(path, col, filtered=NULL){
+      if(notebook$getCurrentPage() == 0 | (!is.null(filtered) && !filtered)) {
+        iter <- liststore$getIterFromString(path)$iter
+      } else {
+        iter <- model.selected$getIterFromString(path)$iter
+        iter <- model.selected$convertIterToChildIter(iter)$child.iter
+      }
+      value <- unlist(liststore$get(iter, col))
+      return(value)
+    },
+    
+    
     getSelected = function(){
-      iter  <- main$getSelection()$getSelected()$iter
-      value <- liststore$get(iter, unlist(column.definition))
-      value <- value[-(column.definition["msr.image"]+1)]
+      if(notebook$getCurrentPage() == 0) {
+        iter  <- main$getSelection()$getSelected()$iter
+      } else {
+        iter  <- treeview.selected$getSelection()$getSelected()$iter
+        iter  <- model.selected$convertIterToChildIter(iter)$child.iter
+      }
+      value <- liststore$get(iter, unlist(column.definition))        
+      value <- value[-(column.definition["msr.image"]+1)]        
       value <- lapply(value, localize)
       value <- unlist(value)
       names(value) <- names(column.definition[-(column.definition["msr.image"]+1)])
@@ -220,7 +320,7 @@ setRefClass("RzVariableView",
       .self$changeFont()
       if (is.null(rzSearchEntry)){
         main$setSearchEntry(NULL)
-        sw$hideAll()
+        notebook$hideAll()
         rzPlot$setModel(NULL)
         if(selectable){
           selectable <<- FALSE
@@ -228,10 +328,11 @@ setRefClass("RzVariableView",
       } else {
         main$setSearchEntry(rzSearchEntry$getEntry.search())
         main$setSearchEqualFunc(rzSearchEntry$searchFunc)
-        sw$showAll()
+        notebook$showAll()
+        notebook$setCurrentPage(0)
         rzPlot$setModel(main$getModel())
         rzPlot$setData(data)
-        if(rzSettings$getVariableEditorViewEnabled()){
+        if(rzSettings$getAnalysisViewEnabled()){
           selectable <<- TRUE
         }
       }
@@ -250,14 +351,14 @@ setRefClass("RzVariableView",
       
     },
     
-    onSelectAll = function(){
+    onSelectAll = function(...){
       liststore$foreach(function(model, path, iter){
         model$setValue(iter, column.definition["select"], TRUE)
         return(FALSE)
       })
     },
     
-    onUnselect = function(){
+    onUnselect = function(...){
       liststore$foreach(function(model, path, iter){
         model$setValue(iter, column.definition["select"], FALSE)
         return(FALSE)
@@ -285,7 +386,7 @@ setRefClass("RzVariableView",
 #                       txt)
 #      if(invalid) return()
       txt           <- make.names(txt)
-      row           <- as.numeric(path) + 1
+      row           <- as.numeric(getSelected()["index"])
       data.set.name <- data$getData.set.name()
       var.name      <- data$getVariableNames()[row]
       data.set      <- data$getData.set()
@@ -300,7 +401,7 @@ setRefClass("RzVariableView",
     onCellEditedVarLabs = function(renderer, path, new.text){
       txt           <- localize(new.text)
       txt           <- sub("^([[:space:]]+)([^[:space:]]+)([[:space:]]+)$", "\\2", txt)
-      row           <- as.numeric(path) + 1
+      row           <- as.numeric(getSelected()["index"])
       data.set.name <- data$getData.set.name()
       var.name      <- data$getVariableNames()[row]
       data.set      <- data$getData.set()
@@ -364,7 +465,7 @@ setRefClass("RzVariableView",
           data$constructVariable(row)
           data$linkDataFrame()
           cell.row <- as.character(row - 1)
-          .self$setCell(cell.row, column.definition["msr"], msr)
+          .self$setCell(cell.row, column.definition["msr"], msr, filtered=FALSE)
           summaries[row] <<- data$getSummary(row)
         }
       }
@@ -388,7 +489,7 @@ setRefClass("RzVariableView",
     onCellEditedMissing = function(renderer, path, new.text){
       txt           <- localize(new.text)
       txt           <- sub("^([[:space:]]+)([^[:space:]]+)([[:space:]]+)$", "\\2", txt)
-      row           <- as.numeric(path) + 1
+      row           <- as.numeric(getSelected()["index"])
       data.set.name <- data$getData.set.name()
       var.name      <- data$getVariableNames()[row]
       data.set      <- data$getData.set()
@@ -496,14 +597,14 @@ setRefClass("RzVariableView",
           cell.row <- as.character(row - 1)
           data$constructVariable(row)
           data$linkDataFrame()
-          .self$setCell(cell.row, column.definition["index"], as.character(row))
-          .self$setCell(cell.row, column.definition["select"], FALSE)
-          .self$setCell(cell.row, column.definition["vars"], new.var)
-          .self$setCell(cell.row, column.definition["var.labs"], new.var.lab)
-          .self$setCell(cell.row, column.definition["msr"], msr)
-          .self$setCell(cell.row, column.definition["msr.image"], .self$msrPix(msr))
-          .self$setCell(cell.row, column.definition["val.labs"], val.labs)
-          .self$setCell(cell.row, column.definition["missing"] , miss.val)
+          .self$setCell(cell.row, column.definition["index"], as.character(row), filtered=FALSE)
+          .self$setCell(cell.row, column.definition["select"], FALSE, filtered=FALSE)
+          .self$setCell(cell.row, column.definition["vars"], new.var, filtered=FALSE)
+          .self$setCell(cell.row, column.definition["var.labs"], new.var.lab, filtered=FALSE)
+          .self$setCell(cell.row, column.definition["msr"], msr, filtered=FALSE)
+          .self$setCell(cell.row, column.definition["msr.image"], .self$msrPix(msr), filtered=FALSE)
+          .self$setCell(cell.row, column.definition["val.labs"], val.labs, filtered=FALSE)
+          .self$setCell(cell.row, column.definition["missing"] , miss.val, filtered=FALSE)
           summary <- data$getSummary(row)
           summaries[row] <<- summary
         } else {
@@ -772,7 +873,7 @@ setRefClass("RzVariableView",
             data$constructVariable(row)
             data$linkDataFrame()
             cell.row <- as.character(row - 1)
-            .self$setCell(cell.row, column.definition["val.labs"], labels)
+            .self$setCell(cell.row, column.definition["val.labs"], labels, filtered=FALSE)
             summaries[row] <<- data$getSummary(row)
           }
         } else {
@@ -783,17 +884,17 @@ setRefClass("RzVariableView",
     },
     
     onRowActivated      = function(tw, path, column){
-      row      <- as.numeric(path$toString())
+      row   <- as.numeric(getCell(path$toString(), column.definition["index"])) 
       col.title <- column$getData("attr")["title"]
 
       if (col.title=="index") {
         data.set <- data$getData.set()
         if(rzSettings$getPlotViewEnabled() & rzSettings$getRunPlot()) {
-          rzPlot$setX(row + 1)
+          rzPlot$setX(row)
           rzPlot$onPlot()
         }
         if(!(rzSettings$getPlotViewEnabled() & rzSettings$getCodebookOff())) {
-          print(codebook(data.set[ row+1 ]))
+          print(codebook(data.set[ row ]))
         }
       } else if (col.title=="val.labs") {
         .self$onEditValueLabels()
@@ -807,8 +908,8 @@ setRefClass("RzVariableView",
       if(rzSettings$getPopupOff()) return(FALSE)
       path <- tw$getPathAtPos(x, y - 20)$path
       if(is.null(path)) return(FALSE)
-      row <- as.numeric(path$toString())
-      char  <- summaries[ row+1 ]
+      row   <- as.numeric(getCell(path$toString(), column.definition["index"]))
+      char  <- summaries[ row ]
       tooltip$setMarkup(paste("<span font_family=\"", rzSettings$getMonospaceFontFamily(), "\">", char, "</span>", sep="", collapse=""))
       tw$setTooltipRow(tooltip, path)
       return(TRUE)
@@ -816,7 +917,10 @@ setRefClass("RzVariableView",
     
     changeFont = function(){
       main$modifyFont(pangoFontDescriptionFromString(rzSettings$getVariableViewFont()))
-    }
+      treeview.selected$modifyFont(pangoFontDescriptionFromString(rzSettings$getVariableViewFont()))
+    },
+    
+    getView = function() return(notebook)
   )
 )
-variable.view$accessors("sw", "liststore", "data")
+variable.view$accessors("liststore", "data", "model.selected")

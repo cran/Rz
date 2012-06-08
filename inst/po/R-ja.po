@@ -2,9 +2,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Rz 0.1\n"
 "Report-Msgid-Bugs-To: bugs@r-project.org\n"
-"POT-Creation-Date: 2012-05-01 13:09\n"
-"PO-Revision-Date: 2012-05-02 13:06+0900\n"
-"Last-Translator: Masahiro Hayashi <mh@m884.jp>\n"
+"POT-Creation-Date: 2012-06-08 14:12\n"
+"PO-Revision-Date: 2012-06-08 15:13+0900\n"
+"Last-Translator: Masahiro Hayashi <rinm884@gmail.com>\n"
 "Language-Team:  <rinm884@gmail.com>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -79,12 +79,6 @@ msgstr "欠損値"
 msgid "Recode"
 msgstr "リコード"
 
-msgid "Select All Variables"
-msgstr "全ての変数を選択"
-
-msgid "Unselect All Variables"
-msgstr "選択を解除"
-
 msgid "Delete Selected Variables"
 msgstr "選択されている変数を削除"
 
@@ -103,14 +97,14 @@ msgstr "設定"
 msgid "_View"
 msgstr "表示(_V)"
 
-msgid "Data View"
-msgstr "データビュー"
+msgid "Data"
+msgstr "データ"
 
-msgid "Plot View"
-msgstr "プロットビュー"
+msgid "Plot"
+msgstr "プロット"
 
-msgid "Quick Editor View"
-msgstr "クイックエディタビュー"
+msgid "Analysis"
+msgstr "分析"
 
 msgid "_Help"
 msgstr "ヘルプ(_H)"
@@ -120,6 +114,63 @@ msgstr "チュートリアル（Web）"
 
 msgid "Load Sample Dataset"
 msgstr "サンプル・データセットの読み込み"
+
+msgid "=============== Output from Quick Editor ==============="
+msgstr "=============== クイックエディタからの出力 ==============="
+
+msgid "Basic Statistics"
+msgstr "基本統計量"
+
+msgid "Cross Tabulation"
+msgstr "クロス集計表"
+
+msgid "Correlation"
+msgstr "相関係数"
+
+msgid "=============== Output by Rz ==============="
+msgstr "=============== Rz による出力 ==============="
+
+msgid "Row"
+msgstr ""
+
+msgid "Col"
+msgstr ""
+
+msgid "Stratum"
+msgstr ""
+
+msgid "use"
+msgstr ""
+
+msgid "method"
+msgstr ""
+
+msgid "adjust"
+msgstr ""
+
+msgid "Change Measurement"
+msgstr "尺度を変更する"
+
+msgid "Edit Variable Labels"
+msgstr "変数ラベルを編集する"
+
+msgid "Apply Missing Values"
+msgstr "欠損値を設定する"
+
+msgid "Reverse"
+msgstr "反転する"
+
+msgid "Templates"
+msgstr "テンプレート"
+
+msgid "Descriptive statistics"
+msgstr "記述統計量"
+
+msgid "Editor"
+msgstr "エディタ"
+
+msgid "Variable Editor"
+msgstr "変数エディタ"
 
 msgid "This dataset name is invalid. Please enter a valid dataset name."
 msgstr "このデータセット名は無効です。有効なデータセット名を入力してください。"
@@ -317,9 +368,6 @@ msgstr "テーマフォルダ"
 msgid "Theme (requires restart R)"
 msgstr "テーマ（Rの再起動が必要）"
 
-msgid "Sync as data.set object"
-msgstr "data.setオブジェクトとして同期"
-
 msgid "Use embeded graphics divice (requires cairoDevice package)"
 msgstr "埋め込みグラフィックスデバイスを使う (cairoDeviceパッケージが必要です)"
 
@@ -356,27 +404,6 @@ msgstr "全般"
 msgid "Font"
 msgstr "フォント"
 
-msgid "Change Measurement"
-msgstr "尺度を変更する"
-
-msgid "Edit Variable Labels"
-msgstr "変数ラベルを編集する"
-
-msgid "Apply Missing Values"
-msgstr "欠損値を設定する"
-
-msgid "Reverse"
-msgstr "反転する"
-
-msgid "Templates"
-msgstr "テンプレート"
-
-msgid "Quick Editor"
-msgstr "クイックエディタ"
-
-msgid "Quick Variable Editor"
-msgstr "クイック変数エディタ"
-
 msgid "Measurement"
 msgstr "尺度"
 
@@ -389,8 +416,17 @@ msgstr "変数ラベル"
 msgid "Missing"
 msgstr "欠損値"
 
-msgid "=============== Output from Quick Editor ==============="
-msgstr "=============== クイックエディタからの出力 ==============="
+msgid "Select All Variables"
+msgstr "全ての変数を選択"
+
+msgid "Unselect All Variables"
+msgstr "選択を解除"
+
+msgid "All Variables"
+msgstr "全ての変数"
+
+msgid "Selected Variables"
+msgstr "選択された変数"
 
 msgid "This recode syntax is invalid. Please enter a valid recode syntax."
 msgstr "このリコード・シンタックスは無効です。有効なリコード・シンタックスを入力してください。"
@@ -433,6 +469,18 @@ msgstr "Rz() を実行して開始してください．"
 
 msgid "or you can start from menu bar if you use R on Windows."
 msgstr "WindowsでRを使っている場合はメニューバーから起動することもできます．"
+
+#~ msgid "Data View"
+#~ msgstr "データビュー"
+
+#~ msgid "Quick Editor View"
+#~ msgstr "クイックエディタビュー"
+
+#~ msgid "Sync as data.set object"
+#~ msgstr "data.setオブジェクトとして同期"
+
+#~ msgid "Quick Editor"
+#~ msgstr "クイックエディタ"
 
 #~ msgid "Select All"
 #~ msgstr "全て選択"

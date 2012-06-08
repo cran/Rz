@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: R 2.15.0\n"
 "Report-Msgid-Bugs-To: bugs@r-project.org\n"
-"POT-Creation-Date: 2012-05-01 13:09\n"
+"POT-Creation-Date: 2012-06-08 14:15\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -77,12 +77,6 @@ msgstr ""
 msgid "Recode"
 msgstr ""
 
-msgid "Select All Variables"
-msgstr ""
-
-msgid "Unselect All Variables"
-msgstr ""
-
 msgid "Delete Selected Variables"
 msgstr ""
 
@@ -101,13 +95,13 @@ msgstr ""
 msgid "_View"
 msgstr ""
 
-msgid "Data View"
+msgid "Data"
 msgstr ""
 
-msgid "Plot View"
+msgid "Plot"
 msgstr ""
 
-msgid "Quick Editor View"
+msgid "Analysis"
 msgstr ""
 
 msgid "_Help"
@@ -117,6 +111,63 @@ msgid "Tutorial on Web"
 msgstr ""
 
 msgid "Load Sample Dataset"
+msgstr ""
+
+msgid "=============== Output from Quick Editor ==============="
+msgstr ""
+
+msgid "Basic Statistics"
+msgstr ""
+
+msgid "Cross Tabulation"
+msgstr ""
+
+msgid "Correlation"
+msgstr ""
+
+msgid "=============== Output by Rz ==============="
+msgstr ""
+
+msgid "Row"
+msgstr ""
+
+msgid "Col"
+msgstr ""
+
+msgid "Stratum"
+msgstr ""
+
+msgid "use"
+msgstr ""
+
+msgid "method"
+msgstr ""
+
+msgid "adjust"
+msgstr ""
+
+msgid "Change Measurement"
+msgstr ""
+
+msgid "Edit Variable Labels"
+msgstr ""
+
+msgid "Apply Missing Values"
+msgstr ""
+
+msgid "Reverse"
+msgstr ""
+
+msgid "Templates"
+msgstr ""
+
+msgid "Descriptive statistics"
+msgstr ""
+
+msgid "Editor"
+msgstr ""
+
+msgid "Variable Editor"
 msgstr ""
 
 msgid "This dataset name is invalid. Please enter a valid dataset name."
@@ -311,9 +362,6 @@ msgstr ""
 msgid "Theme (requires restart R)"
 msgstr ""
 
-msgid "Sync as data.set object"
-msgstr ""
-
 msgid "Use embeded graphics divice (requires cairoDevice package)"
 msgstr ""
 
@@ -350,27 +398,6 @@ msgstr ""
 msgid "Font"
 msgstr ""
 
-msgid "Change Measurement"
-msgstr ""
-
-msgid "Edit Variable Labels"
-msgstr ""
-
-msgid "Apply Missing Values"
-msgstr ""
-
-msgid "Reverse"
-msgstr ""
-
-msgid "Templates"
-msgstr ""
-
-msgid "Quick Editor"
-msgstr ""
-
-msgid "Quick Variable Editor"
-msgstr ""
-
 msgid "Measurement"
 msgstr ""
 
@@ -383,7 +410,16 @@ msgstr ""
 msgid "Missing"
 msgstr ""
 
-msgid "=============== Output from Quick Editor ==============="
+msgid "Select All Variables"
+msgstr ""
+
+msgid "Unselect All Variables"
+msgstr ""
+
+msgid "All Variables"
+msgstr ""
+
+msgid "Selected Variables"
 msgstr ""
 
 msgid "This recode syntax is invalid. Please enter a valid recode syntax."

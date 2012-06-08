@@ -42,7 +42,7 @@ setRefClass("RzData",
     },
 
     reloadFromGlobalEnv = function(){
-      data.set.tmp <- try(get(data.set.name, envir=.GlobalEnv), silent=TRUE)
+      data.set.tmp <- try(get(paste(data.set.name, ".ds", sep=""), envir=.GlobalEnv), silent=TRUE)
       if(is.data.set(data.set.tmp)){
         data.set   <<- data.set.tmp
         data.frame <<- suppressWarnings(as.data.frame(data.set))
@@ -89,11 +89,13 @@ setRefClass("RzData",
     },
     
     linkDataFrame     = function(){
-      if(rzSettings$getUseDataSetObject()){
-        assign(data.set.name, data.set, envir=.GlobalEnv)
-      } else {
-        assign(data.set.name, data.frame, envir=.GlobalEnv)
-      }
+#      if(rzSettings$getUseDataSetObject()){
+#        assign(data.set.name, data.set, envir=.GlobalEnv)
+#      } else {
+#        assign(data.set.name, data.frame, envir=.GlobalEnv)
+#      }
+      assign(paste(data.set.name, ".ds", sep=""), data.set, envir=.GlobalEnv)
+      assign(data.set.name                      , data.frame, envir=.GlobalEnv)
     },
 
     import = function(data){

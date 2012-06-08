@@ -1,4 +1,16 @@
-0.4-0
+0.5-0
+analysis view
+Basic Statistics function
+crossTable function
+Correlation function
+improve layout
+
+0.4.2
+relocate menu
+New Select All Button and Unselect Button
+Selected Variables View
+
+0.4-0 2012-05-02
 Plot when a index cell is double-clicked (in preferences)
 Link to Tutorial (in Help)
 load sample dataset (in Help)

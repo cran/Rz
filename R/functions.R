@@ -1,22 +1,22 @@
-gettext  <- function(...) base::gettext(..., domain = "Rz")
-gettextf <- function(...) base::gettextf(..., domain = "Rz")
+gettext  <- function(...) base::gettext(..., domain = "R-Rz")
+gettextf <- function(...) base::gettextf(..., domain = "R-Rz")
 
 #if(grepl("darwin",R.Version()$os) formals(gettext)$domain <- NULL
 #if(grepl("darwin",R.Version()$os) formals(gettextf)$domain <- NULL
 
-fixTranslations <- function(w){
-  if ("GtkLabel" %in% class(w))
-    w$setLabel(gettext(w$getLabel()))
-  else if ("GtkNotebook" %in% class(w))
-    lapply(gtkChildren(w),
-           function(wc)
-             w$getTabLabel(wc)$setLabel(gettext(w$getTabLabelText(wc))))
-
-  if ("GtkContainer" %in% class(w))
-    lapply(gtkChildren(w), fixTranslations)
-  
-  return()
-}
+#fixTranslations <- function(w){
+#  if ("GtkLabel" %in% class(w))
+#    w$setLabel(gettext(w$getLabel()))
+#  else if ("GtkNotebook" %in% class(w))
+#    lapply(gtkChildren(w),
+#           function(wc)
+#             w$getTabLabel(wc)$setLabel(gettext(w$getTabLabelText(wc))))
+#
+#  if ("GtkContainer" %in% class(w))
+#    lapply(gtkChildren(w), fixTranslations)
+#  
+#  return()
+#}
 
 fileCheck <- function(filename, parent){
   if (file.exists(filename)){
@@ -82,7 +82,7 @@ gtkFileChooserDialogFilteredActivate <- function(obj){
 gtkFileChooserDialogFilteredRun <- function(obj) gtkDialogRun(obj)
 
 Rz <- function(...){
-  main.obj <- new("RzMain")
+  rzMain  <- new("RzMain")
 }
 
 gtkInfoBarRzNew <- function(show=TRUE){
@@ -149,3 +149,4 @@ write.stata <- function (df, datafile, codefile, varlabels)
     cat("infile", nms, " using ", datafile, ", automatic\n", varlabels,
         file = codefile)
 }
+

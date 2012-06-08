@@ -5,7 +5,7 @@ setRefClass("RzActionGroup",
              "a.quit", "a.edit","a.ch.name", "a.revert", "a.reload",
              "a.remove", "a.vlabs", "a.missing", "a.selectall", "a.unselect",
              "a.recode", "a.value.lab", "a.settings",
-             "a.view", "a.data.view", "a.plot.view", "a.variable.editor.view",
+             "a.view", "a.data.view", "a.plot.view", "a.analysis.view",
              "a.help", "a.tutorial", "a.load.sample"),
   methods = list(
     initialize            = function(...) {
@@ -24,23 +24,23 @@ setRefClass("RzActionGroup",
       a.vlabs     <<- gtkActionNew("ValueLabels", gettext("Value Labels"))
       a.missing   <<- gtkActionNew("Missing", gettext("Missing Values"))
       a.recode    <<- gtkActionNew("Recode", gettext("Recode"))
-      a.selectall <<- gtkActionNew("SelectAll", gettext("Select All Variables"), gettext("Select All Variables"))
-      a.unselect  <<- gtkActionNew("Unselect", gettext("Unselect All Variables"), gettext("Unselect All Variables"))
+#      a.selectall <<- gtkActionNew("SelectAll", gettext("Select All Variables"), gettext("Select All Variables"))
+#      a.unselect  <<- gtkActionNew("Unselect", gettext("Unselect All Variables"), gettext("Unselect All Variables"))
       a.delete    <<- gtkActionNew("Delete", gettext("Delete Selected Variables"), gettext("Delete Selected Variables"))
       a.duplicate <<- gtkActionNew("Duplicate", gettext("Duplicate Selected Variables"), gettext("Duplicate Selected Variables"))
       a.value.lab <<- gtkActionNew("EditValueLabels", gettext("Edit Value Labels"))
       a.settings  <<- gtkActionNew("Settings", gettext("_Preferences"), gettext("Preferences"), stock.id=GTK_STOCK_PREFERENCES)
       a.view      <<- gtkActionNew("MenuView", gettext("_View"))
-      a.data.view <<- gtkActionNew("DataView", gettext("Data View"), gettext("Data View"))
-      a.plot.view <<- gtkToggleActionNew("PlotView", gettext("Plot View"), gettext("Plot View"))
-      a.variable.editor.view <<- gtkToggleActionNew("QuickEditorView", gettext("Quick Editor View"), gettext("Quick Editor View"))
+      a.data.view <<- gtkActionNew("DataView", gettext("Data"), gettext("Data"))
+      a.plot.view <<- gtkToggleActionNew("PlotView", gettext("Plot"), gettext("Plot"))
+      a.analysis.view <<- gtkToggleActionNew("AnalysisView", gettext("Analysis"), gettext("Analysis"))
       a.help      <<- gtkActionNew("MenuHelp", gettext("_Help"))
       a.tutorial  <<- gtkActionNew("Tutorial", gettext("Tutorial on Web"), gettext("Tutorial on Web"))
       a.load.sample <<- gtkActionNew("LoadSample", gettext("Load Sample Dataset"), gettext("Load Sample Dataset"))
-      image <- gFileIconNew(gFileNewForPath(file.path(rzSettings$getRzPath(), "images", "tick.png")))
-      a.selectall$setGicon(image)
-      image <- gFileIconNew(gFileNewForPath(file.path(rzSettings$getRzPath(), "images", "cross.png")))
-      a.unselect$setGicon(image)
+#      image <- gFileIconNew(gFileNewForPath(file.path(rzSettings$getRzPath(), "images", "tick.png")))
+#      a.selectall$setGicon(image)
+#      image <- gFileIconNew(gFileNewForPath(file.path(rzSettings$getRzPath(), "images", "cross.png")))
+#      a.unselect$setGicon(image)
       image <- gFileIconNew(gFileNewForPath(file.path(rzSettings$getRzPath(), "images", "table_add.png")))
       a.ds$setGicon(image)
       image <- gFileIconNew(gFileNewForPath(file.path(rzSettings$getRzPath(), "images", "table_delete.png")))
@@ -55,15 +55,15 @@ setRefClass("RzActionGroup",
       a.data.view$setGicon(image)
       image <- gFileIconNew(gFileNewForPath(file.path(rzSettings$getRzPath(), "images", "order.png")))
       a.plot.view$setGicon(image)
-      image <- gFileIconNew(gFileNewForPath(file.path(rzSettings$getRzPath(), "images", "table_edit.png")))
-      a.variable.editor.view$setGicon(image)
+      image <- gFileIconNew(gFileNewForPath(file.path(rzSettings$getRzPath(), "images", "application_form.png")))
+      a.analysis.view$setGicon(image)
       a.open$setAccelPath("<Rz-Menu>/File/Open")
       a.save$setAccelPath("<Rz-Menu>/File/Save As")
       a.ds$setAccelPath("<Rz-Menu>/File/Import")
       a.quit$setAccelPath("<Rz-Menu>/File/Close")
       a.reload$setAccelPath("<Rz-Menu>/Edit/Reload")
       a.data.view$setAccelPath("<Rz-Menu>/View/Data View")
-      a.variable.editor.view$setAccelPath("<Rz-Menu>/View/Quick Editor View")
+      a.analysis.view$setAccelPath("<Rz-Menu>/View/Analysis View")
       a.plot.view$setAccelPath("<Rz-Menu>/View/Plot View")
       
       action.group  <<- gtkActionGroupNew()
@@ -82,8 +82,8 @@ setRefClass("RzActionGroup",
       action.group$addAction(a.remove)
       action.group$addAction(a.revert)
       action.group$addAction(a.reload)
-      action.group$addAction(a.selectall)
-      action.group$addAction(a.unselect)
+#      action.group$addAction(a.selectall)
+#      action.group$addAction(a.unselect)
       action.group$addAction(a.delete)
       action.group$addAction(a.duplicate)
       action.group$addAction(a.settings)
@@ -91,7 +91,7 @@ setRefClass("RzActionGroup",
       action.group$addAction(a.view)
       action.group$addAction(a.data.view)
       action.group$addAction(a.plot.view)
-      action.group$addAction(a.variable.editor.view)
+      action.group$addAction(a.analysis.view)
       
       action.group$addAction(a.help)
       action.group$addAction(a.tutorial)
@@ -110,6 +110,6 @@ ag$accessors(c("action.group", "a.file", "a.open",
                "a.revert", "a.reload",
                "a.vlabs", "a.duplicate", "a.delete", "a.selectall", "a.unselect",
                "a.missing", "a.recode", "a.value.lab", "a.settings",
-               "a.data.view", "a.plot.view", "a.variable.editor.view",
+               "a.data.view", "a.plot.view", "a.analysis.view",
                "a.tutorial", "a.load.sample"))
 

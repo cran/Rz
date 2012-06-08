@@ -61,7 +61,7 @@ setRefClass("RzDataView",
       win["width-request"] <- 800
       win["height-request"] <- 600
       win["allow-shrink"] <- TRUE
-      win["title"] <- gettext("Data View")
+      win["title"] <- gettext("Data")
       win["window-position"] <- GtkWindowPosition["center"]
       
       accel.group <- gtkAccelGroupNew()
