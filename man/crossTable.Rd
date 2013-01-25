@@ -8,10 +8,13 @@ Cross Tabulation
 Output well-formatted cross tabulation. Also can genarate latex syntax of cross tabulation.
 }
 \usage{
-crossTable(...)
+crossTable(..., deparse.level = 2)
 \method{summary}{CrossTable}(object, digits=3, latex=FALSE, ...)
 }
 \arguments{
+  \item{deparse.level}{
+passed to \code{\link{table}}
+}
   \item{\dots}{
 passed to \code{\link{table}}
 }

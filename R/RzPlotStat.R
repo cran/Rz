@@ -1,6 +1,6 @@
 rzplot.stat <- 
 setRefClass("RzPlotStat",
-  fields = c("expander", "button",
+  fields = c("main", "rzPlotScript",
              "combo", "combo.method", "combo.geom", "combo.geom2",
              "combo.fun", "combo.color", "entry.size"),
   methods = list(
@@ -9,15 +9,26 @@ setRefClass("RzPlotStat",
       
       label <- gtkLabelNew("statistics")
       combo <<- gtkComboBoxNewText()
-      stats <- c("none", "smooth", "quantile", "sum", "summary")
+      stats <- c("none", "sum", "summary", "qq")
       for(i in stats) combo$appendText(i)
 
-      image <- gtkImageNewFromStock(GTK_STOCK_ADD, GtkIconSize["menu"])
-      button <<- gtkButtonNew()
+      image  <- gtkImageNewFromStock(GTK_STOCK_ADD, GtkIconSize["menu"])
+      button <- gtkButtonNew()
+      button["tooltip-text"] <- gettext("Stack Layer")
       button$setFocusOnClick(FALSE)
       button$setImage(image)
       button$setRelief(GtkReliefStyle["none"])
-      button["tooltip-text"] <<- gettext("Add Layer and Redraw")
+      
+      image   <- gtkImageNewFromStock(GTK_STOCK_REMOVE, GtkIconSize["menu"])
+      button2 <- gtkButtonNew()
+      button2["tooltip-text"] <- gettext("Remove Layer")
+      button2$setFocusOnClick(FALSE)
+      button2$setImage(image)
+      button2$setRelief(GtkReliefStyle["none"])
+      
+      button.hbox <- gtkHBoxNew(spacing=2)
+      button.hbox$packStart(button)
+      button.hbox$packStart(button2)
       
       label.method <- gtkLabelNew("method")
       combo.method <<- gtkComboBoxNewText()
@@ -40,7 +51,7 @@ setRefClass("RzPlotStat",
       entry.size <<- gtkEntryNew()
       entry.size$setText("0.5")
       
-      label.geom2 <- gtkLabelNew("geom (additional)")
+      label.geom2 <- gtkLabelNew("geom2")
       combo.geom2 <<- gtkComboBoxNewText()
       geoms2 <- c("point", "line", "bar", "none")
       for(i in geoms2) combo.geom2$appendText(i)
@@ -56,7 +67,7 @@ setRefClass("RzPlotStat",
       table["border-width"] <- 5
       table$attach        (label,        0, 1, 0, 1, "shrink", "shrink", 0, 0)
       table$attachDefaults(combo,        1, 2, 0, 1)
-      table$attach        (button,       2, 3, 0, 1, "shrink", "shrink", 0, 0)
+      table$attach        (button.hbox,  2, 3, 0, 1, "shrink", "shrink", 0, 0)
       table$attach        (label.method, 0, 1, 1, 2, "shrink", "shrink", 0, 0)
       table$attachDefaults(combo.method, 1, 3, 1, 2)
       table$attach        (label.geom,   0, 1, 2, 3, "shrink", "shrink", 0, 0)
@@ -72,13 +83,24 @@ setRefClass("RzPlotStat",
       table$setColSpacings(5)
       table$setRowSpacings(2)
             
-      expander <<- gtkExpanderNew(gettext("statistics options"))
-      expander["border-width"] <<- 3
-      expander$setExpanded(FALSE)
-      expander$add(table)
+      main <<- buildPlotOptionPage(table)
       
+      gSignalConnect(combo.method, "changed", .self$generateScript)
+      gSignalConnect(combo.geom  , "changed", .self$generateScript)
+      gSignalConnect(combo.color , "changed", .self$generateScript)
+      gSignalConnect(entry.size  , "changed", .self$generateScript)
+      gSignalConnect(combo.geom2 , "changed", .self$generateScript)
+      gSignalConnect(combo.fun   , "changed", .self$generateScript)
+      
+      gSignalConnect(button, "clicked", function(button){
+        rzPlotScript$stackLayer("stat")
+      })
+      gSignalConnect(button2, "clicked", function(button){
+        rzPlotScript$removeLayer("stat")
+      })
+      
+            
       gSignalConnect(combo, "changed", function(combo){
-        
         stat <- localize(combo$getActiveText())
         
         label.geom$hide()
@@ -109,6 +131,8 @@ setRefClass("RzPlotStat",
           label.method$showAll()
           combo.method$showAll()
         }
+        
+        .self$generateScript()
       })
       combo$setActive(0)
     },
@@ -123,24 +147,43 @@ setRefClass("RzPlotStat",
       entry.size$setText("0.5")
     },
     
-    getArgs = function(){
+    generateScript = function(...){
       stat   <- localize(combo$getActiveText())
       method <- localize(combo.method$getActiveText())
       geom   <- localize(combo.geom$getActiveText())
       color  <- localize(combo.color$getActiveText())
-      size   <- as.numeric(localize(entry.size$getText()))
+      size   <- suppressWarnings(as.numeric(localize(entry.size$getText())))
       geom2  <- localize(combo.geom2$getActiveText())
       fun    <- localize(combo.fun$getActiveText())
+      fun.y  <- ifelse(fun=="median_hilow","median", "mean")
+      if(is.na(size)) size <- NULL
       if(any(color==c("", "default"))) color <- NULL
-      args   <- list(stat=stat,
-                     method=method,
-                     geom=geom,
-                     color=color,
-                     size=size,
-                     geom2=geom2,
-                     fun=fun)
-      return(args)
+      
+
+      if (stat == "smooth") {
+        if (method=="auto") {
+          rzPlotScript$setScript(layer="stat", type="smooth")
+        } else {
+          rzPlotScript$setScript(layer="stat", type="smooth", args=list(method=deparse(method)))
+        } 
+      } else if (stat == "quantile") {
+        rzPlotScript$setScript(layer="stat", type="quantile")
+      } else if (stat == "sum") {
+        rzPlotScript$setScript(layer="stat", type="sum")
+      } else if (stat == "summary") {
+        if (geom2=="none") {
+          rzPlotScript$setScript(layer="stat", type="summary",
+                                 args=list(fun.data=deparse(fun), geom=deparse(geom), size=deparse(size), color=deparse(color)))
+        } else {
+          rzPlotScript$setScript(layer="stat", type="summary",
+                                 args=list(fun.data=deparse(fun), geom=deparse(geom), size=deparse(size), color=deparse(color)))
+          rzPlotScript$setScript(layer="stat", type="summary",
+                                 args=list(fun.y=deparse(fun.y) , geom=deparse(geom), size=deparse(size), color=deparse(color)), add=TRUE)
+        }
+      } else {
+        rzPlotScript$clearScript(layer="stat")
+      }
     }
   )
 )
-rzplot.stat$accessors("expander", "button")
+rzplot.stat$accessors("main")

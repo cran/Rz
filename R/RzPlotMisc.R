@@ -1,18 +1,19 @@
 rzplot.misc <- 
 setRefClass("RzPlotMisc",
-  fields = c("expander", "combo.theme",
+  fields = c("axisPage", "themePage", "rzPlotScript",
              "flip.togglebutton",
-             "na.rm.togglebutton",
              "combo.scalex", "combo.scaley",
              "combo.coordx", "combo.coordy",
-             "entry.xlim", "entry.ylim"),
+             "entry.xlim.scale", "entry.ylim.scale",
+             "entry.xlim.coord", "entry.ylim.coord",
+             "title.entry", "xlab.combo", "ylab.combo"),
   methods = list(
     initialize  = function(...) {
       initFields(...)
-            
+      
       # misc options
-      label.scale <- gtkLabelNew("scale")
-      label.coord <- gtkLabelNew("coord")
+      label.scale <- gtkLabelNew("trans")
+      label.coord <- gtkLabelNew("trans")
       
       label.scalex <- gtkLabelNew("x")
       combo.scalex <<- gtkComboBoxNewText()
@@ -38,58 +39,95 @@ setRefClass("RzPlotMisc",
       for(i in trans) combo.coordy$appendText(i)
       combo.coordy$setActive(0)
       
-      label.limits <-  gtkLabelNew(gettext("axis limits"))
-      label.xlim   <-  gtkLabelNew("x")
-      label.ylim   <-  gtkLabelNew("y")
-      entry.xlim   <<- gtkEntryNew()
-      entry.ylim   <<- gtkEntryNew()
-      entry.xlim["width-request"] <<- 1
-      entry.ylim["width-request"] <<- 1
+      label.limits.scale <-  gtkLabelNew(gettext("range"))
+      entry.xlim.scale   <<- gtkEntryNew()
+      entry.ylim.scale   <<- gtkEntryNew()
+      entry.xlim.scale["width-request"] <<- 1
+      entry.ylim.scale["width-request"] <<- 1
+
+      label.limits.coord <-  gtkLabelNew(gettext("range"))
+      entry.xlim.coord   <<- gtkEntryNew()
+      entry.ylim.coord   <<- gtkEntryNew()
+      entry.xlim.coord["width-request"] <<- 1
+      entry.ylim.coord["width-request"] <<- 1
       
       #flip
       flip.togglebutton <<- gtkToggleButtonNewWithLabel(gettext("flip"))
       
-      #remove NA
-      na.rm.togglebutton <<- gtkToggleButtonNewWithLabel(gettext("remove NA"))
-      na.rm.togglebutton$setActive(TRUE)
+      table.scale <- gtkTableNew(FALSE)
+      table.scale["border-width"] <- 5
+      table.scale$attach        (label.scalex      , 1, 2, 0, 1, "fill"  , "shrink", 0, 0)
+      table.scale$attach        (label.scaley      , 2, 3, 0, 1, "fill"  , "shrink", 0, 0)
+      table.scale$attach        (label.scale       , 0, 1, 1, 2, "shrink", "shrink", 0, 0)
+      table.scale$attachDefaults(combo.scalex      , 1, 2, 1, 2)
+      table.scale$attachDefaults(combo.scaley      , 2, 3, 1, 2)
+      table.scale$attach        (label.limits.scale, 0, 1, 2, 3, "shrink", "shrink", 0, 0)
+      table.scale$attachDefaults(entry.xlim.scale  , 1, 2, 2, 3)
+      table.scale$attachDefaults(entry.ylim.scale  , 2, 3, 2, 3)
+      table.scale$setColSpacings(5)
+      table.scale$setRowSpacings(2)
+      frame.scale <- gtkFrameNew("Scale")
+      frame.scale$setShadowType(GtkShadowType["etched-in"])
+      frame.scale$add(table.scale)
+      
+      table.coord <- gtkTableNew(FALSE)
+      table.coord["border-width"] <- 5
+      table.coord$attach        (label.coordx      , 1, 2, 0, 1, "fill"  , "shrink", 0, 0)
+      table.coord$attach        (label.coordy      , 2, 3, 0, 1, "fill"  , "shrink", 0, 0)
+      table.coord$attach        (label.coord       , 0, 1, 1, 2, "shrink", "shrink", 0, 0)
+      table.coord$attachDefaults(combo.coordx      , 1, 2, 1, 2)
+      table.coord$attachDefaults(combo.coordy      , 2, 3, 1, 2)
+      table.coord$attach        (label.limits.coord, 0, 1, 2, 3, "shrink", "shrink", 0, 0)
+      table.coord$attachDefaults(entry.xlim.coord  , 1, 2, 2, 3)
+      table.coord$attachDefaults(entry.ylim.coord  , 2, 3, 2, 3)
+      table.coord$attachDefaults(flip.togglebutton , 0, 3, 3, 4)
+      table.coord$setColSpacings(5)
+      table.coord$setRowSpacings(2)
+      frame.coord <- gtkFrameNew("Coordinate")
+      frame.coord$setShadowType(GtkShadowType["etched-in"])
+      frame.coord$add(table.coord)
+      
+      vbox.axisPage <- gtkVBoxNew()
+      vbox.axisPage$packStart(frame.scale, expand=FALSE)
+      vbox.axisPage$packStart(frame.coord, expand=FALSE)
+      axisPage <<- buildPlotOptionPage(vbox.axisPage)
       
       #theme
-      label.theme <- gtkLabelNew("theme")
-      combo.theme <<- gtkComboBoxNewText()
-      themes <- c("grey", "bw")
-      for(i in themes) combo.theme$appendText(i)
-      combo.theme$setActive(0)
+      button.customize <- gtkButtonNewWithLabel(gettext("Open Theme Editor"))
+      hbox.button.customize <- gtkHBoxNew()
+      hbox.button.customize$packStart(button.customize, expand=TRUE, fill=FALSE)
+      gSignalConnect(button.customize, "clicked", function(...) {
+        if (is.null(rzTools$getThemeEditor())) {
+          rzTools$setThemeEditor(new("RzPlotTheme"))        
+        }
+        rzTools$getThemeEditor()$show()
+      })
       
+      table.theme <- gtkTableNew(FALSE)
+      table.theme["border-width"] <- 5
+      table.theme$setColSpacings(5)
+      table.theme$setRowSpacings(2)
+      table.theme$attachDefaults(hbox.button.customize, 0, 1, 0, 1)
       
-      table <- gtkTableNew(6, 5, FALSE)
-      table["border-width"] <- 5
-      table$attach        (label.scale       , 0, 1, 0, 1, "shrink", "shrink", 0, 0)
-      table$attach        (label.scalex      , 1, 2, 0, 1, "shrink", "shrink", 0, 0)
-      table$attachDefaults(combo.scalex      , 2, 3, 0, 1)
-      table$attach        (label.scaley      , 3, 4, 0, 1, "shrink", "shrink", 0, 0)
-      table$attachDefaults(combo.scaley      , 4, 5, 0, 1)
-      table$attach        (label.coord       , 0, 1, 1, 2, "shrink", "shrink", 0, 0)
-      table$attach        (label.coordx      , 1, 2, 1, 2, "shrink", "shrink", 0, 0)
-      table$attachDefaults(combo.coordx      , 2, 3, 1, 2)
-      table$attach        (label.coordy      , 3, 4, 1, 2, "shrink", "shrink", 0, 0)
-      table$attachDefaults(combo.coordy      , 4, 5, 1, 2)
-      table$attach        (label.limits      , 0, 1, 2, 3, "shrink", "shrink", 0, 0)
-      table$attach        (label.xlim        , 1, 2, 2, 3, "shrink", "shrink", 0, 0)
-      table$attachDefaults(entry.xlim        , 2, 3, 2, 3)
-      table$attach        (label.ylim        , 3, 4, 2, 3, "shrink", "shrink", 0, 0)
-      table$attachDefaults(entry.ylim        , 4, 5, 2, 3)
-      table$attachDefaults(flip.togglebutton , 0, 5, 3, 4)
-      table$attachDefaults(na.rm.togglebutton, 0, 5, 4, 5)
-      table$attach        (label.theme       , 0, 1, 5, 6, "shrink", "shrink", 0, 0)
-      table$attachDefaults(combo.theme       , 1, 5, 5, 6)
+      frame.theme <- gtkFrameNew("Theme")
+      frame.theme$setShadowType(GtkShadowType["etched-in"])
+      frame.theme$add(table.theme)
       
-      table$setColSpacings(5)
-      table$setRowSpacings(2)
-            
-      expander <<- gtkExpanderNew(gettext("misc options"))
-      expander["border-width"] <<- 3
-      expander$setExpanded(FALSE)
-      expander$add(table)        
+      vbox.themePage <- gtkVBoxNew()
+      vbox.themePage$packStart(frame.theme, expand=FALSE)
+      themePage <<- buildPlotOptionPage(vbox.themePage)
+
+      .self$generateScript()
+      
+      gSignalConnect(combo.scalex      , "changed", .self$generateScript)
+      gSignalConnect(combo.scaley      , "changed", .self$generateScript)
+      gSignalConnect(combo.coordx      , "changed", .self$generateScript)
+      gSignalConnect(combo.coordy      , "changed", .self$generateScript)
+      gSignalConnect(entry.xlim.scale  , "changed", .self$generateScript)
+      gSignalConnect(entry.ylim.scale  , "changed", .self$generateScript)
+      gSignalConnect(entry.xlim.coord  , "changed", .self$generateScript)
+      gSignalConnect(entry.ylim.coord  , "changed", .self$generateScript)
+      gSignalConnect(flip.togglebutton , "toggled", .self$generateScript)
     },
     
     clear = function(){
@@ -97,40 +135,76 @@ setRefClass("RzPlotMisc",
       combo.scaley$setActive(0)
       combo.coordx$setActive(0)
       combo.coordy$setActive(0)
-      entry.xlim$setText("")
-      entry.ylim$setText("")
+      entry.xlim.scale$setText("")
+      entry.ylim.scale$setText("")
+      entry.xlim.coord$setText("")
+      entry.ylim.coord$setText("")
       flip.togglebutton$setActive(FALSE)
-      na.rm.togglebutton$setActive(TRUE)
-      combo.theme$setActive(0)
     },
     
-    getArgs = function(){
+    generateScript = function(...){
       scalex <- localize(combo.scalex$getActiveText())
       scaley <- localize(combo.scaley$getActiveText())
       coordx <- localize(combo.coordx$getActiveText())
       coordy <- localize(combo.coordy$getActiveText())
-      xlim   <- localize(entry.xlim$getText())
-      ylim   <- localize(entry.ylim$getText())
-      xlim   <- strsplit(xlim, ",")[[1]]
-      ylim   <- strsplit(ylim, ",")[[1]]
-      xlim   <- suppressWarnings(as.numeric(xlim))
-      ylim   <- suppressWarnings(as.numeric(ylim))
-      if(any(is.na(xlim)) | length(xlim)==0) xlim <- NULL
-      if(any(is.na(ylim)) | length(ylim)==0) ylim <- NULL
+      xlim.scale   <- localize(entry.xlim.scale$getText())
+      ylim.scale   <- localize(entry.ylim.scale$getText())
+      xlim.scale   <- strsplit(xlim.scale, ",")[[1]]
+      ylim.scale   <- strsplit(ylim.scale, ",")[[1]]
+      xlim.scale   <- suppressWarnings(as.numeric(xlim.scale))
+      ylim.scale   <- suppressWarnings(as.numeric(ylim.scale))
+      xlim.coord   <- localize(entry.xlim.coord$getText())
+      ylim.coord   <- localize(entry.ylim.coord$getText())
+      xlim.coord   <- strsplit(xlim.coord, ",")[[1]]
+      ylim.coord   <- strsplit(ylim.coord, ",")[[1]]
+      xlim.coord   <- suppressWarnings(as.numeric(xlim.coord))
+      ylim.coord   <- suppressWarnings(as.numeric(ylim.coord))
+      
+      if (coordx == "identity") coordx <- NULL
+      if (coordy == "identity") coordy <- NULL
+      
+      if (any(is.na(xlim.scale)) | length(xlim.scale) != 2) xlim.scale <- NULL
+      if (any(is.na(ylim.scale)) | length(ylim.scale) != 2) ylim.scale <- NULL
+      if (any(is.na(xlim.coord)) | length(xlim.coord) != 2) xlim.coord <- NULL
+      if (any(is.na(ylim.coord)) | length(ylim.coord) != 2) ylim.coord <- NULL
+      
       flip   <- flip.togglebutton$getActive()
-      na.rm  <- na.rm.togglebutton$getActive()
-      theme  <- combo.theme$getActiveText()
-      args <- list(scalex = scalex,
-                   scaley = scaley,
-                   coordx = coordx,
-                   coordy = coordy,
-                   xlim   = xlim,
-                   ylim   = ylim,
-                   flip   = flip,
-                   na.rm  = na.rm,
-                   theme  = theme)
-      return(args)
+      
+      if (scalex != "default") rzPlotScript$setScript(layer="scale_x", type=scalex)
+      else                     rzPlotScript$clearScript("scale_x")
+
+      if (scaley != "default") rzPlotScript$setScript("scale_y", type=scaley)
+      else                     rzPlotScript$clearScript("scale_y")
+      
+      if (!is.null(coordx) || !is.null(coordy)) {
+        rzPlotScript$setScript("coord", type="trans",
+                               args=list(xtrans=deparse(coordx), ytrans=deparse(coordy), limx=deparse(xlim), limy=deparse(ylim)))
+        if (flip) rzPlotScript$setScript("coord", type="flip", add=TRUE)
+        
+      } else if (!is.null(xlim.coord) || !is.null(ylim.coord)) {
+        rzPlotScript$setScript("coord", type="cartesian", args=list(xlim=deparse(xlim.coord), ylim=deparse(ylim.coord)))
+        if (flip) rzPlotScript$setScript("coord", type="flip", add=TRUE)
+        
+      } else if (flip) {
+        rzPlotScript$setScript("coord", type="flip")
+        
+      } else {
+        rzPlotScript$clearScript("coord")
+      }
+      
+      if (is.null(xlim.scale)) {
+        rzPlotScript$setFreeScript(name="xlim", script=NA)
+      } else {
+        rzPlotScript$setFreeScript(name="xlim", script=sprintf("xlim(%s)", deparse(xlim.scale)))
+      }
+      
+      if (is.null(ylim.scale)) {
+        rzPlotScript$setFreeScript(name="ylim", script=NA)
+      } else {
+        rzPlotScript$setFreeScript(name="ylim", script=sprintf("ylim(%s)", deparse(ylim.scale)))
+      }
+      
     }
   )
 )
-rzplot.misc$accessors("expander")
+rzplot.misc$accessors(c("axisPage", "themePage"))

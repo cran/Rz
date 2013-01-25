@@ -1,6 +1,6 @@
 fontSettingWidget <- 
 setRefClass("RzFontSettingWidget",
-  fields = c("title", "fontName", "fontBox", "showSize", "showStyle"),
+  fields = c("title", "fontName", "fontFamily", "fontBox", "showSize", "showStyle"),
   methods = list(
     initialize  = function(...) {
       initFields(...)
@@ -20,7 +20,8 @@ setRefClass("RzFontSettingWidget",
     },
 
     onSelectFont = function(button){
-      fontName <<- button$getFontName()
+      fontName   <<- button$getFontName()
+      fontFamily <<- pangoFontDescriptionFromString(fontName)$getFamily()
     }
 ))
-fontSettingWidget$accessors(c("fontName", "fontBox"))
+fontSettingWidget$accessors(c("fontName", "fontFamily", "fontBox"))

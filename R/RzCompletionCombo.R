@@ -1,9 +1,12 @@
 completion.combo <- 
 setRefClass("RzCompletionCombo",
-              fields = c("combo", "entry.completion"),
+              fields = c("combo", "entry.completion", "width", "show.combo"),
   methods = list(
     initialize  = function(...) {
       initFields(...)
+      if (class(width) == "uninitializedField")      width      <<- 120
+      if (class(show.combo) == "uninitializedField") show.combo <<- TRUE
+      
       entry.completion <<- gtkEntryCompletionNew()
       entry.completion$setTextColumn(column.definition["vars"])
       entry.completion$setInlineCompletion(TRUE)
@@ -20,8 +23,8 @@ setRefClass("RzCompletionCombo",
       entry.completion$addAttribute(renderer2, "text"  , column.definition["vars"])
       entry.completion$addAttribute(renderer3, "text"  , column.definition["var.labs"])
       
-      combo <<- gtkComboBoxEntryNew(show=TRUE)
-      combo["width-request"] <<- 120
+      combo <<- gtkComboBoxEntryNew(show=show.combo)
+      combo["width-request"] <<- width
       entry <- combo$getChild()
       entry$setCompletion(entry.completion)
       combo["text-column"] <<- column.definition["vars"]
@@ -44,7 +47,8 @@ setRefClass("RzCompletionCombo",
     
     clear = function(){
       entry <- combo$getChild()
-      entry$setText("")      
+      entry$setText("")
+      entry$setText("")
     },
     
     getActiveText = function(){

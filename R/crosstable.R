@@ -1,11 +1,13 @@
-crossTable <- function(...){
-  table <- table(...)
+crossTable <- function(..., deparse.level = 2){
+  table <- table(..., deparse.level = deparse.level)
   class(table) <- c("CrossTable", "table")
   return(table)
 }
 
 summary.CrossTable <- function(object, digits=3, latex=FALSE, ...){
+  vcd    <- suppressWarnings(require(vcd, quietly=TRUE))
   x      <- object
+  class(x) <- "table"
   sep    <- ifelse(latex, "&", " ")
   twoDimTable <- function(x, digits=3, width=6){
     output <- NULL
@@ -115,8 +117,12 @@ summary.CrossTable <- function(object, digits=3, latex=FALSE, ...){
     cat(output, fill=TRUE)
     cat("\n")
     cat("Chi-Square Test for Independence", fill=TRUE)
-    cat("\n")
-    summary.table(x)
+    if(vcd){
+      summary(assocstats(x))
+    } else {
+      cat("\n")
+      summary.table(x)      
+    }
     
     
   } else {
@@ -202,13 +208,26 @@ summary.CrossTable <- function(object, digits=3, latex=FALSE, ...){
     for(i in seq_len(dim[1])) {
       x.tmp <- as.table(x[i, , ])
       cat(sprintf("%s : %s", names(dimnames(x))[1], stratumcat[i]), fill=TRUE)
-      cat("\n")
-      print(summary.table(x.tmp))
+      
+      if(vcd){
+        print(summary(assocstats(x.tmp)))
+      } else {
+        cat("\n")
+        print(summary.table(x.tmp))
+      }
       cat("\n")
     }
     cat("Total", fill=TRUE)
+
+    if(vcd){
+      print(summary(assocstats(margin.table(x, c(2, 3)))))
+    } else {
+      cat("\n")
+      print(summary.table(margin.table(x, c(2, 3))))
+    }
     cat("\n")
-    print(summary.table(margin.table(x, c(2, 3))))
-    cat("\n")
+  }
+  if (!vcd) {
+    message("Please install vcd package to output Cramer's V.")
   }
 }

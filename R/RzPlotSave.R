@@ -1,12 +1,12 @@
 rzplot.save <- 
 setRefClass("RzPlotSave",
-  fields = c("win", "expander", "dialog", "file.types", "file.type.list",
-             "entry1", "entry2"),
+  fields = c("button.save", "dialog", "file.types", "file.type.list",
+             "entry1", "entry2", "combo.unit", "entry.scale", "entry.dpi"),
   methods = list(
     initialize  = function(...) {
       initFields(...)
       # save
-      dialog <<- gtkFileChooserDialogNew(title=gettext("Save"), parent=win,
+      dialog <<- gtkFileChooserDialogNew(title=gettext("Save"), parent=rzTools$getWindow(),
                                          action=GtkFileChooserAction["save"],
                                          "gtk-save", GtkResponseType["accept"],
                                          "gtk-cancel", GtkResponseType["cancel"], 
@@ -37,33 +37,52 @@ setRefClass("RzPlotSave",
         dialog$addFilter(filter)
       }
       dialogRun <- function(...) dialog$run()
-      save.button <- gtkButtonNewFromStock(GTK_STOCK_SAVE)
-      gSignalConnect(save.button, "clicked", dialogRun)
       
-      label1 <- gtkLabelNew(gettext("width (cm)"))
+      image       <-  gtkImageNewFromStock(GTK_STOCK_SAVE, GtkIconSize["button"])
+      button.save <<- gtkButtonNew()
+      button.save["sensitive"] <<- TRUE
+      button.save$setImage(image)
+      gSignalConnect(button.save, "clicked", dialogRun)
+      
+      label1 <- gtkLabelNew(gettext("width"))
       entry1 <<- gtkEntryNew()
       entry1$setText("(auto)")
-      label2 <- gtkLabelNew(gettext("height (cm)"))
+      label2 <- gtkLabelNew(gettext("height"))
       entry2 <<- gtkEntryNew()
       entry2$setText("(auto)")
+      label.unit <- gtkLabelNew(gettext("unit"))
+      combo.unit <<- gtkComboBoxNewText()
+      combo.unit$appendText("in")
+      combo.unit$appendText("cm")
+      combo.unit$appendText("mm")
+      combo.unit$setActive(1)
+      label.scale <- gtkLabelNew(gettext("scale"))
+      entry.scale <<- gtkEntryNew()
+      entry.scale$setText("1")
+      label.dpi <- gtkLabelNew(gettext("dpi"))
+      entry.dpi <<- gtkEntryNew()
+      entry.dpi$setText("300")
       
-      table  <- gtkTableNew(3, 2, FALSE)
+      
+      table  <- gtkTableNew(FALSE)
       table["border-width"] <- 5
       table$attach(label1, 0, 1, 0, 1, "shrink", "shrink", 0, 0)
       table$attachDefaults(entry1, 1, 2, 0, 1)
       table$attach(label2, 0, 1, 1, 2, "shrink", "shrink", 0, 0)
       table$attachDefaults(entry2, 1, 2, 1, 2)
-      table$attach(save.button, 0, 2, 2, 3, "fill", "fill", 0, 0)
+      table$attach(label.unit, 0, 1, 2, 3, "shrink", "shrink", 0, 0)
+      table$attachDefaults(combo.unit, 1, 2, 2, 3)
+      table$attach(label.scale, 2, 3, 0, 1, "shrink", "shrink", 0, 0)
+      table$attachDefaults(entry.scale, 3, 4, 0, 1)
+      table$attach(label.dpi, 2, 3, 1, 2, "shrink", "shrink", 0, 0)
+      table$attachDefaults(entry.dpi, 3, 4, 1, 2)
       table$setColSpacings(5)
       table$setRowSpacings(2)
       
-      expander <<- gtkExpanderNew(gettext("save options"))
-      expander["border-width"] <<- 3
-      expander$setExpanded(FALSE)
-      expander$add(table)
+      dialog$setExtraWidget(table)
     },
     
-    onSave = function(response.id, p.current, theme_Rz, legend.position, legend.linetype, legend.justification){
+    onSave = function(response.id, p.current, data){
       if (response.id == GtkResponseType["accept"]) {
         dialog$hide()
         
@@ -93,40 +112,28 @@ setRefClass("RzPlotSave",
         
         width  <- localize(entry1$getText())
         width  <- suppressWarnings(as.numeric(width))
-        width  <- ifelse(is.na(width), par("din")[1], width / 2.54)
+        width  <- ifelse(is.na(width), par("din")[1], width)
         height <- localize(entry2$getText())
         height <- suppressWarnings(as.numeric(height))
-        height <- ifelse(is.na(height), par("din")[2], height / 2.54)
+        height <- ifelse(is.na(height), par("din")[2], height)
+        scale  <- localize(entry.scale$getText())
+        scale  <- suppressWarnings(as.numeric(scale))
+        scale  <- ifelse(is.na(scale), 1, scale)
+        dpi    <- localize(entry.dpi$getText())
+        dpi    <- suppressWarnings(as.numeric(dpi))
+        dpi    <- ifelse(is.na(dpi), 3000, dpi)
+        units  <- localize(combo.unit$getActiveText())
         
         if(filetype==file.types[["eps"]]){
-          p <- p.current + theme_Rz() + opts(legend.position=legend.position,
-                                             legend.background = theme_rect(fill="white", linetype=legend.linetype),
-                                             legend.justification = legend.justification)
-          ggsave(filename=filename, plot=p, width=width, height=height,
-                 family=rzSettings$getPsFont())
+          p.current <- p.current + theme(text=element_text(family=""))
+          ggsave(filename=filename, plot=p.current, width=width, height=height,
+                 family=rzSettings$getPsFont(), units=units, dpi=dpi, scale=scale)
         } else if(filetype==file.types[["pdf"]]){
-          p <- p.current + theme_Rz() + opts(legend.position=legend.position,
-                                             legend.background = theme_rect(fill="white", linetype=legend.linetype),
-                                             legend.justification = legend.justification)
-          
-          ggsave(filename=filename, plot=p, width=width, height=height,
-                 family=rzSettings$getPdfFont())
+          p.current <- p.current + theme(text=element_text(family=""))
+          ggsave(filename=filename, plot=p.current, width=width, height=height,
+                 family=rzSettings$getPdfFont(), units=units, dpi=dpi, scale=scale)
         } else {
-          p <- p.current
-          if(grepl("mingw", R.Version()$os)){
-            windowsFonts(F = windowsFont(rzSettings$getPlotFontFamily()))
-            p <- p + theme_Rz(base_family="F") + opts(legend.position=legend.position,
-                                                      legend.background = theme_rect(fill="white", linetype=legend.linetype),
-                                                      legend.justification= legend.justification)
-          } else if(grepl("darwin", R.Version()$os)){
-            X11Fonts(F=X11Font(sprintf("-*-%s-*-*-*-*-*-*-*-*-*-*-*-*", rzSettings$getPlotFontFamily())))
-            quartzFonts(F = quartzFont(rep(rzSettings$getPlotFontFamily(), 4)))
-            p <- p + theme_Rz(base_family="F") + opts(legend.position=legend.position,
-                                                      legend.background = theme_rect(fill="white", linetype=legend.linetype),
-                                                      legend.justification = legend.justification)
-          }
-          
-          ggsave(filename=filename, plot=p, width=width, height=height)
+          ggsave(filename=filename, plot=p.current, width=width, height=height, units=units, dpi=dpi, scale=scale)
         }
       } else {
         dialog$hide()
@@ -135,4 +142,4 @@ setRefClass("RzPlotSave",
     }
   )
 )
-rzplot.save$accessors("expander", "dialog")
+rzplot.save$accessors("button.save", "dialog")

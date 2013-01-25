@@ -8,29 +8,17 @@ setRefClass("RzMain",
   methods = list(
     initialize            = function(...) {
       initFields(...)
+      if (! exists("theme_rz", envir=.GlobalEnv)) {
+        rzTools$sync("theme_rz", theme_grey)        
+      }
+
       settings <- gtkSettingsGetDefault()
       settings$setStringProperty("gtk-font-name", rzSettings$getGlobalFont(), NULL)
       gtkRcReparseAll()
-      rzDataSetIO   <<- new("RzDataSetIO")
-      recode.id     <<- NULL
-      win           <<- gtkWindowNew(show=FALSE)
-      main.hpaned   <<- gtkHPanedNew()
-      main.vpaned   <<- gtkVPanedNew()
-      main.view     <<- gtkVBoxNew()
-      plot.view     <<- gtkVPanedNew()
-      rzAnalysisView <<- new("RzAnalysisView")
-#      view.box      <<- gtkHBoxNew()
-#      view.box$packStart(plot.view)
-#      view.box$packStart(rzAnalysisView$getMain())
-      
-      main.vpaned$pack1(main.view, resize=TRUE)
-      main.vpaned$pack2(rzAnalysisView$getMain(), resize=TRUE)
-      main.vpaned$setPosition(300)
-      
-      main.hpaned$pack1(main.vpaned, resize=TRUE)
-      main.hpaned$pack2(plot.view, resize=TRUE)
-      main.hpaned$setPosition(450)
-      
+      rzDataSetIO    <<- new("RzDataSetIO")
+      recode.id      <<- NULL
+      win            <<- gtkWindowNew(show=FALSE)
+      rzTools$setWindow(win)
       info.bar      <<- gtkInfoBarRzNew()
       message.label <<- gtkLabelNew()
       info.bar$addButton("gtk-ok", GtkResponseType["ok"])
@@ -38,33 +26,30 @@ setRefClass("RzMain",
       info.bar$getContentArea()$packStart(message.label, expand=FALSE, fill=FALSE)
       info.bar$hide()
       info.bar$setNoShowAll(TRUE)
+      # must before new("Rzplot")
       rzTools$setInfoBar(info.bar)
       status.bar    <<- gtkStatusbarNew()
       progress.bar  <<- gtkProgressBarNew()
       
+      main.hpaned    <<- gtkHPanedNew()
+      main.vpaned    <<- gtkVPanedNew()
+      main.view      <<- gtkVBoxNew()
+      rzAnalysisView <<- new("RzAnalysisView")
+      rzPlot         <<- new("RzPlot")
+      
+      main.vpaned$pack1(main.view, resize=TRUE)
+      main.vpaned$pack2(rzAnalysisView$getMain(), resize=TRUE)
+      main.vpaned$setPosition(280)
+      
+      main.hpaned$pack1(main.vpaned, resize=TRUE)
+      main.hpaned$pack2(rzPlot$getMain(), resize=TRUE)
+      main.hpaned$setPosition(450)
+            
       status.bar$packEnd(progress.bar, expand=FALSE)
       
       rzSearchEntry <<- new("RzSearchEntry")
       variable.view <<- NULL
       variable.view.list <<- list()
-      
-      rzPlot <<- new("RzPlot", win=win)
-      rzPlot$setInfo.bar(info.bar)
-      plot.view$pack2(rzPlot$getMain(), resize=FALSE)
-      if(rzSettings$getUseEmbededDevice()){
-        if(require(cairoDevice)) {
-          plot.area <- gtkDrawingArea()
-          plot.view$pack1(plot.area, resize=TRUE)
-          plot.view$setPosition(300)
-          asCairoDevice(plot.area)
-          rzSettings$setEmbededDeviceOn(TRUE)
-        } else {
-          cat("cairoDevice package isn't installed", fill=TRUE)
-          rzSettings$setEmbededDeviceOn(FALSE)          
-        }
-      } else {
-        rzSettings$setEmbededDeviceOn(FALSE)
-      }
       
       win["title"] <<- "Rz"
       win$setDefaultSize(800, 700)
@@ -85,7 +70,6 @@ setRefClass("RzMain",
       
       rzActionGroup$getA.plot.view()$setActive(rzSettings$getPlotViewEnabled())
       rzActionGroup$getA.analysis.view()$setActive(rzSettings$getAnalysisViewEnabled())
-      #rzActionGroup$getA.reload()$setSensitive(rzSettings$getUseDataSetObject())
       gSignalConnect(rzActionGroup$getA.open(),      "activate", .self$onOpen)
       gSignalConnect(rzActionGroup$getA.save(),      "activate", .self$onSave)
       gSignalConnect(rzActionGroup$getA.ds(),        "activate", .self$onImportFromGlobalEnv)
@@ -93,8 +77,6 @@ setRefClass("RzMain",
       gSignalConnect(rzActionGroup$getA.remove(),    "activate", .self$onRemove)
       gSignalConnect(rzActionGroup$getA.revert(),    "activate", .self$onRevert)
       gSignalConnect(rzActionGroup$getA.reload(),    "activate", .self$onReload)
-#      gSignalConnect(rzActionGroup$getA.selectall(), "activate", .self$onSelectAll)
-#      gSignalConnect(rzActionGroup$getA.unselect(),  "activate", .self$onUnselect)
       gSignalConnect(rzActionGroup$getA.delete(),    "activate", .self$onDelete)
       gSignalConnect(rzActionGroup$getA.duplicate(), "activate", .self$onDuplicate)
       gSignalConnect(rzActionGroup$getA.quit(),      "activate", win$destroy)
@@ -123,19 +105,23 @@ setRefClass("RzMain",
       rzMenu$getTool.bar()$showAll()
       win$add(vbox)
       win$show()
-      if(!rzSettings$getPlotViewEnabled()) { plot.view$hide() }
+      win$present()
       if(!rzSettings$getAnalysisViewEnabled()) { rzAnalysisView$getMain()$hide() }
-#      if(!rzSettings$getPlotViewEnabled() && !rzSettings$getVariableEditorViewEnabled()) {
-#        view.box$hide() 
-#      }
+      if(!rzSettings$getPlotViewEnabled()) rzPlot$getMain()$hide()
+      else                                 rzPlot$construct()
       
       gSignalConnect(win, "destroy", function(...){
         rzTools$clean()
-        if(rzSettings$getEmbededDeviceOn()){
+        if(!is.null(rzSettings$getEmbededDeviceOn()) && rzSettings$getEmbededDeviceOn()){
           try(dev.off(), silent=TRUE)
         }
       })
       
+    },
+    
+    show = function(){
+      win$show()
+      win$present()
     },
     
     # actions
@@ -169,48 +155,41 @@ setRefClass("RzMain",
     },
     
     onPlotViewToggled = function(action){
+      if (!rzPlot$getConstructed()) {
+        rzPlot$construct()
+      }
+      view <- rzPlot$getMain()
+      parent <- view$getParent()
       if(action$getActive()) {
-#        view.box$show()
-        plot.view$show()
+        if(class(parent)[1] == "GtkWindow") parent$show()    # if detached
+        view$showAll()
         rzSettings$setPlotViewEnabled(TRUE)
-#        if(rzSettings$getVariableEditorViewEnabled()){
-#          action <- rzActionGroup$getA.variable.editor.view()
-#          action["active"] <- FALSE
-##          action$toggled()
-#        }
       } else {
-        plot.view$hide()
+        if(class(parent)[1] == "GtkWindow") parent$hide()    # if detached
+        view$hide()
         rzSettings$setPlotViewEnabled(FALSE)
-#        if(!rzSettings$getVariableEditorViewEnabled()){
-#          view.box$hide()
-#        }
       }
     },
     
     onAnalysisViewToggled = function(action){
+      view <- rzAnalysisView$getMain()
+      parent <- view$getParent()
       if(action$getActive()) {
-#        view.box$show()
-        rzAnalysisView$getMain()$show()
+        if(class(parent)[1] == "GtkWindow") parent$show()    # if detached
+        view$showAll()
+        rzAnalysisView$toggled()
         rzSettings$setAnalysisViewEnabled(TRUE)
         if(!is.null(variable.view)) variable.view$selectMode(TRUE)
-#        if(rzSettings$getVariableEditorViewEnabled()){
-#          action <- rzActionGroup$getA.plot.view()
-#          action["active"] <- FALSE
-##          action$toggled()
-#        }
       } else {
-        rzAnalysisView$getMain()$hide()
+        if(class(parent)[1] == "GtkWindow") parent$hide()    # if detached
+        view$hide()
         rzSettings$setAnalysisViewEnabled(FALSE)
         if(!is.null(variable.view)) variable.view$selectMode(FALSE)
-#        if(!rzSettings$getPlotViewEnabled()){
-#          view.box$hide()
-#        }
       }
     },
     
     onSetting = function(action){
       rzSettings$runDialog(win)
-      rzDataHandler$syncAll()
       if(!is.null(variable.view))variable.view$changeFont()
       rzActionGroup$getA.reload()$setSensitive(rzSettings$getUseDataSetObject())
       gtkRcReparseAll()
@@ -246,7 +225,6 @@ setRefClass("RzMain",
     
     onLoadSample = function(action){
       timeoutid <- gTimeoutAdd(80, progress.bar$start)
-#      data <- rzDataSetIO$importFromGlobalEnv(win)
       nes1948.por <- UnZip("anes/NES1948.ZIP","NES1948.POR",package="memisc")
       nes1948 <- spss.portable.file(nes1948.por)
       sample.data.set <- as.data.set(nes1948)
@@ -267,6 +245,7 @@ setRefClass("RzMain",
           result <- rzDataHandler$changeDataSetName(data.set.name, new.name)
           if(result$result){
             rm(list=data.set.name, envir=.GlobalEnv)
+            rm(list=sprintf("%s.ds", data.set.name), envir=.GlobalEnv)
             match <- which(names(variable.view.list)==data.set.name)
             names(variable.view.list)[match] <<- new.name
             dialog$hide()            
@@ -326,7 +305,6 @@ setRefClass("RzMain",
       
       if(response==GtkResponseType["ok"]){
         rzDataHandler$removeCurrentData()
-        rm(list=data.set.name, envir=.GlobalEnv)
         variable.view$toggleView()
         variable.view$getView()$destroy()
         variable.view <<- NULL
@@ -357,8 +335,10 @@ setRefClass("RzMain",
     },
     
     onReload = function(action){
+      on.exit(gSourceRemove(timeoutid))
+      on.exit(progress.bar["activity-mode"] <<- FALSE, add = TRUE)
+      timeoutid <- gTimeoutAdd(80, progress.bar$start)
       if(!is.null(variable.view)){
-        timeoutid <- gTimeoutAdd(80, progress.bar$start)
         
         dialog <- gtkMessageDialogNew(win, "destroy-with-parent",
                                       GtkMessageType["question"], GtkButtonsType["ok-cancel"],
@@ -367,21 +347,10 @@ setRefClass("RzMain",
         dialog$hide()
         
         if(response==GtkResponseType["ok"]){
-          data   <- rzDataHandler$getCurrentData()
-          result <- data$reloadFromGlobalEnv()
-          if(result==TRUE){
             variable.view$reload()
-          } else {
-            dialog2 <- gtkMessageDialogNew(win, "destroy-with-parent",
-                                           GtkMessageType["error"], GtkButtonsType["close"],
-                                           gettextf("\"%s\" isn't a data.set or don't exist.", result))
-            dialog2$run()
-            dialog2$hide()
-          }
         }
-        gSourceRemove(timeoutid)
-        progress.bar["activity-mode"] <<- FALSE
       }
+      
     },
     
     onDatasetChanged      = function(combo){
@@ -413,6 +382,39 @@ setRefClass("RzMain",
     
     onInfoBarResponsed    = function(widget, response.id){
       info.bar$hide()
+      
+    },
+    
+    # scripting interface
+    addData = function(data){
+      rzDataHandler$addData(data)
+    },
+    
+    reloadData = function(data.set.name=NULL, ask = TRUE){
+      vv.tmp <- NULL
+      if (is.null(data.set.name)) {
+        vv.tmp <- variable.view
+      } else {
+        vv.tmp <- variable.view.list[[data.set.name]]
+      }
+      if (! is.null(vv.tmp)) {
+        response <- 1
+        if (ask) {
+          response <- menu(c(gettext("yes"), gettext("no")),
+                           title = gettext("Are you sure you want to do that?"))
+        }
+        
+        if (response == 1) {
+          vv.tmp$reload()
+        }
+        
+      } else {
+        if (is.null(data.set.name)) {
+          stop("Please select a dataset on Rz or specify \"data.set.name\".")
+        } else {
+          stop("The dataset named \"", data.set.name, "\" doesn't exist.")
+        }
+      }
     }
   )
 )

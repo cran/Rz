@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: R 2.15.0\n"
+"Project-Id-Version: R 2.15.1\n"
 "Report-Msgid-Bugs-To: bugs@r-project.org\n"
-"POT-Creation-Date: 2012-06-08 14:15\n"
+"POT-Creation-Date: 2012-12-14 15:01\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,6 +18,39 @@ msgid "This file already exists. Overwrite it?"
 msgstr ""
 
 msgid "Cannot handle character variables longer than 255"
+msgstr ""
+
+msgid "Select colour"
+msgstr ""
+
+msgid "Family:"
+msgstr ""
+
+msgid "Preview:"
+msgstr ""
+
+msgid "Select Font Family"
+msgstr ""
+
+msgid "Inherit from the current theme"
+msgstr ""
+
+msgid "Inherit from <span font_style='italic' font_weight='bold' font_size='large'>%s</span>"
+msgstr ""
+
+msgid "Top"
+msgstr ""
+
+msgid "Right"
+msgstr ""
+
+msgid "Bottom"
+msgstr ""
+
+msgid "Left"
+msgstr ""
+
+msgid "Unit"
 msgstr ""
 
 msgid "_File"
@@ -161,6 +194,9 @@ msgstr ""
 msgid "Templates"
 msgstr ""
 
+msgid "Detach"
+msgstr ""
+
 msgid "Descriptive statistics"
 msgstr ""
 
@@ -168,6 +204,12 @@ msgid "Editor"
 msgstr ""
 
 msgid "Variable Editor"
+msgstr ""
+
+msgid "Attach"
+msgstr ""
+
+msgid "Condition of selecting cases is invalid."
 msgstr ""
 
 msgid "This dataset name is invalid. Please enter a valid dataset name."
@@ -239,10 +281,76 @@ msgstr ""
 msgid "New Name"
 msgstr ""
 
-msgid "\"%s\" isn't a data.set or don't exist."
+msgid "yes"
 msgstr ""
 
-msgid "Please enter valid x."
+msgid "no"
+msgstr ""
+
+msgid "Please select a dataset on Rz or specify \"data.set.name\"."
+msgstr ""
+
+msgid "The dataset named \""
+msgstr ""
+
+msgid "\" doesn't exist."
+msgstr ""
+
+msgid "Main"
+msgstr ""
+
+msgid "Sub-group"
+msgstr ""
+
+msgid "Facet"
+msgstr ""
+
+msgid "Axis"
+msgstr ""
+
+msgid "Theme"
+msgstr ""
+
+msgid "Relative sizing"
+msgstr ""
+
+msgid "Colour"
+msgstr ""
+
+msgid "Size"
+msgstr ""
+
+msgid "Line\nType"
+msgstr ""
+
+msgid "Line\nEnd"
+msgstr ""
+
+msgid "<span font_style='italic' font_weight='bold'>theme_blank()</span> when turn <span font_style='italic' font_weight='bold'>OFF</span> the button"
+msgstr ""
+
+msgid "Fill"
+msgstr ""
+
+msgid "Font\nFamily"
+msgstr ""
+
+msgid "Font\nFace"
+msgstr ""
+
+msgid "Horizontal\nJustification"
+msgstr ""
+
+msgid "Vertical\nJustification"
+msgstr ""
+
+msgid "Angle"
+msgstr ""
+
+msgid "Line\nHeight"
+msgstr ""
+
+msgid "x"
 msgstr ""
 
 msgid "variable label"
@@ -251,52 +359,37 @@ msgstr ""
 msgid "variable name"
 msgstr ""
 
-msgid "facet options"
-msgstr ""
-
-msgid "x"
+msgid "(free text)"
 msgstr ""
 
 msgid "y"
 msgstr ""
 
-msgid "Add Layer and Redraw"
-msgstr ""
-
-msgid "geom options"
-msgstr ""
-
 msgid "title"
 msgstr ""
 
-msgid "x axis"
+msgid "Options"
 msgstr ""
 
-msgid "(free text)"
+msgid "Stack Layer"
 msgstr ""
 
-msgid "y axis"
-msgstr ""
-
-msgid "label options"
-msgstr ""
-
-msgid "axis limits"
-msgstr ""
-
-msgid "flip"
-msgstr ""
-
-msgid "remove NA"
-msgstr ""
-
-msgid "misc options"
+msgid "Remove Layer"
 msgstr ""
 
 msgid "position"
 msgstr ""
 
-msgid "position options"
+msgid "No Option"
+msgstr ""
+
+msgid "range"
+msgstr ""
+
+msgid "flip"
+msgstr ""
+
+msgid "Open Theme Editor"
 msgstr ""
 
 msgid "Save"
@@ -329,16 +422,19 @@ msgstr ""
 msgid "pictex (*.tex)"
 msgstr ""
 
-msgid "width (cm)"
+msgid "width"
 msgstr ""
 
-msgid "height (cm)"
+msgid "height"
 msgstr ""
 
-msgid "save options"
+msgid "unit"
 msgstr ""
 
-msgid "statistics options"
+msgid "scale"
+msgstr ""
+
+msgid "dpi"
 msgstr ""
 
 msgid "legend position"
@@ -347,7 +443,34 @@ msgstr ""
 msgid "line type"
 msgstr ""
 
-msgid "stratum options"
+msgid "Theme Editor"
+msgstr ""
+
+msgid "General"
+msgstr ""
+
+msgid "X Axis"
+msgstr ""
+
+msgid "Y Axis"
+msgstr ""
+
+msgid "Legend"
+msgstr ""
+
+msgid "Panel"
+msgstr ""
+
+msgid "Strip"
+msgstr ""
+
+msgid "Theme Preview"
+msgstr ""
+
+msgid "Name of Theme :"
+msgstr ""
+
+msgid "use filename if blank"
 msgstr ""
 
 msgid "Prev: Up Arrow Key\nNext: Down Arrow Key"
@@ -383,19 +506,28 @@ msgstr ""
 msgid "Monospace Font"
 msgstr ""
 
-msgid "Plot Font"
-msgstr ""
-
 msgid "PDF Font"
 msgstr ""
 
 msgid "PostScript Font"
 msgstr ""
 
-msgid "General"
+msgid "Font"
 msgstr ""
 
-msgid "Font"
+msgid "invalid 'type' ("
+msgstr ""
+
+msgid ") of argument"
+msgstr ""
+
+msgid "Please start Rz."
+msgstr ""
+
+msgid "Select Cases"
+msgstr ""
+
+msgid "Duplicate Dataset"
 msgstr ""
 
 msgid "Measurement"
@@ -420,6 +552,24 @@ msgid "All Variables"
 msgstr ""
 
 msgid "Selected Variables"
+msgstr ""
+
+msgid "Management and Manipulation"
+msgstr ""
+
+msgid "Cannot reload while Select Cases enabled."
+msgstr ""
+
+msgid "Cannot reload while \"Select Cases\" enabled."
+msgstr ""
+
+msgid "\"%s\" isn't a data.set or doesn't exist."
+msgstr ""
+
+msgid "\""
+msgstr ""
+
+msgid "\" isn't a data.set or doesn't exist."
 msgstr ""
 
 msgid "This recode syntax is invalid. Please enter a valid recode syntax."
@@ -453,6 +603,39 @@ msgid "Variable Name"
 msgstr ""
 
 msgid "Duplicate label is detected."
+msgstr ""
+
+msgid "All variables"
+msgstr ""
+
+msgid "Only selected variables"
+msgstr ""
+
+msgid "Only not selected variables"
+msgstr ""
+
+msgid "Only selected cases"
+msgstr ""
+
+msgid "Exclude missing values"
+msgstr ""
+
+msgid "Variables"
+msgstr ""
+
+msgid "Cases"
+msgstr ""
+
+msgid "\"Select Cases\" isn't enabled."
+msgstr ""
+
+msgid "No variables are selected."
+msgstr ""
+
+msgid "[Duplicated from %s]"
+msgstr ""
+
+msgid "Enable Select Cases"
 msgstr ""
 
 msgid "Start"

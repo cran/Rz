@@ -1,7 +1,7 @@
 analysisStat <-
 setRefClass("RzAnalysisStat",
   fields = c("main", "textview", "button.clear", "signal.clear",
-             "scrolledwindow.vbox"),
+             "scrolledwindow.vbox", "hbox.methods"),
   methods = list(
     initialize            = function(...) {
       initFields(...)
@@ -13,7 +13,7 @@ setRefClass("RzAnalysisStat",
       
       combo.methods <- gtkComboBoxNewText()
       for(i in methods) combo.methods$appendText(i)
-      hbox.methods  <- gtkHBoxNew(spacing=5)
+      hbox.methods  <<- gtkHBoxNew(spacing=5)
       hbox.methods$packStart(combo.methods)
       
       textview <<- gtkTextViewNew()
@@ -64,7 +64,9 @@ setRefClass("RzAnalysisStat",
           info.bar$setText(e[1])
           info.bar$show()
         } else {
-          print(e)
+          if (!is.null(e)) {
+            print(e)
+          }
           info.bar$hide()
         }
       })
@@ -92,7 +94,8 @@ setRefClass("RzAnalysisStat",
         vbox <- constructCorrelation()
       }
       
-      scrolledwindow.vbox$addWithViewport(vbox)        
+      scrolledwindow.vbox$addWithViewport(vbox)
+      scrolledwindow.vbox$getChild()$setShadowType(GtkShadowType["none"])
       
     },
     
@@ -430,6 +433,20 @@ setRefClass("RzAnalysisStat",
       setScript(widgets=widgets)
       
       return(vbox)
+    },
+    
+    rebuild = function(){
+      hbox.methods$getChildren()[[1]]$destroy()
+      
+      methods <- c(gettext("Basic Statistics"),
+                   gettext("Cross Tabulation"),
+                   gettext("Correlation"))
+      
+      combo.methods <- gtkComboBoxNewText()
+      for(i in methods) combo.methods$appendText(i)
+      hbox.methods$packStart(combo.methods)
+      gSignalConnect(combo.methods, "changed", .self$toggleMethods)
+      
     }
 
   )

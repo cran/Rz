@@ -16,5 +16,7 @@ plot assistant interface based on ggplot2.
 \details{
 Simply excute Rz() to start.
 }
-
+\seealso{
+\code{\link{RzThemeEditor}}%% ~~objects to See Also as \code{\link{help}}, ~~~
+}
 \keyword{ memisc }

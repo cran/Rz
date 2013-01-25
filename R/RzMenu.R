@@ -12,7 +12,7 @@ setRefClass("RzMenu",
       tool.bar     <<- uimanager$getWidget("/ToolBar")
       context.menu <<- uimanager$getWidget("/PopupVV") 
       tool.bar["toolbar-style"] <<- GtkToolbarStyle["icons"]
-      tool.bar$setIconSize(GtkIconSize["small-toolbar"])
+      tool.bar$setIconSize(GtkIconSize["large-toolbar"])
       nitems <- tool.bar$getNItems()
       for(i in seq_len(nitems)){
         item <- tool.bar$getNthItem(i-1)

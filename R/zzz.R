@@ -20,7 +20,7 @@ column.definition <- c(index=0, select=1, vars=2, var.labs=3, msr=4, msr.image=5
   txt3 <- gettext("or you can start from menu bar if you use R on Windows.")
   txt4 <- "####################################################################"
   txt  <- format(c(txt1,txt2,txt3,txt4), justify="centre")
-  txt <- paste(txt, collapse="\n")
+  txt  <- paste(txt, collapse="\n")
   packageStartupMessage(txt)
 }
 

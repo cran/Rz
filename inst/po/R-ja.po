@@ -2,16 +2,16 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Rz 0.1\n"
 "Report-Msgid-Bugs-To: bugs@r-project.org\n"
-"POT-Creation-Date: 2012-06-08 14:12\n"
-"PO-Revision-Date: 2012-06-08 15:13+0900\n"
+"POT-Creation-Date: 2012-12-14 15:01\n"
+"PO-Revision-Date: 2012-12-14 15:01+0900\n"
 "Last-Translator: Masahiro Hayashi <rinm884@gmail.com>\n"
 "Language-Team:  <rinm884@gmail.com>\n"
+"Language: ja_JP\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Poedit-Language: Japanese\n"
-"X-Poedit-Country: JAPAN\n"
 "X-Poedit-SourceCharset: utf-8\n"
+"X-Generator: Poedit 1.5.4\n"
 
 msgid "File Path:"
 msgstr "File Path:"
@@ -21,6 +21,43 @@ msgstr "このファイルは既に存在しています。上書きしますか
 
 msgid "Cannot handle character variables longer than 255"
 msgstr "255文字を超える文字変数は取り扱えません"
+
+msgid "Select colour"
+msgstr "色の選択"
+
+msgid "Family:"
+msgstr "ファミリー："
+
+msgid "Preview:"
+msgstr "プレビュー："
+
+msgid "Select Font Family"
+msgstr "フォント・ファミリーの選択"
+
+msgid "Inherit from the current theme"
+msgstr "現在のテーマから継承"
+
+msgid ""
+"Inherit from <span font_style='italic' font_weight='bold' font_size='large'>"
+"%s</span>"
+msgstr ""
+"<span font_style='italic' font_weight='bold' font_size='large'>%s</span>から"
+"継承"
+
+msgid "Top"
+msgstr "上"
+
+msgid "Right"
+msgstr "右"
+
+msgid "Bottom"
+msgstr "下"
+
+msgid "Left"
+msgstr "左"
+
+msgid "Unit"
+msgstr "単位"
 
 msgid "_File"
 msgstr "ファイル(_F)"
@@ -131,22 +168,22 @@ msgid "=============== Output by Rz ==============="
 msgstr "=============== Rz による出力 ==============="
 
 msgid "Row"
-msgstr ""
+msgstr "Row"
 
 msgid "Col"
-msgstr ""
+msgstr "Col"
 
 msgid "Stratum"
-msgstr ""
+msgstr "Stratum"
 
 msgid "use"
-msgstr ""
+msgstr "use"
 
 msgid "method"
-msgstr ""
+msgstr "method"
 
 msgid "adjust"
-msgstr ""
+msgstr "adjust"
 
 msgid "Change Measurement"
 msgstr "尺度を変更する"
@@ -163,6 +200,9 @@ msgstr "反転する"
 msgid "Templates"
 msgstr "テンプレート"
 
+msgid "Detach"
+msgstr "Detach"
+
 msgid "Descriptive statistics"
 msgstr "記述統計量"
 
@@ -172,11 +212,19 @@ msgstr "エディタ"
 msgid "Variable Editor"
 msgstr "変数エディタ"
 
+msgid "Attach"
+msgstr "Attach"
+
+msgid "Condition of selecting cases is invalid."
+msgstr "ケースの選択の条件が不正です。"
+
 msgid "This dataset name is invalid. Please enter a valid dataset name."
 msgstr "このデータセット名は無効です。有効なデータセット名を入力してください。"
 
 msgid "This dataset name is already exists, please enter another dataset name."
-msgstr "このデータセット名はすでに存在しています。別のデータセット名を入力してください。"
+msgstr ""
+"このデータセット名はすでに存在しています。別のデータセット名を入力してくださ"
+"い。"
 
 msgid "Save Data"
 msgstr "データを保存する"
@@ -221,7 +269,9 @@ msgid "Tab-Separated Text (*.*)"
 msgstr "タブ区切りテキスト (*.*)"
 
 msgid "Changing encoding may takes several or more minutes. Please wait..."
-msgstr "エンコーディングの変更は数分かそれ以上かかることがあります。お待ちください．．．"
+msgstr ""
+"エンコーディングの変更は数分かそれ以上かかることがあります。お待ちくださ"
+"い．．．"
 
 msgid "%s [from Global Environment]"
 msgstr "%s [大局的環境から]"
@@ -241,11 +291,103 @@ msgstr "古い名前"
 msgid "New Name"
 msgstr "新しい名前"
 
-msgid "\"%s\" isn't a data.set or don't exist."
-msgstr "\"%s\" はdata.setではないか，存在しません。"
+msgid "yes"
+msgstr "はい"
 
-msgid "Please enter valid x."
-msgstr "有効な x を入力してください。"
+msgid "no"
+msgstr "いいえ"
+
+msgid "Please select a dataset on Rz or specify \"data.set.name\"."
+msgstr "Rzでデータ・セットを選択するか\"data.set.name\"を指定してください."
+
+msgid "The dataset named \""
+msgstr "次の名前のデータセット \""
+
+msgid "\" doesn't exist."
+msgstr "\"は存在しません."
+
+msgid "Main"
+msgstr "メイン"
+
+msgid "Sub-group"
+msgstr "サブグループ"
+
+msgid "Facet"
+msgstr "ファセット"
+
+msgid "Axis"
+msgstr "軸"
+
+msgid "Theme"
+msgstr "テーマ"
+
+msgid "Relative sizing"
+msgstr "相対的なサイズ"
+
+msgid "Colour"
+msgstr "色"
+
+msgid "Size"
+msgstr "サイズ"
+
+msgid ""
+"Line\n"
+"Type"
+msgstr "線の種類"
+
+msgid ""
+"Line\n"
+"End"
+msgstr "線の終端"
+
+msgid ""
+"<span font_style='italic' font_weight='bold'>theme_blank()</span> when turn "
+"<span font_style='italic' font_weight='bold'>OFF</span> the button"
+msgstr ""
+"<span font_style='italic' font_weight='bold'>OFF</span>のとき<span "
+"font_style='italic' font_weight='bold'>theme_blank()</span>"
+
+msgid "Fill"
+msgstr "塗りつぶし"
+
+msgid ""
+"Font\n"
+"Family"
+msgstr ""
+"フォント・\n"
+"ファミリー"
+
+msgid ""
+"Font\n"
+"Face"
+msgstr ""
+"フォント・\n"
+"フェイス"
+
+msgid ""
+"Horizontal\n"
+"Justification"
+msgstr ""
+"水平方向の\n"
+"位置合わせ"
+
+msgid ""
+"Vertical\n"
+"Justification"
+msgstr ""
+"垂直方向の\n"
+"位置合わせ"
+
+msgid "Angle"
+msgstr "角度"
+
+msgid ""
+"Line\n"
+"Height"
+msgstr "行の高さ"
+
+msgid "x"
+msgstr "x"
 
 msgid "variable label"
 msgstr "変数ラベル"
@@ -253,53 +395,38 @@ msgstr "変数ラベル"
 msgid "variable name"
 msgstr "変数名"
 
-msgid "facet options"
-msgstr "facetオプション"
-
-msgid "x"
-msgstr "x"
+msgid "(free text)"
+msgstr "（任意の文字列）"
 
 msgid "y"
 msgstr "y"
 
-msgid "Add Layer and Redraw"
-msgstr "レイヤーを追加し再描画"
-
-msgid "geom options"
-msgstr "geomオプション"
-
 msgid "title"
 msgstr "タイトル"
 
-msgid "x axis"
-msgstr "x軸"
+msgid "Options"
+msgstr "オプション"
 
-msgid "(free text)"
-msgstr "（任意の文字列）"
+msgid "Stack Layer"
+msgstr "レイヤーを重ねる"
 
-msgid "y axis"
-msgstr "y軸"
-
-msgid "label options"
-msgstr "labelオプション"
-
-msgid "axis limits"
-msgstr "軸の範囲"
-
-msgid "flip"
-msgstr "flip"
-
-msgid "remove NA"
-msgstr "欠損値を取り除く"
-
-msgid "misc options"
-msgstr "その他のオプション"
+msgid "Remove Layer"
+msgstr "レイヤーを取り除く"
 
 msgid "position"
 msgstr "position"
 
-msgid "position options"
-msgstr "positionオプション"
+msgid "No Option"
+msgstr "オプションなし"
+
+msgid "range"
+msgstr "範囲"
+
+msgid "flip"
+msgstr "flip"
+
+msgid "Open Theme Editor"
+msgstr "テーマ・エディターを開く"
 
 msgid "Save"
 msgstr "保存"
@@ -331,17 +458,20 @@ msgstr "tiff (*.tiff)"
 msgid "pictex (*.tex)"
 msgstr "pictex (*.tex)"
 
-msgid "width (cm)"
-msgstr "幅（cm）"
+msgid "width"
+msgstr "幅"
 
-msgid "height (cm)"
-msgstr "高さ（cm）"
+msgid "height"
+msgstr "高さ"
 
-msgid "save options"
-msgstr "保存オプション"
+msgid "unit"
+msgstr "単位"
 
-msgid "statistics options"
-msgstr "statisticsオプション"
+msgid "scale"
+msgstr "スケール"
+
+msgid "dpi"
+msgstr "dpi"
 
 msgid "legend position"
 msgstr "凡例の位置"
@@ -349,8 +479,35 @@ msgstr "凡例の位置"
 msgid "line type"
 msgstr "線の種類"
 
-msgid "stratum options"
-msgstr "層化オプション"
+msgid "Theme Editor"
+msgstr "テーマ・エディタ"
+
+msgid "General"
+msgstr "全般"
+
+msgid "X Axis"
+msgstr "X軸"
+
+msgid "Y Axis"
+msgstr "Y軸"
+
+msgid "Legend"
+msgstr "凡例"
+
+msgid "Panel"
+msgstr "パネル"
+
+msgid "Strip"
+msgstr "ストリップ"
+
+msgid "Theme Preview"
+msgstr "テーマのプレビュー"
+
+msgid "Name of Theme :"
+msgstr "テーマの名前 :"
+
+msgid "use filename if blank"
+msgstr "空欄のときはファイル名が使われます"
 
 msgid ""
 "Prev: Up Arrow Key\n"
@@ -389,20 +546,29 @@ msgstr "変数ビューのフォント"
 msgid "Monospace Font"
 msgstr "等幅フォント"
 
-msgid "Plot Font"
-msgstr "Plotのフォント"
-
 msgid "PDF Font"
 msgstr "PDFのフォント"
 
 msgid "PostScript Font"
 msgstr "PostScriptのフォント"
 
-msgid "General"
-msgstr "全般"
-
 msgid "Font"
 msgstr "フォント"
+
+msgid "invalid 'type' ("
+msgstr "不適切な'type' ("
+
+msgid ") of argument"
+msgstr ") の引数"
+
+msgid "Please start Rz."
+msgstr "Rzをスタートしてください."
+
+msgid "Select Cases"
+msgstr "ケースの選択"
+
+msgid "Duplicate Dataset"
+msgstr "データセットの複製"
 
 msgid "Measurement"
 msgstr "尺度"
@@ -428,8 +594,28 @@ msgstr "全ての変数"
 msgid "Selected Variables"
 msgstr "選択された変数"
 
+msgid "Management and Manipulation"
+msgstr "管理と操作"
+
+msgid "Cannot reload while Select Cases enabled."
+msgstr "ケースの選択の選択が有効になっている間は，リロードはできません。"
+
+msgid "Cannot reload while \"Select Cases\" enabled."
+msgstr "ケースの選択の選択が有効になっている間は，リロードはできません。"
+
+msgid "\"%s\" isn't a data.set or doesn't exist."
+msgstr "\"%s\" はdata.setではないか，存在しません。"
+
+msgid "\""
+msgstr "\""
+
+msgid "\" isn't a data.set or doesn't exist."
+msgstr "\" はdata.setではないか，存在しません。"
+
 msgid "This recode syntax is invalid. Please enter a valid recode syntax."
-msgstr "このリコード・シンタックスは無効です。有効なリコード・シンタックスを入力してください。"
+msgstr ""
+"このリコード・シンタックスは無効です。有効なリコード・シンタックスを入力して"
+"ください。"
 
 msgid "This variable name is invalid. Please enter a valid variable name."
 msgstr "この変数名は無効です。有効な変数名を入力してください。"
@@ -461,6 +647,39 @@ msgstr "変数名"
 msgid "Duplicate label is detected."
 msgstr "ラベルが重複しています。"
 
+msgid "All variables"
+msgstr "全ての変数"
+
+msgid "Only selected variables"
+msgstr "選択されている変数のみ"
+
+msgid "Only not selected variables"
+msgstr "選択されていない変数のみ"
+
+msgid "Only selected cases"
+msgstr "選択されているケースのみ"
+
+msgid "Exclude missing values"
+msgstr "欠損値を取り除く"
+
+msgid "Variables"
+msgstr "変数"
+
+msgid "Cases"
+msgstr "ケース"
+
+msgid "\"Select Cases\" isn't enabled."
+msgstr "\"ケースの選択\"が有効になっていません。"
+
+msgid "No variables are selected."
+msgstr "変数が一つも選択されていません。"
+
+msgid "[Duplicated from %s]"
+msgstr "[%s からの複製]"
+
+msgid "Enable Select Cases"
+msgstr "ケースの選択を有効にする"
+
 msgid "Start"
 msgstr "スタート"
 
@@ -469,6 +688,57 @@ msgstr "Rz() を実行して開始してください．"
 
 msgid "or you can start from menu bar if you use R on Windows."
 msgstr "WindowsでRを使っている場合はメニューバーから起動することもできます．"
+
+#~ msgid "Please enter valid x."
+#~ msgstr "有効な x を入力してください。"
+
+#~ msgid "facet options"
+#~ msgstr "facetオプション"
+
+#~ msgid "Add Layer and Redraw"
+#~ msgstr "レイヤーを追加し再描画"
+
+#~ msgid "x axis"
+#~ msgstr "x軸"
+
+#~ msgid "y axis"
+#~ msgstr "y軸"
+
+#~ msgid "label options"
+#~ msgstr "labelオプション"
+
+#~ msgid "axis limits"
+#~ msgstr "軸の範囲"
+
+#~ msgid "remove NA"
+#~ msgstr "欠損値を取り除く"
+
+#~ msgid "misc options"
+#~ msgstr "その他のオプション"
+
+#~ msgid "position options"
+#~ msgstr "positionオプション"
+
+#~ msgid "height (cm)"
+#~ msgstr "高さ（cm）"
+
+#~ msgid "save options"
+#~ msgstr "保存オプション"
+
+#~ msgid "statistics options"
+#~ msgstr "statisticsオプション"
+
+#~ msgid "stratum options"
+#~ msgstr "層化オプション"
+
+#~ msgid "Plot Font"
+#~ msgstr "Plotのフォント"
+
+#~ msgid "Update"
+#~ msgstr "更新"
+
+#~ msgid "Clear"
+#~ msgstr "消去"
 
 #~ msgid "Data View"
 #~ msgstr "データビュー"
@@ -481,9 +751,6 @@ msgstr "WindowsでRを使っている場合はメニューバーから起動す�
 
 #~ msgid "Quick Editor"
 #~ msgstr "クイックエディタ"
-
-#~ msgid "Select All"
-#~ msgstr "全て選択"
 
 #~ msgid "Change Variable Labels"
 #~ msgstr "変数ラベルを変更する"
@@ -554,20 +821,8 @@ msgstr "WindowsでRを使っている場合はメニューバーから起動す�
 #~ msgid "jitter"
 #~ msgstr "jitter"
 
-#~ msgid "top"
-#~ msgstr "上"
-
-#~ msgid "right"
-#~ msgstr "右"
-
-#~ msgid "bottom"
-#~ msgstr "下"
-
 #~ msgid "left"
 #~ msgstr "左"
-
-#~ msgid "none"
-#~ msgstr "なし"
 
 #~ msgid "Import"
 #~ msgstr "インポート"

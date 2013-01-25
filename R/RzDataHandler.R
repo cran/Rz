@@ -31,7 +31,10 @@ setRefClass("RzDataHandler",
     },
     
     removeCurrentData = function(){
-      data.collection$removeData(.self$getCurrentDataSetName())
+      data.set.name <- .self$getCurrentDataSetName()
+      data.collection$removeData(data.set.name)
+      rm(list=c(data.set.name, paste(data.set.name, ".ds", sep="")),
+         envir=.GlobalEnv)
       iter <- data.set.list.combo$getActiveIter()$iter
       data.set.list$remove(iter)
     },
@@ -50,7 +53,7 @@ setRefClass("RzDataHandler",
       path  <- gtkTreePathNewFromString(index)
       iter  <- data.set.list$getIter(path)$iter
       data.set.list$set(iter, 0, new.name)
-      .self$sync()      
+      .self$sync()
       return(list(result=TRUE, message=NULL))
     },
     

@@ -1,6 +1,7 @@
 variable.view <- 
 setRefClass("RzVariableView",
-  fields = c("data", "win", "notebook", "main", "liststore", "sw", "summaries", "treeview.selected", "model.selected",
+  fields = c("data", "win", "notebook", "main", "liststore", "sw", "summaries", "summaries.subset",
+             "treeview.selected", "model.selected",
              "rt.index", "rtg.select", "rt.vars", "rt.var.labs", "rt.val.labs", "rp.msr", "rt.missing",
              "rzPlot", "selectable", "nominalpix", "ordinalpix", "intervalpix", "ratiopix"),
   methods = list(
@@ -8,21 +9,23 @@ setRefClass("RzVariableView",
       initFields(...)
       selectable <<- FALSE
       liststore <<- gtkListStoreNew("character", "logical", "character", "character", "character", "GdkPixbuf", "character", "character")
-      nominalpix    <<- gdkPixbufNewFromFile(file.path(rzSettings$getRzPath(), "images/cat.png"     ))$retval
-      ordinalpix    <<- gdkPixbufNewFromFile(file.path(rzSettings$getRzPath(), "images/order.png"   ))$retval
-      intervalpix   <<- gdkPixbufNewFromFile(file.path(rzSettings$getRzPath(), "images/interval.png"))$retval
-      ratiopix      <<- gdkPixbufNewFromFile(file.path(rzSettings$getRzPath(), "images/ratio.png"   ))$retval
+      nominalpix    <<- gdkPixbufNewFromFile(file.path(rzSettings$getRzPath(), "images/oxygen/cat.png"     ))$retval
+      ordinalpix    <<- gdkPixbufNewFromFile(file.path(rzSettings$getRzPath(), "images/oxygen/order.png"   ))$retval
+      intervalpix   <<- gdkPixbufNewFromFile(file.path(rzSettings$getRzPath(), "images/oxygen/interval.png"))$retval
+      ratiopix      <<- gdkPixbufNewFromFile(file.path(rzSettings$getRzPath(), "images/oxygen/ratio.png"   ))$retval
       main <<- gtkTreeViewNewWithModel(liststore)
       
       
       sw   <<- gtkScrolledWindowNew()
-      sw["shadow-type"] <<- GtkShadowType["in"]
+      sw["shadow-type"] <<- GtkShadowType["none"]
       sw$add(main)
       sw$setPolicy(GtkPolicyType["automatic"], GtkPolicyType["automatic"])
       main["enable-grid-lines"] <<- GtkTreeViewGridLines["both"]
       main["rules-hint"] <<- TRUE
       main["has-tooltip"] <<- TRUE
-      main$modifyFont(pangoFontDescriptionFromString(rzSettings$getVariableViewFont()))
+      if(! grepl("darwin",R.Version()$os)) {
+        main$modifyFont(pangoFontDescriptionFromString(rzSettings$getVariableViewFont()))
+      }
       
       rt.index    <<- gtkCellRendererText()
       rtg.select  <<- gtkCellRendererToggleNew()
@@ -61,12 +64,21 @@ setRefClass("RzVariableView",
       treeview.selected["enable-grid-lines"] <<- GtkTreeViewGridLines["both"]
       treeview.selected["rules-hint"] <<- TRUE
       treeview.selected["has-tooltip"] <<- TRUE
-      treeview.selected$modifyFont(pangoFontDescriptionFromString(rzSettings$getVariableViewFont()))
-      
+      if(! grepl("darwin",R.Version()$os)) {
+        treeview.selected$modifyFont(pangoFontDescriptionFromString(rzSettings$getVariableViewFont()))
+      }
       scrolledWindow.selected <- gtkScrolledWindowNew()
-      scrolledWindow.selected["shadow-type"] <- GtkShadowType["in"]
+      scrolledWindow.selected["shadow-type"] <- GtkShadowType["none"]
       scrolledWindow.selected$setPolicy(GtkPolicyType["automatic"], GtkPolicyType["automatic"])
       scrolledWindow.selected$add(treeview.selected)
+      
+      # Data Management
+      rzVVSelectCases <- new("RzVVSelectCases", data=data)
+      rzVVDuplicateData <- new("RzVVDuplicateData", data=data)
+      notebook.management <- gtkNotebookNew()
+      notebook.management["tab-pos"] <- GtkPositionType["left"]
+      notebook.management$appendPage(rzVVSelectCases$getMain(), gtkLabelNew(gettext("Select Cases")))
+      notebook.management$appendPage(rzVVDuplicateData$getMain(), gtkLabelNew(gettext("Duplicate Dataset")))
       
       columns <- list(
         index   = gtkTreeViewColumnNewWithAttributes(""                     , rt.index   , "text"=column.definition[["index"]]   ),
@@ -112,20 +124,22 @@ setRefClass("RzVariableView",
       # notebook
       button.selectall <- gtkButtonNew()
       button.selectall["tooltip-text"] <- gettext("Select All Variables")
-      image <- gtkImageNewFromFile(file.path(rzSettings$getRzPath(), "images", "tick.png"))
+      image <- gtkImageNewFromFile(file.path(rzSettings$getRzPath(), "images/oxygen", "tick.png"))
       button.selectall$setImage(image)
       button.unselect <- gtkButtonNew()
       button.unselect["tooltip-text"] <- gettext("Unselect All Variables")
-      image <- gtkImageNewFromFile(file.path(rzSettings$getRzPath(), "images", "cross.png"))
+      image <- gtkImageNewFromFile(file.path(rzSettings$getRzPath(), "images/oxygen", "cross.png"))
       button.unselect$setImage(image)
       hbox.select <- gtkHBoxNew(spacing=2)
       hbox.select$packEnd(button.unselect , expand=FALSE)
       hbox.select$packEnd(button.selectall, expand=FALSE)
       notebook <<- gtkNotebookNew()
-      notebook$setActionWidget(hbox.select, GtkPackType["end"])
+      if(is.null(gtkCheckVersion(2, 20, 0))) {
+        notebook$setActionWidget(hbox.select, GtkPackType["end"])
+      }
       notebook$appendPage(sw, gtkLabelNew(gettext("All Variables")))
       notebook$appendPage(scrolledWindow.selected, gtkLabelNew(gettext("Selected Variables")))
-      
+      notebook$appendPage(notebook.management, gtkLabelNew(gettext("Management and Manipulation")))
       
       gSignalConnect(main, "row-activated", .self$onRowActivated)
       gSignalConnect(main, "query-tooltip", .self$onQueryTooltip)
@@ -151,6 +165,7 @@ setRefClass("RzVariableView",
       val.labs  <-  data$getValueLabels()
       miss.val  <-  data$getMissingValues()
       summaries <<- data$getSummaries()
+      summaries.subset <<- NULL
       for ( i in seq_len(data$ncol()) ) {
         iter <- liststore$append()$iter
         liststore$set(iter,
@@ -221,6 +236,33 @@ setRefClass("RzVariableView",
     },
     
     reload = function(){
+      if (data$getSubset.on()) {
+        if (main$getRealized()) {
+          dialog <- gtkMessageDialogNew(rzTools$getWindow(), "destroy-with-parent",
+                                        "error", "close", gettext("Cannot reload while Select Cases enabled."))
+          dialog$run()
+          dialog$hide()
+          return()
+          
+        } else {
+          stop("Cannot reload while \"Select Cases\" enabled.")          
+        }
+      }
+      
+      result <- data$reloadFromGlobalEnv()
+      
+      if (result != TRUE) {
+        if (main$getRealized()) {
+          dialog2 <- gtkMessageDialogNew(win, "destroy-with-parent",
+                                         GtkMessageType["error"], GtkButtonsType["close"],
+                                         gettextf("\"%s\" isn't a data.set or doesn't exist.", result))
+          dialog2$run()
+          dialog2$hide()
+        } else {
+          stop("\"", result, "\" isn't a data.set or doesn't exist.")          
+        }
+      }
+      
       iter <- liststore$getIterFirst()
       selects <- logical(0)
       while(iter$retval){
@@ -396,6 +438,8 @@ setRefClass("RzVariableView",
       data$linkDataFrame()
       .self$setCell(path, column.definition["vars"], txt)
       summaries[row] <<- data$getSummary(row)
+      if (data$getSubset.on() & nzchar(data$getSubset.condition()))
+        summaries.subset[row] <<- data$getSummary(row, subset=TRUE)
     },
     
     onCellEditedVarLabs = function(renderer, path, new.text){
@@ -420,13 +464,12 @@ setRefClass("RzVariableView",
       msr        <- measurement(var)
       row <- which(names(data.set)==var.name)
       
-      dialog <- gtkDialogNewWithButtons(title=gettext("Change Measurement"),
-                                        parent=win,
-                                        flags=c("modal", "destroy-with-parent"),
-                                        "gtk-cancel", GtkResponseType["cancel"],
-                                        show=FALSE)
+      dialog <- gtkWindowNew(show=FALSE)
+      dialog$setTransientFor(win)
+      dialog$setModal(TRUE)
+      dialog$setDecorated(FALSE)
       dialog["window-position"] <- GtkWindowPosition["mouse"]
-
+      
       radio1 <- gtkRadioButtonNewWithLabel(label="nominal")
       radio2 <- gtkRadioButtonNewWithLabelFromWidget(group=radio1, label="ordinal")
       radio3 <- gtkRadioButtonNewWithLabelFromWidget(radio1, label="interval")
@@ -444,18 +487,27 @@ setRefClass("RzVariableView",
       radio4$setImage(image)
       image$show()
       if(msr=="nominal"){
+        radio1$setCanDefault(TRUE)
+        dialog$setDefault(radio1)
         radio1$setActive(TRUE)
       } else if(msr=="ordinal"){
+        radio2$setCanDefault(TRUE)
+        dialog$setDefault(radio2)
         radio2$setActive(TRUE)
       } else if(msr=="interval"){
+        radio3$setCanDefault(TRUE)
+        dialog$setDefault(radio3)
         radio3$setActive(TRUE)
       } else if(msr=="ratio"){
+        radio4$setCanDefault(TRUE)
+        dialog$setDefault(radio4)
         radio4$setActive(TRUE)
       }
       radio1["draw-indicator"] <- FALSE
       radio2["draw-indicator"] <- FALSE
       radio3["draw-indicator"] <- FALSE
       radio4["draw-indicator"] <- FALSE
+            
       onToggled <- function(button){
         if(button$getActive()){
           dialog$hide()
@@ -467,23 +519,26 @@ setRefClass("RzVariableView",
           cell.row <- as.character(row - 1)
           .self$setCell(cell.row, column.definition["msr"], msr, filtered=FALSE)
           summaries[row] <<- data$getSummary(row)
+          if (data$getSubset.on() & nzchar(data$getSubset.condition()))
+            summaries.subset[row] <<- data$getSummary(row, subset=TRUE)
         }
       }
-      gSignalConnect(radio1, "toggled", onToggled)
-      gSignalConnect(radio2, "toggled", onToggled)
-      gSignalConnect(radio3, "toggled", onToggled)
-      gSignalConnect(radio4, "toggled", onToggled)
-      
-      dialog[["vbox"]]$setSpacing(2)
-      dialog[["vbox"]]$packStart(radio1, expand=FALSE)
-      dialog[["vbox"]]$packStart(radio2, expand=FALSE)
-      dialog[["vbox"]]$packStart(radio3, expand=FALSE)
-      dialog[["vbox"]]$packStart(radio4, expand=FALSE)
-      
-      dialog$show()
-      dialog$getActionArea()$getChildren()[[1]]$grabFocus()
-      dialog$run()
-      dialog$hide()
+      gSignalConnect(radio1, "clicked", onToggled)
+      gSignalConnect(radio2, "clicked", onToggled)
+      gSignalConnect(radio3, "clicked", onToggled)
+      gSignalConnect(radio4, "clicked", onToggled)
+            
+      vbox <- gtkVBoxNew(spacing=2)
+      vbox$packStart(radio1, expand=FALSE)
+      vbox$packStart(radio2, expand=FALSE)
+      vbox$packStart(radio3, expand=FALSE)
+      vbox$packStart(radio4, expand=FALSE)
+      frame <- gtkFrameNew()
+      frame$setShadowType(GtkShadowType["out"])
+      frame$add(vbox)
+      dialog$add(frame)
+      dialog$showAll()
+            
     },
     
     onCellEditedMissing = function(renderer, path, new.text){
@@ -509,6 +564,8 @@ setRefClass("RzVariableView",
       data$linkDataFrame()
       .self$setCell(path, column.definition["missing"], txt)
       summaries[row] <<- data$getSummary(row)
+      if (data$getSubset.on() & nzchar(data$getSubset.condition()))
+        summaries.subset[row] <<- data$getSummary(row, subset=TRUE)
     },
     
     onRecode            = function(action, win){
@@ -605,8 +662,10 @@ setRefClass("RzVariableView",
           .self$setCell(cell.row, column.definition["msr.image"], .self$msrPix(msr), filtered=FALSE)
           .self$setCell(cell.row, column.definition["val.labs"], val.labs, filtered=FALSE)
           .self$setCell(cell.row, column.definition["missing"] , miss.val, filtered=FALSE)
-          summary <- data$getSummary(row)
-          summaries[row] <<- summary
+
+          summaries[row] <<- data$getSummary(row)
+          if (data$getSubset.on() & nzchar(data$getSubset.condition()))
+            summaries.subset[row] <<- data$getSummary(row, subset=TRUE)
         } else {
           dialog$hide()
         }
@@ -675,7 +734,9 @@ setRefClass("RzVariableView",
       entry3$setWidthChars(10)
       entry.var.lab$setWidthChars(10)
       textview <- gtkTextViewNew()
-      textview$modifyFont(pangoFontDescriptionFromString(rzSettings$getMonospaceFont()))
+      if(! grepl("darwin",R.Version()$os)) {
+        textview$modifyFont(pangoFontDescriptionFromString(rzSettings$getMonospaceFont()))
+      }
       textview$setLeftMargin(5)
       textview$setRightMargin(5)
       
@@ -744,8 +805,8 @@ setRefClass("RzVariableView",
       var        <- data.set[[var.name]]
       missing.values(var) <- NULL
       labels     <- labels(var)
-      deletepix  <- gdkPixbufNewFromFile(file.path(rzSettings$getRzPath(), "images/delete.png"))$retval
-      addpix     <- gdkPixbufNewFromFile(file.path(rzSettings$getRzPath(), "images/add.png"   ))$retval
+      deletepix  <- gdkPixbufNewFromFile(file.path(rzSettings$getRzPath(), "images/oxygen/delete.png"))$retval
+      addpix     <- gdkPixbufNewFromFile(file.path(rzSettings$getRzPath(), "images/oxygen/add.png"   ))$retval
       liststore2 <- gtkListStoreNew("GdkPixbuf", "character", "character", "logical")
       if(!is.null(labels)){
         labels <- data.frame(values=labels@values, labels=labels@.Data, stringsAsFactors=FALSE)
@@ -875,6 +936,8 @@ setRefClass("RzVariableView",
             cell.row <- as.character(row - 1)
             .self$setCell(cell.row, column.definition["val.labs"], labels, filtered=FALSE)
             summaries[row] <<- data$getSummary(row)
+            if (data$getSubset.on() & nzchar(data$getSubset.condition()))
+              summaries.subset[row] <<- data$getSummary(row, subset=TRUE)
           }
         } else {
           dialog$hide()
@@ -888,7 +951,12 @@ setRefClass("RzVariableView",
       col.title <- column$getData("attr")["title"]
 
       if (col.title=="index") {
-        data.set <- data$getData.set()
+        data.set <- NULL
+        if (data$getSubset.on() & nzchar(data$getSubset.condition())){
+          data.set <- data$getData.set.subset()
+        } else {
+          data.set <- data$getData.set()
+        }
         if(rzSettings$getPlotViewEnabled() & rzSettings$getRunPlot()) {
           rzPlot$setX(row)
           rzPlot$onPlot()
@@ -908,19 +976,30 @@ setRefClass("RzVariableView",
       if(rzSettings$getPopupOff()) return(FALSE)
       path <- tw$getPathAtPos(x, y - 20)$path
       if(is.null(path)) return(FALSE)
-      row   <- as.numeric(getCell(path$toString(), column.definition["index"]))
-      char  <- summaries[ row ]
+      row  <- as.numeric(getCell(path$toString(), column.definition["index"]))
+      char <- NULL
+      if (data$getSubset.on() & nzchar(data$getSubset.condition())) {
+        char  <- summaries.subset[ row ]
+      } else {
+        char  <- summaries[ row ]
+      }
       tooltip$setMarkup(paste("<span font_family=\"", rzSettings$getMonospaceFontFamily(), "\">", char, "</span>", sep="", collapse=""))
       tw$setTooltipRow(tooltip, path)
       return(TRUE)
     },
     
     changeFont = function(){
-      main$modifyFont(pangoFontDescriptionFromString(rzSettings$getVariableViewFont()))
-      treeview.selected$modifyFont(pangoFontDescriptionFromString(rzSettings$getVariableViewFont()))
+      if(! grepl("darwin",R.Version()$os)) {
+        main$modifyFont(pangoFontDescriptionFromString(rzSettings$getVariableViewFont()))
+        treeview.selected$modifyFont(pangoFontDescriptionFromString(rzSettings$getVariableViewFont()))
+      }
     },
     
-    getView = function() return(notebook)
+    getView = function() return(notebook),
+    
+    setSubsetSummaries = function(){
+      summaries.subset <<- data$getSummaries(subset=TRUE)
+    }
   )
 )
 variable.view$accessors("liststore", "data", "model.selected")
