@@ -5,7 +5,3 @@
 (gtk_accel_path "<Rz-Menu>/File/Import" "<Control>i")
 (gtk_accel_path "<Rz-Menu>/File/Close" "<Control>w")
 (gtk_accel_path "<Rz-Menu>/Edit/Reload" "<Control><Shift>r")
-(gtk_accel_path "<Rz-Menu>/View/Data View" "<Control>1")
-(gtk_accel_path "<Rz-Menu>/View/Analysis View" "<Control>2")
-(gtk_accel_path "<Rz-Menu>/View/Analysis View/Execute" "<Control>r")
-(gtk_accel_path "<Rz-Menu>/View/Plot View" "<Control>3")

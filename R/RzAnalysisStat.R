@@ -1,139 +1,44 @@
 analysisStat <-
 setRefClass("RzAnalysisStat",
-  fields = c("main", "textview", "button.clear", "signal.clear",
-             "scrolledwindow.vbox", "hbox.methods"),
+  fields = c("main", "liststore", "data", "vvcore"),
   methods = list(
     initialize            = function(...) {
       initFields(...)
-      signal.clear   <<- NULL
       
       methods <- c(gettext("Basic Statistics"),
                    gettext("Cross Tabulation"),
                    gettext("Correlation"))
+            
+      main <<- gtkNotebookNew()
+      main$appendPage(.self$constructBasicStatistics(), gtkLabelNew(gettext("Basic Statistics")))
+      main$appendPage(.self$constructCrossTable(), gtkLabelNew(gettext("Cross Tabulation")))
+      main$appendPage(.self$constructCorrelation(), gtkLabelNew(gettext("Correlation")))
       
-      combo.methods <- gtkComboBoxNewText()
-      for(i in methods) combo.methods$appendText(i)
-      hbox.methods  <<- gtkHBoxNew(spacing=5)
-      hbox.methods$packStart(combo.methods)
-      
-      textview <<- gtkTextViewNew()
-      textview$modifyFont(pangoFontDescriptionFromString(rzSettings$getMonospaceFont()))
-      textview$setLeftMargin(5)
-      textview$setRightMargin(5)
-      scrolledwindow.textview <- gtkScrolledWindowNew()
-      scrolledwindow.textview["shadow-type"] <- GtkShadowType["in"]
-      scrolledwindow.textview$setPolicy(GtkPolicyType["automatic"], GtkPolicyType["automatic"])
-      scrolledwindow.textview$add(textview)
-      
-      button.execute <-  gtkButtonNewFromStock(GTK_STOCK_EXECUTE)
-      button.clear   <<- gtkButtonNewFromStock(GTK_STOCK_CLEAR)
+    },
+    
+    execute = function(script){
+      cat(gettext("\n=============== Output by Rz ===============\n"), fill=TRUE)
+      e <- try(eval(parse(text=script), envir=.GlobalEnv), silent=TRUE)
+      info.bar <- rzTools$getInfoBar()
+      if (any(class(e)=="try-error")) {
+        info.bar$setMessageType(GtkMessageType["error"])
+        info.bar$setText(e[1])
+        info.bar$show()
+      } else {
+        if (!is.null(e)) {
+          print(e)
+        }
+        info.bar$hide()
+      }
+    },
+    
+    constructBasicStatistics = function(){      
+      button.execute <- gtkButtonNewFromStock(GTK_STOCK_EXECUTE)
       button.box     <- gtkHButtonBoxNew()
-      button.box$packStart(button.clear)
       button.box$packStart(button.execute)
       
-      scrolledwindow.vbox <<- gtkScrolledWindowNew()
-      scrolledwindow.vbox$setPolicy(GtkPolicyType["automatic"], GtkPolicyType["automatic"])
-      
-      hpaned <- gtkHPanedNew()
-      hpaned$pack1(scrolledwindow.vbox    , resize=FALSE)
-      hpaned$pack2(scrolledwindow.textview, resize=TRUE)
-      hpaned$setPosition(280)
-      
-      main <<- gtkVBoxNew(spacing=0)
-      main$packStart(hbox.methods, expand=FALSE, padding=2)
-      main$packStart(hpaned      , expand=TRUE , padding=2)
-      main$packStart(button.box  , expand=FALSE, padding=2)
-            
-      gSignalConnect(combo.methods, "changed", .self$toggleMethods)
-      
-      gSignalConnect(button.execute, "clicked", function(button){
-        variable.view <- rzTools$getVariableView()
-        if(is.null(variable.view)) return()
-        
-        buffer <- textview$getBuffer()
-        iter   <- buffer$getBounds()
-        script <- localize(buffer$getText(iter$start, iter$end))
-        script <- sub("^([[:space:]]+)([^[:space:]]+)([[:space:]]+)$", "\\2", script)
-        if(!nzchar(script)) return()
-        
-        cat(gettext("\n=============== Output by Rz ===============\n"), fill=TRUE)
-        e <- try(eval(parse(text=script), envir=.GlobalEnv), silent=TRUE)
-        info.bar <- rzTools$getInfoBar()
-        if (any(class(e)=="try-error")) {
-          info.bar$setMessageType(GtkMessageType["error"])
-          info.bar$setText(e[1])
-          info.bar$show()
-        } else {
-          if (!is.null(e)) {
-            print(e)
-          }
-          info.bar$hide()
-        }
-      })
-      
-    },
-    
-    toggled = function(){
-
-    },
-    
-    toggleMethods = function(combo){
-      text <- localize(combo$getActiveText())
-      vbox <- NULL
-      child <- scrolledwindow.vbox$getChild()
-      if( !is.null(child) ) {
-        scrolledwindow.vbox$remove(child)
-        gSignalHandlerDisconnect(button.clear  , signal.clear)
-      }
-      
-      if (text == gettext("Basic Statistics")){
-        vbox <- constructBasicStatistics()
-      } else if (text == gettext("Cross Tabulation")){
-        vbox <- constructCrossTable()
-      } else if (text == gettext("Correlation")){
-        vbox <- constructCorrelation()
-      }
-      
-      scrolledwindow.vbox$addWithViewport(vbox)
-      scrolledwindow.vbox$getChild()$setShadowType(GtkShadowType["none"])
-      
-    },
-    
-    constructBasicStatistics = function(){
-      setScript <- function(object=NULL, widgets){
-        script <- NULL
-        variable.view  <- rzTools$getVariableView()
-        if(is.null(variable.view)) return()
-        data.set.name  <- variable.view$getData()$getData.set.name()
-        variable.names <- variable.view$getData()$getVariableNames()
-        variable.names <- variable.names[variable.view$getSelectedRows()]
-        variable.names <- paste("\"", variable.names, "\"", sep="", collapse=", ")
-        
-        group  <- localize(widgets[[1]]$getActiveText())
-        check1 <- widgets[[2]]$getActive()
-        check2 <- widgets[[3]]$getActive()
-        check3 <- widgets[[4]]$getActive()
-        check4 <- widgets[[5]]$getActive()
-        trim   <- localize(widgets[[6]]$getText())
-        type   <- localize(widgets[[7]]$getActiveText())
-
-        if(!nzchar(group)){
-          script <- sprintf("psych::describe(%s[c(%s)],\n    na.rm = %s, interp = %s, skew = %s, ranges = %s,\n    trim=%s, type=%s)",
-                            data.set.name, variable.names,
-                            check1, check2, check3, check4,
-                            trim, type)
-        } else {
-          script <- sprintf("psych::describe.by(%s[c(%s)],\n    group=%s$%s,\n    na.rm = %s, interp = %s, skew = %s, ranges = %s,\n    trim=%s, type=%s)",
-                            data.set.name, variable.names,
-                            data.set.name, group,
-                            check1, check2, check3, check4,
-                            trim, type)
-        }
-        
-        textview$getBuffer()$setText(script)
-      }
-      
       group.combo <- new("RzCompletionCombo")
+      group.combo$setModel(liststore)
       group.label <- gtkLabelNew("group")
       check1      <- gtkCheckButtonNewWithLabel("na.rm")
       check2      <- gtkCheckButtonNewWithLabel("interp")
@@ -154,12 +59,6 @@ setRefClass("RzAnalysisStat",
       
       widgets <- list(group.combo, check1, check2, check3, check4, trim.entry, type.combo)
       
-      variable.view <- rzTools$getVariableView()
-      if(!is.null(variable.view)){
-        model  <- variable.view$getListstore()
-        group.combo$setModel(model)
-      }
-      
       basic.table <- gtkTableNew(homogeneous=FALSE)
       basic.table$setSizeRequest(250, -1)
       basic.table$attach(group.label           , 0, 1, 0, 1, xpadding=2, xoptions="shrink")
@@ -177,62 +76,60 @@ setRefClass("RzAnalysisStat",
       hbox <- gtkHBoxNew()
       hbox$packStart(basic.table, padding=2, expand=FALSE)
       vbox$packStart(hbox       , padding=2, expand=FALSE)
-            
-      gSignalConnect(group.combo$getCombo(), "changed", setScript, widgets)
-      gSignalConnect(check1                , "toggled", setScript, widgets)
-      gSignalConnect(check2                , "toggled", setScript, widgets)
-      gSignalConnect(check3                , "toggled", setScript, widgets)
-      gSignalConnect(check4                , "toggled", setScript, widgets)
-      gSignalConnect(trim.entry            , "changed", setScript, widgets)
-      gSignalConnect(type.combo            , "changed", setScript, widgets)
+      vbox$packStart(button.box , padding=2, expand=FALSE)
+
+      sw <- gtkScrolledWindowNew()
+      sw$addWithViewport(vbox)
+      sw$setShadowType(GtkShadowType["none"])
+      sw$getChild()$setShadowType(GtkShadowType["none"])
+      sw$getChild()$setBorderWidth(5)
+      sw$setPolicy(GtkPolicyType["automatic"], GtkPolicyType["automatic"])
       
-      signal.clear <<- gSignalConnect(button.clear, "clicked", function(button){
-        group.combo$clear()
-        check1$setActive(TRUE)
-        check2$setActive(FALSE)
-        check3$setActive(TRUE)
-        check4$setActive(TRUE)
-        trim.entry$setText(".1")
-        type.combo$setActive(2)
+      gSignalConnect(button.execute, "clicked", function(button){
+        data.set.name  <- data$getData.set.name()
+        variable.names <- data$getVariableNames()
+        variable.names <- variable.names[vvcore$getSelectedRows()]
+        variable.names <- paste("\"", variable.names, "\"", sep="", collapse=", ")
+        
+        group  <- localize(group.combo$getActiveText())
+        check1 <- check1$getActive()
+        check2 <- check2$getActive()
+        check3 <- check3$getActive()
+        check4 <- check4$getActive()
+        trim   <- localize(trim.entry$getText())
+        type   <- localize(type.combo$getActiveText())
+        
+        script <- NULL
+        if(!nzchar(group)){
+          script <- sprintf("psych::describe(%s[c(%s)],\n    na.rm = %s, interp = %s, skew = %s, ranges = %s,\n    trim=%s, type=%s)",
+                            data.set.name, variable.names,
+                            check1, check2, check3, check4,
+                            trim, type)
+        } else {
+          script <- sprintf("psych::describe.by(%s[c(%s)],\n    group=%s$%s,\n    na.rm = %s, interp = %s, skew = %s, ranges = %s,\n    trim=%s, type=%s)",
+                            data.set.name, variable.names,
+                            data.set.name, group,
+                            check1, check2, check3, check4,
+                            trim, type)
+        }
+        
+        .self$execute(script)
       })
       
-      setScript(widgets=widgets)
-      
-      return(vbox)
+      return(sw)
     },
     
     constructCrossTable = function(){
-      setScript <- function(combo=NULL, list.combo){
-        script <- NULL
-        data.set.name <- rzTools$getVariableView()$getData()$getData.set.name()
-        x <- localize(list.combo[[1]]$getActiveText())
-        y <- localize(list.combo[[2]]$getActiveText())
-        z <- localize(list.combo[[3]]$getActiveText())
-        if(!nzchar(z)){
-          script <- sprintf("with(%s,\n    summary(crossTable(%s, %s))\n)",
-                            data.set.name, x, y)        
-        } else {
-          script <- sprintf("with(%s,\n    summary(crossTable(%s, %s, %s))\n)",
-                            data.set.name, z, x, y)
-        }
-        
-        textview$getBuffer()$setText(script)
-      }
       
       cross.combo1 <- new("RzCompletionCombo")
       cross.combo2 <- new("RzCompletionCombo")
       cross.combo3 <- new("RzCompletionCombo")
+      cross.combo1$setModel(liststore)
+      cross.combo2$setModel(liststore)
+      cross.combo3$setModel(liststore)
       cross.label1 <-  gtkLabelNew(gettext("Row"))
       cross.label2 <-  gtkLabelNew(gettext("Col"))
       cross.label3 <-  gtkLabelNew(gettext("Stratum"))
-      
-      variable.view <- rzTools$getVariableView()
-      if(!is.null(variable.view)){
-        model  <- variable.view$getListstore()
-        cross.combo1$setModel(model)
-        cross.combo2$setModel(model)
-        cross.combo3$setModel(model)        
-      }
       
       cross.table <- gtkTableNew(homogeneous=FALSE)
       cross.table$setSizeRequest(250, -1)
@@ -243,65 +140,45 @@ setRefClass("RzAnalysisStat",
       cross.table$attach(cross.label3           , 0, 1, 2, 3, xpadding=2, xoptions=2)
       cross.table$attach(cross.combo3$getCombo(), 1, 2, 2, 3)
       
+      button.execute <- gtkButtonNewFromStock(GTK_STOCK_EXECUTE)
+      button.box     <- gtkHButtonBoxNew()
+      button.box$packStart(button.execute)
+
       vbox <- gtkVBoxNew()
       hbox <- gtkHBoxNew()
       hbox$packStart(cross.table, padding=2, expand=FALSE)
       vbox$packStart(hbox       , padding=2, expand=FALSE)
+      vbox$packStart(button.box , padding=2, expand=FALSE)
       
-      gSignalConnect(cross.combo1$getCombo(), "changed", setScript, list(cross.combo1, cross.combo2, cross.combo3))
-      gSignalConnect(cross.combo2$getCombo(), "changed", setScript, list(cross.combo1, cross.combo2, cross.combo3))
-      gSignalConnect(cross.combo3$getCombo(), "changed", setScript, list(cross.combo1, cross.combo2, cross.combo3))
+      sw <- gtkScrolledWindowNew()
+      sw$addWithViewport(vbox)
+      sw$setShadowType(GtkShadowType["none"])
+      sw$getChild()$setShadowType(GtkShadowType["none"])
+      sw$getChild()$setBorderWidth(5)
+      sw$setPolicy(GtkPolicyType["automatic"], GtkPolicyType["automatic"])
       
-      signal.clear <<- gSignalConnect(button.clear, "clicked", function(button){
-        cross.combo1$clear()
-        cross.combo2$clear()
-        cross.combo3$clear()
+      gSignalConnect(button.execute, "clicked", function(button){
+        data.set.name  <- data$getData.set.name()
+        
+        script <- NULL
+        x <- localize(cross.combo1$getActiveText())
+        y <- localize(cross.combo2$getActiveText())
+        z <- localize(cross.combo3$getActiveText())
+        if(!nzchar(z)){
+          script <- sprintf("with(%s,\n    summary(crossTable(%s, %s))\n)",
+                            data.set.name, x, y)        
+        } else {
+          script <- sprintf("with(%s,\n    summary(crossTable(%s, %s, %s))\n)",
+                            data.set.name, z, x, y)
+        }
+        
+        .self$execute(script)
       })
       
-      setScript(list.combo=list(cross.combo1, cross.combo2, cross.combo3))
-      
-      return(vbox)
+      return(sw)
     },
     
-    constructCorrelation = function(){
-      setScript <- function(combo=NULL, widgets){
-        script <- NULL
-        variable.view  <- rzTools$getVariableView()
-        if(is.null(variable.view)) return()
-        data.set.name  <- variable.view$getData()$getData.set.name()
-        variable.names <- variable.view$getData()$getVariableNames()
-        variable.names <- variable.names[variable.view$getSelectedRows()]
-        variable.names <- paste("\"", variable.names, "\"", sep="", collapse=", ")
-        
-        use     <- sprintf("use = \"%s\""    ,localize(widgets[[1]]$getActiveText()))
-        method  <- sprintf("method = \"%s\"" ,localize(widgets[[2]]$getActiveText()))
-        adjust  <- sprintf("adjust = \"%s\"" ,localize(widgets[[3]]$getActiveText()))
-        check1  <- widgets[[4]]$getActive()
-        check2  <- sprintf("smooth = %s"     , widgets[[5]]$getActive())
-        check3  <- sprintf("scale = %s"      , widgets[[6]]$getActive())
-        check4  <- sprintf("density = %s"    , widgets[[7]]$getActive())
-        check5  <- sprintf("ellipses = %s"   , widgets[[8]]$getActive())
-        check6  <- sprintf("lm = %s"         , widgets[[9]]$getActive())
-        check7  <- sprintf("cor = %s"        , widgets[[10]]$getActive())
-        check8  <- sprintf("jiggle = %s"     , widgets[[11]]$getActive())
-        factor  <- sprintf("factor = %s"     , localize(widgets[[12]]$getText()))
-        check9  <- sprintf("show.points = %s", widgets[[13]]$getActive())
-        check10 <- sprintf("rug = %s"        , widgets[[14]]$getActive())
-        
-        script1 <- sprintf("corr.test(%s[c(%s)],\n    %s, %s, %s)",
-                           data.set.name, variable.names, use, method, adjust)
-        script2 <- sprintf("pairs.panels(%s[c(%s)],\n    %s, %s, %s,\n    %s, %s, %s,\n    %s, %s, %s,\n    %s, %s)",
-                           data.set.name, variable.names,
-                           check2, check3, check4, check5, method, check6,
-                           check7, check8, factor, check9, check10)
-        if(check1){
-          script <- sprintf("%s\n%s", script2, script1)
-        } else {
-          script <- script1
-        }
-        textview$getBuffer()$setText(script)
-      }
-      
+    constructCorrelation = function(){      
       text      <- c("pairwise", "complete")
       use.combo <- gtkComboBoxNewText()
       for(i in text) use.combo$appendText(i)
@@ -385,26 +262,26 @@ setRefClass("RzAnalysisStat",
       cor.table$attach(adjust.label, 0, 1, 2, 3, xpadding=2, xoptions=2)
       cor.table$attach(adjust.combo, 1, 2, 2, 3)
       
+      button.execute <- gtkButtonNewFromStock(GTK_STOCK_EXECUTE)
+      button.box     <- gtkHButtonBoxNew()
+      button.box$packStart(button.execute)
+      
       vbox <- gtkVBoxNew()
       hbox <- gtkHBoxNew()
       hbox$packStart(cor.table, padding=2, expand=FALSE)
       vbox$packStart(hbox     , padding=2, expand=FALSE)
       vbox$packStart(splom    , padding=2, expand=FALSE)
+      vbox$packStart(button.box, padding=2, expand=FALSE)
       
-      gSignalConnect(use.combo   , "changed", setScript, widgets)
-      gSignalConnect(method.combo, "changed", setScript, widgets)
-      gSignalConnect(adjust.combo, "changed", setScript, widgets)
-      gSignalConnect(factor.entry, "changed", setScript, widgets)
-      gSignalConnect(check1      , "toggled", setScript, widgets)
-      gSignalConnect(check2      , "toggled", setScript, widgets)
-      gSignalConnect(check3      , "toggled", setScript, widgets)
-      gSignalConnect(check4      , "toggled", setScript, widgets)
-      gSignalConnect(check5      , "toggled", setScript, widgets)
-      gSignalConnect(check6      , "toggled", setScript, widgets)
-      gSignalConnect(check7      , "toggled", setScript, widgets)
-      gSignalConnect(check8      , "toggled", setScript, widgets)
-      gSignalConnect(check9      , "toggled", setScript, widgets)
-      gSignalConnect(check10     , "toggled", setScript, widgets)
+      viewport <- gtkViewportNew()
+      viewport$setShadowType(GtkShadowType["none"])
+      viewport$setBorderWidth(5)
+      viewport$add(vbox)
+      sw <- gtkScrolledWindowNew()
+      sw$add(viewport)
+      sw$setShadowType(GtkShadowType["none"])
+      sw$setPolicy(GtkPolicyType["automatic"], GtkPolicyType["automatic"])      
+      
       gSignalConnect(check1      , "toggled", function(button){
         if(button$getActive())
           vbox.splom$setSensitive(TRUE)
@@ -412,43 +289,47 @@ setRefClass("RzAnalysisStat",
           vbox.splom$setSensitive(FALSE)
       })
       
-      signal.clear <<- gSignalConnect(button.clear, "clicked", function(button){
-        use.combo$setActive(0)
-        method.combo$setActive(0)
-        adjust.combo$setActive(0)
-        check1$setActive(FALSE)
-        check2$setActive(TRUE)
-        check3$setActive(FALSE)
-        check4$setActive(TRUE)
-        check5$setActive(TRUE)
-        check6$setActive(FALSE)
-        check7$setActive(TRUE)
-        check8$setActive(FALSE)
-        factor.entry$setText("2")
-        check9$setActive(TRUE)
-        check10$setActive(TRUE)
-        vbox.splom$setSensitive(FALSE)
+      gSignalConnect(button.execute, "clicked", function(button){
+        data.set.name  <- data$getData.set.name()
+        variable.names <- data$getVariableNames()
+        variable.names <- variable.names[vvcore$getSelectedRows()]
+        variable.names <- paste("\"", variable.names, "\"", sep="", collapse=", ")
+        
+        script <- NULL
+        
+        use     <- sprintf("use = \"%s\""    ,localize(widgets[[1]]$getActiveText()))
+        method  <- sprintf("method = \"%s\"" ,localize(widgets[[2]]$getActiveText()))
+        adjust  <- sprintf("adjust = \"%s\"" ,localize(widgets[[3]]$getActiveText()))
+        check1  <- widgets[[4]]$getActive()
+        check2  <- sprintf("smooth = %s"     , widgets[[5]]$getActive())
+        check3  <- sprintf("scale = %s"      , widgets[[6]]$getActive())
+        check4  <- sprintf("density = %s"    , widgets[[7]]$getActive())
+        check5  <- sprintf("ellipses = %s"   , widgets[[8]]$getActive())
+        check6  <- sprintf("lm = %s"         , widgets[[9]]$getActive())
+        check7  <- sprintf("cor = %s"        , widgets[[10]]$getActive())
+        check8  <- sprintf("jiggle = %s"     , widgets[[11]]$getActive())
+        factor  <- sprintf("factor = %s"     , localize(widgets[[12]]$getText()))
+        check9  <- sprintf("show.points = %s", widgets[[13]]$getActive())
+        check10 <- sprintf("rug = %s"        , widgets[[14]]$getActive())
+        
+        script1 <- sprintf("corr.test(%s[c(%s)],\n    %s, %s, %s)",
+                           data.set.name, variable.names, use, method, adjust)
+        script2 <- sprintf("pairs.panels(%s[c(%s)],\n    %s, %s, %s,\n    %s, %s, %s,\n    %s, %s, %s,\n    %s, %s)",
+                           data.set.name, variable.names,
+                           check2, check3, check4, check5, method, check6,
+                           check7, check8, factor, check9, check10)
+        if(check1){
+          script <- sprintf("%s\n%s", script2, script1)
+        } else {
+          script <- script1
+        }
+        
+        .self$execute(script)
       })
       
-      setScript(widgets=widgets)
       
-      return(vbox)
-    },
-    
-    rebuild = function(){
-      hbox.methods$getChildren()[[1]]$destroy()
-      
-      methods <- c(gettext("Basic Statistics"),
-                   gettext("Cross Tabulation"),
-                   gettext("Correlation"))
-      
-      combo.methods <- gtkComboBoxNewText()
-      for(i in methods) combo.methods$appendText(i)
-      hbox.methods$packStart(combo.methods)
-      gSignalConnect(combo.methods, "changed", .self$toggleMethods)
-      
+      return(sw)
     }
-
   )
 )
 analysisStat$accessors("main")

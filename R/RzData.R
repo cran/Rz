@@ -1,13 +1,14 @@
 rzdata <-
 setRefClass("RzData",
-  fields = c("file.path", "data.set.name", "original.name",
+  fields = c("version", "file.path", "data.set.name", "original.name",
              "data.set", "original.data.set", "data.frame",
              "data.set.subset", "data.frame.subset",
              "log", "subset.condition", "subset.on",
-             "system", "package.version", "encoding", "time"),
+             "system", "package.version", "encoding", "time", "autosaved"),
   methods = list(
     initialize        = function(...) {
       initFields(...)
+      version <<- numeric_version("1")
 #      data.set.name    <<- NULL
       original.data.set <<- data.set
       data.frame        <<- suppressWarnings(as.data.frame(data.set))
@@ -22,6 +23,7 @@ setRefClass("RzData",
       subset.on         <<- FALSE
       data.set.subset   <<- NULL
       data.frame.subset <<- NULL
+      autosaved         <<- FALSE
     },
 
     save = function(file){
@@ -41,12 +43,14 @@ setRefClass("RzData",
     },
 
     revert = function(){
+      autosaved  <<- FALSE
       data.set   <<- original.data.set
       data.frame <<- suppressWarnings(as.data.frame(data.set))
       .self$linkDataFrame()
     },
 
     reloadFromGlobalEnv = function(){
+      autosaved  <<- FALSE
       data.set.tmp <- try(get(paste(data.set.name, ".ds", sep=""), envir=.GlobalEnv), silent=TRUE)
       if(is.data.set(data.set.tmp)){
         data.set   <<- data.set.tmp
@@ -58,7 +62,20 @@ setRefClass("RzData",
       }
     },
     
+    existVar = function(varname){
+      var <- data.set[[varname]]
+      return(!is.null(var))
+    },
+    
+    addItem = function(item, name){
+      autosaved  <<- FALSE
+      data.set[[name]]  <<- item
+      data.frame        <<- suppressWarnings(as.data.frame(data.set))      
+      .self$linkDataFrame()
+    },
+    
     deleteVars = function(inds){
+      autosaved  <<- FALSE
       inds <- sort(inds)
       inds <- rev(inds)
       for(i in inds){
@@ -69,6 +86,7 @@ setRefClass("RzData",
     },
     
     duplicate = function(inds){
+      autosaved  <<- FALSE
       dup <- data.set[inds]
       orig.names <- colnames(data.set)
       dup.names  <- colnames(dup)
@@ -110,6 +128,7 @@ setRefClass("RzData",
         rzTools$sync(paste(data.set.name, ".ds", sep=""), data.set)
         rzTools$sync(data.set.name                      , data.frame)
       }
+      if (rzSettings$getAutosave()) saveSession()
       return(TRUE)
     },
 
@@ -188,5 +207,5 @@ setRefClass("RzData",
     }
   )
 )
-rzdata$accessors(c("data.set.name", "original.name", "data.set", "data.frame", "file.path",
-                   "subset.condition", "subset.on", "data.set.subset", "data.frame.subset"))
+rzdata$accessors(c("version", "data.set.name", "original.name", "data.set", "data.frame", "file.path",
+                   "subset.condition", "subset.on", "data.set.subset", "data.frame.subset", "autosaved"))

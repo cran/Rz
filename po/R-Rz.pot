@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: R 2.15.1\n"
-"Report-Msgid-Bugs-To: bugs@r-project.org\n"
-"POT-Creation-Date: 2012-12-14 15:01\n"
+"Project-Id-Version: Rz 0.9-0\n"
+"Report-Msgid-Bugs-To: rinm884@gmail.com\n"
+"POT-Creation-Date: 2013-05-30 16:53\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -10,144 +10,6 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-
-msgid "File Path:"
-msgstr ""
-
-msgid "This file already exists. Overwrite it?"
-msgstr ""
-
-msgid "Cannot handle character variables longer than 255"
-msgstr ""
-
-msgid "Select colour"
-msgstr ""
-
-msgid "Family:"
-msgstr ""
-
-msgid "Preview:"
-msgstr ""
-
-msgid "Select Font Family"
-msgstr ""
-
-msgid "Inherit from the current theme"
-msgstr ""
-
-msgid "Inherit from <span font_style='italic' font_weight='bold' font_size='large'>%s</span>"
-msgstr ""
-
-msgid "Top"
-msgstr ""
-
-msgid "Right"
-msgstr ""
-
-msgid "Bottom"
-msgstr ""
-
-msgid "Left"
-msgstr ""
-
-msgid "Unit"
-msgstr ""
-
-msgid "_File"
-msgstr ""
-
-msgid "_Open"
-msgstr ""
-
-msgid "Open"
-msgstr ""
-
-msgid "Save _As"
-msgstr ""
-
-msgid "Save As"
-msgstr ""
-
-msgid "Import from _Grobal Environment"
-msgstr ""
-
-msgid "Import from Grobal Environment"
-msgstr ""
-
-msgid "_Close"
-msgstr ""
-
-msgid "Close"
-msgstr ""
-
-msgid "_Edit"
-msgstr ""
-
-msgid "_Change the Name of Current Dataset"
-msgstr ""
-
-msgid "Change the Name of Current Dataset"
-msgstr ""
-
-msgid "_Remove Current Dataset"
-msgstr ""
-
-msgid "Remove Current Dataset"
-msgstr ""
-
-msgid "Revert to Original DataSet"
-msgstr ""
-
-msgid "Reload from Grobal Environment"
-msgstr ""
-
-msgid "Value Labels"
-msgstr ""
-
-msgid "Missing Values"
-msgstr ""
-
-msgid "Recode"
-msgstr ""
-
-msgid "Delete Selected Variables"
-msgstr ""
-
-msgid "Duplicate Selected Variables"
-msgstr ""
-
-msgid "Edit Value Labels"
-msgstr ""
-
-msgid "_Preferences"
-msgstr ""
-
-msgid "Preferences"
-msgstr ""
-
-msgid "_View"
-msgstr ""
-
-msgid "Data"
-msgstr ""
-
-msgid "Plot"
-msgstr ""
-
-msgid "Analysis"
-msgstr ""
-
-msgid "_Help"
-msgstr ""
-
-msgid "Tutorial on Web"
-msgstr ""
-
-msgid "Load Sample Dataset"
-msgstr ""
-
-msgid "=============== Output from Quick Editor ==============="
-msgstr ""
 
 msgid "Basic Statistics"
 msgstr ""
@@ -179,36 +41,6 @@ msgstr ""
 msgid "adjust"
 msgstr ""
 
-msgid "Change Measurement"
-msgstr ""
-
-msgid "Edit Variable Labels"
-msgstr ""
-
-msgid "Apply Missing Values"
-msgstr ""
-
-msgid "Reverse"
-msgstr ""
-
-msgid "Templates"
-msgstr ""
-
-msgid "Detach"
-msgstr ""
-
-msgid "Descriptive statistics"
-msgstr ""
-
-msgid "Editor"
-msgstr ""
-
-msgid "Variable Editor"
-msgstr ""
-
-msgid "Attach"
-msgstr ""
-
 msgid "Condition of selecting cases is invalid."
 msgstr ""
 
@@ -230,7 +62,7 @@ msgstr ""
 msgid "Stata Do File and CSV (*.*)"
 msgstr ""
 
-msgid "Stata File (*.dta)"
+msgid "Stata Data File (*.dta)"
 msgstr ""
 
 msgid "Comma-Separated Text (*.csv)"
@@ -254,22 +86,97 @@ msgstr ""
 msgid "SPSS Portable File (*.por)"
 msgstr ""
 
-msgid "Comma-Separated Text (*.*)"
-msgstr ""
-
-msgid "Tab-Separated Text (*.*)"
+msgid "Open"
 msgstr ""
 
 msgid "Changing encoding may takes several or more minutes. Please wait..."
 msgstr ""
 
+msgid "Import from Grobal Environment"
+msgstr ""
+
 msgid "%s [from Global Environment]"
 msgstr ""
 
-msgid "http://m884.jp/RzTutorial.html"
+msgid "Character code"
 msgstr ""
 
-msgid "Are you sure you want to do that?"
+msgid "Header"
+msgstr ""
+
+msgid "Separator"
+msgstr ""
+
+msgid "Comma"
+msgstr ""
+
+msgid "Whitespace"
+msgstr ""
+
+msgid "Tab"
+msgstr ""
+
+msgid "Semicolon"
+msgstr ""
+
+msgid "Other:"
+msgstr ""
+
+msgid "Missing"
+msgstr ""
+
+msgid "Blank"
+msgstr ""
+
+msgid "Period"
+msgstr ""
+
+msgid "\"NA\""
+msgstr ""
+
+msgid "Decimal"
+msgstr ""
+
+msgid "Quote"
+msgstr ""
+
+msgid "Double quote (\")"
+msgstr ""
+
+msgid "Single quote (')"
+msgstr ""
+
+msgid "None"
+msgstr ""
+
+msgid "Input File (first 20 Lines)"
+msgstr ""
+
+msgid "Preview (first 20 rows)"
+msgstr ""
+
+msgid "Select text file"
+msgstr ""
+
+msgid "Remove Dataset"
+msgstr ""
+
+msgid "Change the Dataset Name"
+msgstr ""
+
+msgid "Reload from Grobal Environment"
+msgstr ""
+
+msgid "Manage Data"
+msgstr ""
+
+msgid "View Data"
+msgstr ""
+
+msgid "Data"
+msgstr ""
+
+msgid "http://m884.jp/RzTutorial.html"
 msgstr ""
 
 msgid "NES1948 [Sample Dataset in memisc]"
@@ -281,10 +188,19 @@ msgstr ""
 msgid "New Name"
 msgstr ""
 
+msgid "Change the Name of Current Dataset"
+msgstr ""
+
+msgid "Are you sure you want to do that?"
+msgstr ""
+
 msgid "yes"
 msgstr ""
 
 msgid "no"
+msgstr ""
+
+msgid "\"%s\" already exists. Are you sure you want to overwrite?"
 msgstr ""
 
 msgid "Please select a dataset on Rz or specify \"data.set.name\"."
@@ -294,6 +210,57 @@ msgid "The dataset named \""
 msgstr ""
 
 msgid "\" doesn't exist."
+msgstr ""
+
+msgid "_File"
+msgstr ""
+
+msgid "_Open Data..."
+msgstr ""
+
+msgid "_Import Data"
+msgstr ""
+
+msgid "From SPSS System File..."
+msgstr ""
+
+msgid "From SPSS Portable File..."
+msgstr ""
+
+msgid "From Stata Data File..."
+msgstr ""
+
+msgid "From Text File..."
+msgstr ""
+
+msgid "From Grobal Environment..."
+msgstr ""
+
+msgid "Save _As..."
+msgstr ""
+
+msgid "_Close"
+msgstr ""
+
+msgid "_Preferences"
+msgstr ""
+
+msgid "_Preferences..."
+msgstr ""
+
+msgid "Preferences..."
+msgstr ""
+
+msgid "_Help"
+msgstr ""
+
+msgid "Tutorial on Web"
+msgstr ""
+
+msgid "Load Sample Dataset"
+msgstr ""
+
+msgid "Detach"
 msgstr ""
 
 msgid "Main"
@@ -309,6 +276,12 @@ msgid "Axis"
 msgstr ""
 
 msgid "Theme"
+msgstr ""
+
+msgid "Attach"
+msgstr ""
+
+msgid "Plot"
 msgstr ""
 
 msgid "Relative sizing"
@@ -327,6 +300,12 @@ msgid "Line\nEnd"
 msgstr ""
 
 msgid "<span font_style='italic' font_weight='bold'>theme_blank()</span> when turn <span font_style='italic' font_weight='bold'>OFF</span> the button"
+msgstr ""
+
+msgid "Inherit from the current theme"
+msgstr ""
+
+msgid "Inherit from <span font_style='italic' font_weight='bold' font_size='large'>%s</span>"
 msgstr ""
 
 msgid "Fill"
@@ -437,6 +416,9 @@ msgstr ""
 msgid "dpi"
 msgstr ""
 
+msgid "This file already exists. Overwrite it?"
+msgstr ""
+
 msgid "legend position"
 msgstr ""
 
@@ -473,13 +455,13 @@ msgstr ""
 msgid "use filename if blank"
 msgstr ""
 
+msgid "Recode"
+msgstr ""
+
 msgid "Prev: Up Arrow Key\nNext: Down Arrow Key"
 msgstr ""
 
 msgid "Settings"
-msgstr ""
-
-msgid "Themes Folder"
 msgstr ""
 
 msgid "Theme (requires restart R)"
@@ -488,13 +470,10 @@ msgstr ""
 msgid "Use embeded graphics divice (requires cairoDevice package)"
 msgstr ""
 
-msgid "Plot when a index cell is double-clicked"
-msgstr ""
-
-msgid "Don't output summary while plot view open"
-msgstr ""
-
 msgid "Don't Popup Summary"
+msgstr ""
+
+msgid "Automatically save the session"
 msgstr ""
 
 msgid "Global Font"
@@ -524,12 +503,6 @@ msgstr ""
 msgid "Please start Rz."
 msgstr ""
 
-msgid "Select Cases"
-msgstr ""
-
-msgid "Duplicate Dataset"
-msgstr ""
-
 msgid "Measurement"
 msgstr ""
 
@@ -539,37 +512,7 @@ msgstr ""
 msgid "Labels"
 msgstr ""
 
-msgid "Missing"
-msgstr ""
-
-msgid "Select All Variables"
-msgstr ""
-
-msgid "Unselect All Variables"
-msgstr ""
-
-msgid "All Variables"
-msgstr ""
-
-msgid "Selected Variables"
-msgstr ""
-
-msgid "Management and Manipulation"
-msgstr ""
-
-msgid "Cannot reload while Select Cases enabled."
-msgstr ""
-
-msgid "Cannot reload while \"Select Cases\" enabled."
-msgstr ""
-
-msgid "\"%s\" isn't a data.set or doesn't exist."
-msgstr ""
-
-msgid "\""
-msgstr ""
-
-msgid "\" isn't a data.set or doesn't exist."
+msgid "Value Labels"
 msgstr ""
 
 msgid "This recode syntax is invalid. Please enter a valid recode syntax."
@@ -600,6 +543,9 @@ msgid "Generate Template"
 msgstr ""
 
 msgid "Variable Name"
+msgstr ""
+
+msgid "Edit Value Labels"
 msgstr ""
 
 msgid "Duplicate label is detected."
@@ -635,7 +581,85 @@ msgstr ""
 msgid "[Duplicated from %s]"
 msgstr ""
 
+msgid "Select Cases"
+msgstr ""
+
+msgid "Duplicate Dataset"
+msgstr ""
+
 msgid "Enable Select Cases"
+msgstr ""
+
+msgid "Delete Variables"
+msgstr ""
+
+msgid "Duplicate Variables"
+msgstr ""
+
+msgid "Select All Variables"
+msgstr ""
+
+msgid "Unselect All Variables"
+msgstr ""
+
+msgid "Show Selected Variables Only"
+msgstr ""
+
+msgid "Descriptive statistics"
+msgstr ""
+
+msgid "Cannot reload while Select Cases enabled."
+msgstr ""
+
+msgid "Cannot reload while \"Select Cases\" enabled."
+msgstr ""
+
+msgid "\"%s\" isn't a data.set or doesn't exist."
+msgstr ""
+
+msgid "\""
+msgstr ""
+
+msgid "\" isn't a data.set or doesn't exist."
+msgstr ""
+
+msgid "Please install vcd package to output Cramer's V."
+msgstr ""
+
+msgid "File Path:"
+msgstr ""
+
+msgid "Cannot handle character variables longer than 255"
+msgstr ""
+
+msgid "Select colour"
+msgstr ""
+
+msgid "Family:"
+msgstr ""
+
+msgid "Preview:"
+msgstr ""
+
+msgid "Select Font Family"
+msgstr ""
+
+msgid "Top"
+msgstr ""
+
+msgid "Right"
+msgstr ""
+
+msgid "Bottom"
+msgstr ""
+
+msgid "Left"
+msgstr ""
+
+msgid "Unit"
+msgstr ""
+
+msgid "Create the directory below to save the config file and/or the session.\n\t%s\nIs it OK?\n\nOr you can change the directory by\n\toptions(RzConfPath=\"/path/to/dir\")"
 msgstr ""
 
 msgid "Start"

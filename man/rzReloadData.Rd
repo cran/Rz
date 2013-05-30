@@ -26,5 +26,5 @@ Reload data.set from globalenv
 Masahiro Hayashi
 }
 \seealso{
-\code{\link{rzAddData}}
+\code{\link{rzAddData}}, \code{\link{rzAddItem}}
 }

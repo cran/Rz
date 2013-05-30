@@ -26,5 +26,5 @@ Add data.set to Rz
 Masahiro Hayashi
 }
 \seealso{
-\code{\link{rzReloadData}}
+\code{\link{rzReloadData}}, \code{\link{rzAddItem}}
 }

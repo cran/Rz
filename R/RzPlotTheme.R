@@ -424,7 +424,7 @@ setRefClass("RzPlotTheme",
         suppressMessages(ggsave(preview.path, plot.preview, width=8, height=6))
         pixbuf <- gdkPixbufNewFromFileAtSize(preview.path, width=600, height=-1)$retval
       } else if (data==3) {
-        data(iris)
+        data(iris, envir=environment())
         plot.preview <- ggplot(iris, aes(Sepal.Length, Petal.Length)) + 
           geom_point() + 
           labs(title="plot.title", x="axis.title.x", y="axis.title.y") + theme.tmp

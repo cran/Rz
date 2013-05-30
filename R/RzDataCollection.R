@@ -6,7 +6,28 @@ setRefClass("RzDataCollection",
       data.collection <<- list()
       initFields(...)
     },
+    
+    saveSession = function(file=NULL, force=FALSE){
+      if (is.null(file)) {
+        autosaved <- sapply(data.collection, function(x) x$getAutosaved())
+        if(!force && all(autosaved)) return()
+        sapply(data.collection, function(x) x$setAutosaved(TRUE))
+        if(!checkConfDir()) return()
+        file <- file.path(rzConfPath(), "session.rzs")
+      }
+      
+      session <- data.collection
+      save(session, file=file)
+    },
 
+    loadSession = function(file=NULL){
+      if (is.null(file)) file <- file.path(rzConfPath(), "session.rzs")
+      if (file.exists(file)) {
+        load(file=file)
+        data.collection <<- session
+      }
+    },
+    
     syncAll = function(){
       lapply(data.collection, function(x) x$linkDataFrame())
     },
@@ -23,6 +44,9 @@ setRefClass("RzDataCollection",
     removeData       = function(data.set.name){
       names <- .self$getDataSetNames()      
       data.collection[ which(names == data.set.name) ] <<- NULL
+      if (rzSettings$getAutosave()) {
+        saveSession(force=TRUE)
+      }
     },
 
     getDataSetNames  = function(){
@@ -44,3 +68,4 @@ setRefClass("RzDataCollection",
     getLength        = function(){length(data.collection)}
   )
 )
+data.collection$accessors(c("data.collection"))

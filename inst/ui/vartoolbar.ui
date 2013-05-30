@@ -1,0 +1,10 @@
+<ui>
+  <toolbar name='VarToolBar'>
+    <toolitem action='SelectAll' />
+    <toolitem action='UnselectAll' />
+    <toolitem action='ToggleSelectedView' />
+    <separator/>
+    <toolitem action='Delete' />
+    <toolitem action='Duplicate' />
+  </toolbar>
+</ui>

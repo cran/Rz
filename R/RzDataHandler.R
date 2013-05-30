@@ -4,6 +4,7 @@ setRefClass("RzDataHandler",
   methods = list(
     initialize            = function(...) {
       initFields(...)
+      data.collection <<- data.collection.obj
       data.set.list <<- gtkListStoreNew("character", "character", "character", "character")
       data.set.list.combo <<- gtkComboBoxNewWithModel(data.set.list)
       dsnames        <- data.collection$getDataSetNames()
@@ -32,11 +33,17 @@ setRefClass("RzDataHandler",
     
     removeCurrentData = function(){
       data.set.name <- .self$getCurrentDataSetName()
+      ind <- data.set.list.combo$getActive()
       data.collection$removeData(data.set.name)
       rm(list=c(data.set.name, paste(data.set.name, ".ds", sep="")),
          envir=.GlobalEnv)
       iter <- data.set.list.combo$getActiveIter()$iter
       data.set.list$remove(iter)
+      return(ind)
+    },
+    
+    changeData = function(ind) {
+      data.set.list.combo$setActive(ind)
     },
     
     changeDataSetName = function(data.set.name, new.name){

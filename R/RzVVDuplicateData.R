@@ -1,6 +1,6 @@
 duplicateData <-
   setRefClass("RzVVDuplicateData",
-              fields = c("main", "data"),
+              fields = c("main", "vvcore", "data"),
               methods = list(
                 initialize = function(...) {
                   initFields(...)
@@ -53,7 +53,7 @@ duplicateData <-
                     }
                     
                     if (radio.button2$getActive()) {
-                      ind <- rzTools$getVariableView()$getSelectedRows()
+                      ind <- vvcore$getSelectedRows()
                       if (length(ind) == 0) {
                         rzTools$runDialog(gettext("No variables are selected."), type = "error")
                         return()
@@ -61,7 +61,7 @@ duplicateData <-
                       data.set <- data.set[ind]
                       
                     } else if (radio.button3$getActive()) {
-                      ind <- rzTools$getVariableView()$getSelectedRows()
+                      ind <- vvcore$getSelectedRows()
                       if (length(ind) == 0) {
                         rzTools$runDialog(gettext("No variables are selected."), type = "error")
                         return()

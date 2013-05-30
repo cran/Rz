@@ -1,6 +1,6 @@
 selectCases <-
   setRefClass("RzVVSelectCases",
-  fields = c("main", "data", "textView", "textBuffer", "button.update", "button.clear"),
+  fields = c("main", "vvcore", "data", "textView", "textBuffer", "button.update", "button.clear"),
   methods = list(
     initialize = function(...) {
       initFields(...)
@@ -26,21 +26,21 @@ selectCases <-
       scrolledWindow.textView$add(textView)
       scrolledWindow.textView$setSizeRequest(-1, 100)
       
-      vbox.button1 <- gtkVBoxNew()
-      vbox.button1$packStart(toggleButton, expand=FALSE)
+      hbox.button1 <- gtkHBoxNew()
+      hbox.button1$packStart(toggleButton, expand=FALSE)
       
-      vbox.button2 <- gtkVBoxNew()
-      vbox.button2$packStart(button.update, expand=FALSE)
-      vbox.button2$packEnd(button.clear, expand=FALSE)
+      hbox.button2 <- gtkHBoxNew()
+      hbox.button2$packEnd(button.update, expand=FALSE)
+      hbox.button2$packStart(button.clear, expand=FALSE)
 
-      hbox1 <- gtkHBoxNew(spacing=2)
-      hbox1$packStart(vbox.button1, expand=FALSE)
-      hbox1$packStart(scrolledWindow.textView)
-      hbox1$packStart(vbox.button2, expand=FALSE)
-            
+      vbox1 <- gtkVBoxNew(spacing=2)
+      vbox1$packStart(hbox.button1, expand=FALSE)
+      vbox1$packStart(scrolledWindow.textView, expand=FALSE)
+      vbox1$packStart(hbox.button2, expand=FALSE)
+      
       vbox <- gtkVBoxNew(spacing=4)
       vbox$setBorderWidth(2)
-      vbox$packStart(hbox1, expand=FALSE)
+      vbox$packStart(vbox1, expand=FALSE)
       
       main <<- gtkScrolledWindowNew()
       main$setShadowType(GtkShadowType["none"])

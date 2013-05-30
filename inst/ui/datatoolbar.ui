@@ -1,0 +1,10 @@
+<ui>
+  <toolbar name='DataToolBar'>
+    <toolitem action='ChageDataSetName' />
+    <toolitem action='ReloadFromGlobalEnv' />
+    <toolitem action='ManageData' />
+    <toolitem action='DataView' />
+    <separator/>
+    <toolitem action='RemoveDataSet' />
+  </toolbar>
+</ui>

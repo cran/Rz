@@ -5,7 +5,7 @@ created by Kim Kahns ( http://kims-area.com )
 modfied by Dennis Schmitz
 modfied by Masahiro Hayashi
 
-*************  License under under images/oxygen  *************
+*************  License under images/oxygen  *************
 The Oxygen Icon Theme
     Copyright (C) 2007 Nuno Pinheiro <nuno@oxygen-icons.org>
     Copyright (C) 2007 David Vignoni <david@icon-king.com>
@@ -55,3 +55,10 @@ Clarification:
   the use of elements of this art library in a GUI.
 
   kde-artists [at] kde.org
+
+*************  License of write.spss and write.stata function  *************
+GPL2
+These are originally contained in foreign package in CRAN,
+maintained by R Core Team <R-core at R-project.org>,
+and modfied by Masahiro Hayashi.
+(Their original names are writeForeignSPSS and writeForeignStata.)

@@ -16,7 +16,7 @@ setRefClass("RzDataSetIO",
       file.types <- c(rzd    = gettext(gettext("Rz Data File (*.rzd)")),
                       spss   = gettext("SPSS Syntax and CSV (*.*)"),
                       stata  = gettext("Stata Do File and CSV (*.*)"),
-                      stata2 = gettext("Stata File (*.dta)"),
+                      stata2 = gettext("Stata Data File (*.dta)"),
                       csv    = gettext("Comma-Separated Text (*.csv)"),
                       tsv    = gettext("Tab-Separated Text (*.csv)"))
       file.type.list <- list(rzd     = list(name=file.types[["rzd"]]   , pattern="*.rzd"),
@@ -65,6 +65,7 @@ setRefClass("RzDataSetIO",
       vbox$packEnd(hbox, expand=FALSE)
 
       gSignalConnect(dialog, "response", function(dialog, respons.id){
+        spinStart()
         if (respons.id == GtkResponseType["accept"]) {
           filename   <- localize(dialog$getFilename())
           filetype   <- localize(dialog$getFilter()$getName())
@@ -130,9 +131,8 @@ setRefClass("RzDataSetIO",
       dialog$run()
       
     },
-
-
-    open = function(win, info.bar){
+    
+    open = function(win, type, info.bar){
       # Encoding Selector
       label <- gtkLabel(gettext("Encoding"))
       combo <- gtkComboBoxNewText()
@@ -140,60 +140,40 @@ setRefClass("RzDataSetIO",
       index <- which(localeToCharset()[1]==iconvlist()) - 1
       if(length(index)==0) index <- -1
       combo$setActive(index)
-
-      # Header Selector
-      header.button <- gtkCheckButtonNewWithLabel(gettext("Hearder(Only for Text File)"))
-      header.button$setActive(TRUE)
-
-      # NA Strings
-      label.na <- gtkLabel(gettext("NA Strings"))
-      entry.na <- gtkEntryNew()
-      entry.na$setText("NA")
-
+      hbox <- gtkHBoxNew()
+      hbox$packEnd(combo, expand=FALSE, padding=5)
+      hbox$packEnd(label, expand=FALSE)
+      
       # File Filter
       file.types <- c(rzdata   = gettext("Rz Data File (*.rzd)"),
                       spss     = gettext("SPSS System File (*.sav)"),
                       spss.por = gettext("SPSS Portable File (*.por)"),
-                      stata    = gettext("Stata File (*.dta)"),
-                      csv      = gettext("Comma-Separated Text (*.*)"),
-                      tsv      = gettext("Tab-Separated Text (*.*)"))
-      file.type.list <- list(spss    = list(name=file.types[["rzdata"]]  , pattern="*.rzd"),
+                      stata    = gettext("Stata Data File (*.dta)")
+                      )
+      file.type.list <- list(rzdata  = list(name=file.types[["rzdata"]]  , pattern="*.rzd"),
                              spss    = list(name=file.types[["spss"]]    , pattern="*.sav"),
                              spss.por= list(name=file.types[["spss.por"]], pattern="*.por"),
-                             stata   = list(name=file.types[["stata"]]   , pattern="*.dta"),
-                             csv     = list(name=file.types[["csv"]]     , pattern="*.*"),
-                             tsv     = list(name=file.types[["tsv"]]     , pattern="*.*")
+                             stata   = list(name=file.types[["stata"]]   , pattern="*.dta")
                             )
 
       # File Import Dialog
-      dialog <- gtkFileChooserDialogFilteredNew(title=gettext("Open"), parent=win, file.type.list=file.type.list)
-
-      hbox <- gtkHBoxNew()
-      hbox$packEnd(combo, expand=FALSE, padding=5)
-      hbox$packEnd(label, expand=FALSE)
-      hbox2 <- gtkHBoxNew()
-      hbox2$packEnd(header.button, expand=FALSE, padding=5)
-      hbox3 <- gtkHBoxNew()
-      hbox3$packEnd(entry.na, expand=FALSE, padding=5)
-      hbox3$packEnd(label.na, expand=FALSE)
+      dialog <- gtkFileChooserDialogFilteredNew(title=gettext("Open"), parent=win, file.type.list=file.type.list[type])
 
       vbox <- dialog$getContentArea()
-      vbox$packEnd(hbox3, expand=FALSE)
-      vbox$packEnd(hbox2, expand=FALSE)
       vbox$packEnd(hbox, expand=FALSE)
       
       file       <- dialog$activate()
       encoding   <- localize(combo$getActiveText())
       c.encoding <- localeToCharset()[1]
-      na.strings <- localize(entry.na$getText())
-      header     <- header.button$getActive()
       data.set   <- NULL
       dialog$hide()
+      
+      spinStart()
+      
       if (is.null(file)){
 
         return(NULL)
       } else {
-#        spinner$start()
 
         dir  <- dirname(file$filename)
         base <- basename(file$filename)
@@ -225,21 +205,6 @@ setRefClass("RzDataSetIO",
           importer <- Stata.file(file$filename)
           data.set   <- as.data.set(importer)
           
-        } else if (file$filetype == file.types[["csv"]]) {
-        # read csv
-          df <- read.csv(file$filename, header=header, na.strings=na.strings,
-                         row.names=NULL, fileEncoding=encoding)
-          data.set   <- data.set(df)
-          names(data.set) <- colnames(df)
-          encoding <- localeToCharset()[1]
-          
-        } else if (file$filetype == file.types[["tsv"]]) {
-        # read delim
-          df <- read.delim(file$filename, header=header, na.strings=na.strings,
-                           row.names=NULL, fileEncoding=encoding)
-          data.set   <- data.set(df)
-          names(data.set) <- colnames(df)
-          encoding <- localeToCharset()[1]
         }
         
         # transcoding
@@ -280,6 +245,24 @@ setRefClass("RzDataSetIO",
       }
 
     },
+    
+    importFromText = function(win){
+      io <- new("RzDataSetIoText", win=win)
+      df <- io$run()
+      file.path <- io$getFilepath()
+      if (is.null(df)) {
+        return(NULL)
+      } else {
+        data.set   <- data.set(df)
+        names(data.set) <- colnames(df)
+        encoding <- localeToCharset()[1]
+        colnames(data.set) <- make.names(colnames(data.set), unique=TRUE)
+        data <- new("RzData",
+                    file.path=file.path, original.name=basename(file.path),
+                    data.set=data.set)
+        return(data)        
+      }
+    },
 
     importFromGlobalEnv = function(win){
       combo <- gtkComboBoxNewText()
@@ -298,7 +281,8 @@ setRefClass("RzDataSetIO",
       response <- dialog$run()
       import <- localize(combo$getActiveText())
       dialog$hide()
-#      spinner$start()
+
+      spinStart()
       if (response==GtkResponseType["ok"] & length(import)!=0) {
         ds <- get(import, envir=.GlobalEnv)
         if (is.data.frame(ds)) {

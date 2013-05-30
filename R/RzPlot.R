@@ -1,6 +1,6 @@
 rzplot <- 
 setRefClass("RzPlot",
-  fields = c("info.bar", "main", "notebook", "data", "model", "constructed",
+  fields = c("info.bar", "main", "notebook", "data", "model", "constructed", "vvcore",
              "geom", "stratum", "misc", "save",
              "button.prev", "button.next",
              "p.current", "p.list", "p.current.num", "parent", "parent.win", "rzPlotScript"),
@@ -119,7 +119,7 @@ setRefClass("RzPlot",
       vbox <- gtkVBoxNew()
       vbox$packStart(button.box1, expand=FALSE, padding=5)
       if(is.null(gtkCheckVersion(2, 20, 0))) {
-        notebook$setActionWidget(button.detach, GtkPackType["end"])
+#        notebook$setActionWidget(button.detach, GtkPackType["end"])
       }      
       vbox$packStart(notebook, expand=TRUE, fill=TRUE)
       

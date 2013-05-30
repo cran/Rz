@@ -73,11 +73,6 @@ fontsRegisterScript <- function(fonts){
   return(script)
 }
 
-gtkProgressBarStart <- function(progress.bar){
-  progress.bar$Pulse()
-  return(TRUE)
-}
-
 gtkFileChooserDialogFilteredNew <- function(title, parent=NULL,
                                             action=GtkFileChooserAction["open"],
                                             file.type.list){
@@ -132,7 +127,6 @@ gtkInfoBarRzNew <- function(show=TRUE){
     class(obj) <- c("gtkInfoBarRz", class(obj))
     return(obj)
 }
-gtkInfoBarRzNew()
 
 gtkInfoBarRzSetText <- function(obj, txt){
   label <- obj$getContentArea()$getChildren()[[1]]
@@ -969,6 +963,32 @@ gktPlotThemeWidgetsGetScript <- function(object) {
   }
 }
 
+gtkActionSetIconFromFile <- function(widget, path, filename) {
+  image <- gFileIconNew(gFileNewForPath(file.path(path, filename)))
+  widget$setGicon(image)
+}
+
+spinStart <- function() {
+  spinner <- rzTools$getSpinner()
+  if (is.null(spinner)) {
+    return()
+  } else {
+    spinner$getToplevel()$setSensitive(FALSE)
+    spinner$start()
+    spinner$show()
+  }
+}
+spinStop  <- function() {
+  spinner <- rzTools$getSpinner()
+  if (is.null(spinner)) {
+    return()
+  } else {
+    spinner$hide()
+    spinner$stop() 
+    spinner$getToplevel()$setSensitive(TRUE)
+  }
+}
+
 rzAddData <- function(data.set, name=NULL){
   name <- ifelse(is.null(name),
                  sprintf("%s [from Global Environment]", as.character(match.call()[2])), name)
@@ -979,3 +999,38 @@ rzReloadData <- function(data.set.name = NULL, ask = TRUE){
   rzTools$reloadData(data.set.name, ask = ask)
 }
 
+rzAddItem <- function(item, name = as.character(substitute(item)), data.set.name = NULL, description = name,
+                      measurement = c("auto", "nominal", "ordinal", "interval", "ratio"),
+                      overwrite = FALSE, ask = FALSE){
+  rzTools$addItem(item = item, name = name, data.set.name, description = description,
+                  measurement = measurement, overwrite = overwrite, ask = ask)
+}
+
+
+saveSession <- function(file=NULL){
+  data.collection.obj$saveSession(file)
+}
+
+loadSession <- function(file=NULL){
+  data.collection.obj$loadSession(file)
+}
+
+checkConfDir <- function(){
+  confDir <- normalizePath(rzConfPath(), winslash="/", mustWork=FALSE)
+  if (file.exists(confDir)) {
+    return(TRUE)
+  } else {
+    response <- rzTools$runDialog(gettextf(
+      'Create the directory below to save the config file and/or the session.\n\t%s\nIs it OK?\n\nOr you can change the directory by\n\toptions(RzConfPath="/path/to/dir")',
+      confDir
+      ), type="question")
+    if(response == GtkResponseType["ok"]) {
+      dir.create(confDir, recursive=TRUE)
+      return(TRUE)
+    } else {
+      return(FALSE)
+    }
+  }
+}
+
+rzConfPath <- function() getOption("RzConfPath", path.expand("~/Rz"))

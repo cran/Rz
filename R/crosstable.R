@@ -118,10 +118,10 @@ summary.CrossTable <- function(object, digits=3, latex=FALSE, ...){
     cat("\n")
     cat("Chi-Square Test for Independence", fill=TRUE)
     if(vcd){
-      summary(assocstats(x))
+      print(summary(assocstats(x)))
     } else {
       cat("\n")
-      summary.table(x)      
+      print(summary.table(x))
     }
     
     
