@@ -229,7 +229,7 @@ datasetiotext <-
                     widget$hide()
                     if (response == GtkResponseType["accept"]) {
                       spinStart()
-                      data <<- read.table(filepath, nrows=20,
+                      data <<- read.table(filepath,
                                           header=getActiveData(header1),
                                           sep=getActiveData(sepchar1),
                                           na.strings=getActiveData(missing1),

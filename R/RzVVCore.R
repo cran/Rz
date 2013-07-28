@@ -39,9 +39,7 @@ setRefClass("RzVVCore",
       vvTreeView["enable-grid-lines"] <<- GtkTreeViewGridLines["both"]
       vvTreeView["rules-hint"] <<- TRUE
       vvTreeView["has-tooltip"] <<- TRUE
-      if(! grepl("darwin",R.Version()$os)) {
-        vvTreeView$modifyFont(pangoFontDescriptionFromString(rzSettings$getVariableViewFont()))
-      }
+      vvTreeView$modifyFont(pangoFontDescriptionFromString(rzSettings$getVariableViewFont()))
       
       rt.index    <<- gtkCellRendererText()
       rtg.select  <<- gtkCellRendererToggleNew()
@@ -528,9 +526,8 @@ setRefClass("RzVVCore",
       entry3$setWidthChars(10)
       entry.var.lab$setWidthChars(10)
       textview <- gtkTextViewNew()
-      if(! grepl("darwin",R.Version()$os)) {
-        textview$modifyFont(pangoFontDescriptionFromString(rzSettings$getMonospaceFont()))
-      }
+      textview$modifyFont(pangoFontDescriptionFromString(rzSettings$getMonospaceFont()))
+      
       textview$setLeftMargin(5)
       textview$setRightMargin(5)
       
@@ -776,9 +773,7 @@ setRefClass("RzVVCore",
     },
     
     changeFont = function(){
-      if(! grepl("darwin",R.Version()$os)) {
-        vvTreeView$modifyFont(pangoFontDescriptionFromString(rzSettings$getVariableViewFont()))
-      }
+      vvTreeView$modifyFont(pangoFontDescriptionFromString(rzSettings$getVariableViewFont()))
     },
     
     onSelectAll = function(...){

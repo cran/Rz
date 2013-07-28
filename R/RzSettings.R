@@ -21,13 +21,9 @@ setRefClass("RzSettings",
         } else {
           theme            <<- ifelse(is.null(settings$theme)   , "kde42-oxygen", settings$theme)
         }
-        if(grepl("darwin", R.Version()$os)){
-          globalFont       <<- ifelse(is.null(settings$globalFont)   , "Arial 10"     , settings$globalFont)
-          variableViewFont <<- ifelse(is.null(settings$variableViewFont)   , "Arial 10"     , settings$variableViewFont)
-        } else {
-          globalFont       <<- ifelse(is.null(settings$globalFont)   , "sans 10"     , settings$globalFont)
-          variableViewFont <<- ifelse(is.null(settings$variableViewFont)   , "sans 10"     , settings$variableViewFont)
-        }
+        globalFont       <<- ifelse(is.null(settings$globalFont)   , "sans 10"     , settings$globalFont)
+        variableViewFont <<- ifelse(is.null(settings$variableViewFont)   , "sans 10"     , settings$variableViewFont)
+
         # settings        
         monospaceFont    <<- ifelse(is.null(settings$monospaceFont), "monospace 10", settings$monospaceFont)
         monospaceFontFamily <<- pangoFontDescriptionFromString(monospaceFont)$getFamily()
@@ -43,13 +39,9 @@ setRefClass("RzSettings",
         } else {
           theme      <<- "kde42-oxygen"          
         }
-        if(grepl("darwin", R.Version()$os)){
-          globalFont <<- "Arial 10"
-          variableViewFont <<- "Arial 10"
-        } else {
-          globalFont <<- "sans 10"
-          variableViewFont <<- "sans 10"
-        }
+        globalFont <<- "sans 10"
+        variableViewFont <<- "sans 10"
+        
         monospaceFont <<- "monospace 10"
         monospaceFontFamily <<- pangoFontDescriptionFromString(monospaceFont)$getFamily()
         psFont <<- "sans"
@@ -124,13 +116,7 @@ setRefClass("RzSettings",
       font.tab$packStart(rzFontSettingWidget2$getFontBox(), fill=FALSE, expand=FALSE)
       font.tab$packStart(pdffont.hbox, fill=FALSE, expand=FALSE)
       font.tab$packStart(psfont.hbox, fill=FALSE, expand=FALSE)
-      
-      if(grepl("darwin",R.Version()$os)) {
-        rzFontSettingWidget1$getFontBox()$setSensitive(FALSE)
-        rzFontSettingWidget4$getFontBox()$setSensitive(FALSE)
-        rzFontSettingWidget2$getFontBox()$setSensitive(FALSE)
-      }
-      
+            
       note <- gtkNotebookNew()
       note$appendPage(general.tab, gtkLabelNew(gettext("General")))
       note$appendPage(font.tab, gtkLabelNew(gettext("Font")))
@@ -149,9 +135,8 @@ setRefClass("RzSettings",
           popupOff         <<- checkButtonPopupOff$getActive()
           autosave         <<- checkButtonAutosave$getActive()
           settings <- gtkSettingsGetDefault()
-          if(! grepl("darwin",R.Version()$os)) {
-            settings$setStringProperty("gtk-font-name", rzSettings$getGlobalFont(), NULL)
-          }
+          settings$setStringProperty("gtk-font-name", rzSettings$getGlobalFont(), NULL)
+          
           if (checkConfDir()) {
             path <- file.path(rzConfPath(), "Rz.conf")
             
